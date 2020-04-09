@@ -1,0 +1,13 @@
+ntop:10
+ncand:1
+experiment_type:ER
+task:train-test
+with_cid:all
+with_rid:first
+match_file:pipeline/matches/matches-walmart_amazon.txt
+input_file:pipeline/datasets/walmart_amazon/walmart_amazon-heuristic.csv
+dataset_info:pipeline/info/info-walmart_amazon.txt
+test_dir:
+embeddings_file:
+output_file:walmart-amazon-review
+flatten:true

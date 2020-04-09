@@ -1,0 +1,13 @@
+ntop:10
+ncand:1
+experiment_type:ER
+task:train-test
+with_cid:all
+with_rid:first
+match_file:pipeline/matches/matches-amazon_google.txt
+input_file:pipeline/datasets/amazon_google/amazon_google-heuristic.csv
+dataset_info:pipeline/info/info-amazon_google.txt
+test_dir:
+embeddings_file:
+output_file:amazon_google-review
+flatten:true

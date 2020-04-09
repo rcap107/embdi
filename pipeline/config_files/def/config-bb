@@ -1,0 +1,11 @@
+task:train-test
+with_cid:all
+with_rid:first
+input_file:pipeline/datasets/beer/beer-heuristic-er.csv
+dataset_info:pipeline/info/info-beer.txt
+output_file:beer-review
+flatten:true
+mlflow:true
+embeddings_file:pipeline/embeddings/beer-review.embs
+experiment_type:ER
+match_file:pipeline/matches/matches-beer.txt
