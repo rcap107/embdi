@@ -10,7 +10,8 @@ from EmbDI.graph import Node
 from tqdm import tqdm
 
 class RandomWalk:
-    def __init__(self, G, starting_node_name, sentence_len, backtrack, repl_strings=True, repl_numbers=True):
+    def __init__(self, G, starting_node_name, sentence_len, backtrack, repl_strings=True, repl_numbers=True,
+                 follow_replacement=False):
         # self.walk = []
         starting_node = G.nodes[starting_node_name]
         first_node_name = starting_node.get_random_start()
@@ -26,17 +27,22 @@ class RandomWalk:
             if repl_numbers:
                 current_node_name = self.replace_numeric_value(current_node_name, G.nodes)
             if repl_strings:
-                try:
-                    current_node_name = self.replace_string_value(G.nodes[current_node_name])
-                except KeyError:
-                    print('reeeeeee')
+                current_node_name, replaced_node= self.replace_string_value(G.nodes[current_node_name])
+            else:
+                replaced_node = current_node_name
             if not backtrack and current_node_name == self.walk[-1]:
                 continue
+            if follow_replacement:
+                current_node_name = replaced_node
+
             current_node = G.nodes[current_node_name]
             if not current_node.node_class['isappear']:
                 continue
             else:
-                self.walk.append(current_node_name)
+                if replaced_node != current_node_name:
+                    self.walk.append(replaced_node)
+                else:
+                    self.walk.append(current_node_name)
             sentence_step += 1
 
     def get_walk(self):
@@ -65,9 +71,9 @@ class RandomWalk:
 
     def replace_string_value(self, value: Node):
         if len(value.similar_tokens) > 1:
-            return value.get_random_replacement()
+            return value.name, value.get_random_replacement()
         else:
-            return value.name
+            return value.name, value.name
 
 def basic_random_walk(G, starting_node_name, sentence_len, n_sentences, backtrack):
     walks = []
