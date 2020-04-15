@@ -284,13 +284,13 @@ class Graph:
                     # node_prefix = node_name.split('__', maxsplit=1)[0]
                     valsplit = node_name.split('_')
                     for idx, val in enumerate(valsplit):
-                        if idx == 0 and val in self.node_classes:
+                        if idx == 0 and val in self.node_classes or val == '':
                             continue
                         if val not in self.nodes:
                             node = Node(val, node_prefix, node_class=self.node_classes[node_prefix],
                                         numeric=False)
                             self.nodes[val] = node
-                    to_link.append([self.nodes[_] for _ in valsplit if _ not in self.node_classes])
+                    to_link.append([self.nodes[_] for _ in valsplit if _ not in self.node_classes and _ != ''])
                 else:
                     # node_prefix = node_name.split('__', maxsplit=1)[0]
 

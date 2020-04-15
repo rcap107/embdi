@@ -99,8 +99,7 @@ def random_walks_generation(configuration, df, graph):
         # configuration['with_rid'] = WITH_RID_FIRST
 
     # Generating walks.
-    walks = generate_walks(configuration, graph, intersection=intersection,
-                           backtrack=configuration['backtrack'])
+    walks = generate_walks(configuration, graph, intersection=intersection)
     t2 = datetime.datetime.now()
     dt = t2 - t1
 

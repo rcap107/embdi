@@ -1,8 +1,4 @@
 import datetime
-import random
-
-import networkx as nx
-import numpy as np
 
 from EmbDI.utils import *
 from EmbDI.graph import Node
@@ -48,6 +44,9 @@ class RandomWalk:
     def get_walk(self):
         return self.walk
 
+    def get_reversed_walk(self):
+        return self.walk[::-1]
+
     def replace_numeric_value(self, value, nodes):
         if nodes[value].numeric:
             try:
@@ -75,34 +74,6 @@ class RandomWalk:
         else:
             return value.name, value.name
 
-def basic_random_walk(G, starting_node_name, sentence_len, n_sentences, backtrack):
-    walks = []
-    for _ in range(n_sentences):
-        starting_node = G.nodes[starting_node_name]
-        first_node_name = starting_node.get_random_start()
-        if first_node_name != starting_node_name:
-            walk = [first_node_name, starting_node_name]
-        else:
-            walk = [starting_node_name]
-        current_node_name = starting_node_name
-        current_node = G.nodes[current_node_name]
-        sentence_step = 0
-        full_steps = 0
-        while sentence_step < sentence_len - 1:
-            full_steps += 1
-            current_node_name = current_node.get_weighted_random_neighbor()
-            if not backtrack and current_node_name == walk[-1]:
-                continue
-            current_node = G.nodes[current_node_name]
-            if not current_node.node_class['isappear']:
-                continue
-            else:
-                walk.append(current_node_name)
-            sentence_step += 1
-        walks.append(walk)
-
-    return walks
-
 
 def extract_numeric_rep(value, keys_array):
     new_val = np.around(np.random.normal(loc=value, scale=1))
@@ -124,69 +95,7 @@ def extract_numeric_rep(value, keys_array):
     return str(int(new_val))
 
 
-def random_walk_replacement(G, starting_node, sentence_len, n_sentences, cell_type, weights_by_cell, tokens,
-                            follow_sub=False, with_rid=WITH_RID_FIRST, with_cid=WITH_CID_ALL,
-                            numeric='no'):
-    walks = []
-    # keys_array = np.asarray(weights_by_cell.keys())
-    for _ in range(n_sentences):
-        first_node = random.choice(weights_by_cell[starting_node])
-        walk = [first_node, starting_node]
-        current = starting_node
-
-        for _ in range(sentence_len - 1):
-            c = random.choice(weights_by_cell[current])
-            if numeric != 'no':
-                try:
-                    # raise ValueError
-                    float_c = float(c)
-                    sub = extract_numeric_rep(float_c, weights_by_cell)
-                    # sub = float_c
-                except ValueError:
-                    if numeric == 'only':
-                        sub = c
-                    else:
-                        if tokens[c].n_similar > 1:
-                            tk = tokens[c].similar_tokens
-                            ds = tokens[c].similar_distance
-                            sub = random.choices(tk, weights=ds, k=1)[0]
-                        else:
-                            sub = c
-            else:
-                if tokens[c].n_similar > 1:
-                    tk = tokens[c].similar_tokens
-                    ds = tokens[c].similar_distance
-                    sub = random.choices(tk, weights=ds, k=1)[0]
-                else:
-                    sub = c
-            if sub in cell_type:
-                ctype = cell_type[sub]
-            else:
-                ctype = cell_type[c]
-            if ctype == 'rid':
-                if with_rid != WITH_RID_ALL:
-                    pass
-                else:
-                    walk.append(sub)
-            elif ctype == 'attr':
-                if with_cid != WITH_CID_ALL:
-                    pass
-                else:
-                    walk.append(sub)
-            else:
-                walk.append(sub)
-
-            if follow_sub:
-                current = sub
-            else:
-                current = c
-
-        walks.append(walk)
-
-    return walks
-
-
-def generate_walks(parameters, graph, intersection=None, backtrack=True):
+def generate_walks(parameters, graph, intersection=None):
     sentences = []
     n_sentences = int(float(parameters['n_sentences']))
     strategies = parameters['walks_strategy']
@@ -228,7 +137,7 @@ def generate_walks(parameters, graph, intersection=None, backtrack=True):
                                    repl_numbers=parameters['repl_numbers'],
                                    repl_strings=parameters['repl_strings'])
                     r.append(w.get_walk())
-                # r = basic_random_walk(graph, cell, sentence_length, random_walks_per_node, backtrack)
+                    r.append(w.get_reversed_walk())
                 if parameters['write_walks']:
                     if len(r) > 0:
                         ws = [' '.join(_) for _ in r]
@@ -253,13 +162,15 @@ def generate_walks(parameters, graph, intersection=None, backtrack=True):
                         w = RandomWalk(graph, cell, sentence_length, backtrack,
                                        repl_numbers=parameters['repl_numbers'],
                                        repl_strings=parameters['repl_strings'])
-                        r = w.get_walk()
-                        if parameters['write_walks']:
-                            ws = ' '.join(r)
-                            s = ws  + '\n'
-                            fp_walks.write(s)
-                        else:
-                            sentences += r
+                        sen = [w.get_walk()]
+                        sen.append(w.get_reversed_walk())
+                        for r in sen:
+                            if parameters['write_walks']:
+                                ws = ' '.join(r)
+                                s = ws  + '\n'
+                                fp_walks.write(s)
+                            else:
+                                sentences += r
                         sentence_counter += len(r)
                         pbar.update(1)
 
@@ -287,18 +198,3 @@ def split_remaining_sentences(freq_row, freq_col):
         fraction_row = rescaling_factor / (rescaling_factor + 1)
         fraction_column = 1 - fraction_row
         return fraction_row, fraction_column
-
-
-def generate_walks_driver(parameters, graph, cells, tokens=None, follow_sub=True, with_rid='first', with_cid='all',
-                          df=None, intersection=None, numeric='no'):
-    w, _ = generate_walks_old(parameters, graph, cells, tokens, follow_sub, with_rid, with_cid, df, intersection, numeric)
-    walks = []
-    for walk in w:
-        walks.append([str(_) for _ in walk])
-    return walks
-
-
-def generate_walks_driver_debug(parameters, graph, follow_sub=True, with_rid='first', with_cid='all', df=None,
-                                intersection=None, numeric='no', backtrack=True):
-    w, _ = generate_walks(parameters, graph, follow_sub, intersection=intersection, backtrack=backtrack)
-    return w
