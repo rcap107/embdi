@@ -5,6 +5,9 @@ from EmbDI.graph import Node
 
 from tqdm import tqdm
 
+import random
+
+
 class RandomWalk:
     def __init__(self, G, starting_node_name, sentence_len, backtrack, repl_strings=True, repl_numbers=True,
                  follow_replacement=False):
@@ -19,6 +22,9 @@ class RandomWalk:
         current_node = G.nodes[current_node_name]
         sentence_step = 0
         while sentence_step < sentence_len - 1:
+            # if G.uniform:
+            #     current_node_name = current_node.get_random_neighbor()
+            # else:
             current_node_name = current_node.get_weighted_random_neighbor()
             if repl_numbers:
                 current_node_name = self.replace_numeric_value(current_node_name, G.nodes)
@@ -46,6 +52,24 @@ class RandomWalk:
 
     def get_reversed_walk(self):
         return self.walk[::-1]
+
+    def get_both_walks(self):
+        return [self.get_walk(), self.get_reversed_walk()]
+
+    def get_sampled_walk(self, seq):
+
+        def orderedSampleWithoutReplacement(seq, k):
+            if not 0 <= k <= len(seq):
+                raise ValueError('Required that 0 <= sample_size <= population_size')
+
+            numbersPicked = 0
+            for i, number in enumerate(seq):
+                prob = (k - numbersPicked) / (len(seq) - i)
+                if random.random() < prob:
+                    yield number
+                    numbersPicked += 1
+
+        return orderedSampleWithoutReplacement(seq, 50)
 
     def replace_numeric_value(self, value, nodes):
         if nodes[value].numeric:
@@ -137,7 +161,9 @@ def generate_walks(parameters, graph, intersection=None):
                                    repl_numbers=parameters['repl_numbers'],
                                    repl_strings=parameters['repl_strings'])
                     r.append(w.get_walk())
-                    r.append(w.get_reversed_walk())
+                    # r.append(w.get_reversed_walk())
+                    # r.append(list(w.get_sampled_walk(w.get_walk())))
+                    # r.append(list(w.get_sampled_walk(w.get_reversed_walk())))
                 if parameters['write_walks']:
                     if len(r) > 0:
                         ws = [' '.join(_) for _ in r]
@@ -163,7 +189,11 @@ def generate_walks(parameters, graph, intersection=None):
                                        repl_numbers=parameters['repl_numbers'],
                                        repl_strings=parameters['repl_strings'])
                         sen = [w.get_walk()]
-                        sen.append(w.get_reversed_walk())
+                        # sen.append(w.get_reversed_walk())
+                        # sen = []
+                        # sen.append(list(w.get_sampled_walk(w.get_walk())))
+                        # sen.append(list(w.get_sampled_walk(w.get_reversed_walk())))
+
                         for r in sen:
                             if parameters['write_walks']:
                                 ws = ' '.join(r)

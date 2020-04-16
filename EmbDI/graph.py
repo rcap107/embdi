@@ -72,7 +72,7 @@ class Node:
 
     def get_random_start(self):
         if len(self.startfrom) > 0:
-            return random.choice(self.startfrom)
+            return np.random.choice(self.startfrom, size=1)[0]
         else:
             return self.name
 
@@ -80,7 +80,8 @@ class Node:
         return self.random_neigh()
 
     def get_random_neighbor(self):
-        return random.choice(self.neighbor_names)
+        return np.random.choice(self.neighbor_names, size=1)[0]
+        # return random.choice(self.neighbor_names)
 
     def add_neighbor(self, neighbor, weight):
         if neighbor not in self.neighbors:
@@ -99,6 +100,7 @@ class Node:
         self.neighbor_names = np.array(list(self.neighbors.keys()))
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
         self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
+        self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
     def rebuild(self):
@@ -234,7 +236,7 @@ class Graph:
 
         self._extract_prefix(prefixes)
         self._check_flatten()
-
+        self.uniform = True
 
         if flatten == 'all':
             print('# Flatten = all, all strings will be expanded.')
@@ -268,7 +270,11 @@ class Graph:
             else:
                 raise ValueError('Line {} does not contain the correct number of values'.format(line))
 
+            if w1 != w2 or w2 is None:
+                self.uniform = False
+
             for _n in [n1,n2]:
+                tl = []
                 try:
                     float_c = float(_n)
                     if math.isnan(float_c):
@@ -280,29 +286,36 @@ class Graph:
                     node_name = str(_n)
 
                 node_prefix = self._get_node_type(node_name)
+                # npr, nn = node_name.split('__', maxsplit=1)
                 if node_prefix in self.to_flatten:
                     # node_prefix = node_name.split('__', maxsplit=1)[0]
                     valsplit = node_name.split('_')
                     for idx, val in enumerate(valsplit):
                         if idx == 0 and val in self.node_classes or val == '':
                             continue
-                        if val not in self.nodes:
-                            node = Node(val, node_prefix, node_class=self.node_classes[node_prefix],
+                        nn = node_prefix + '__' + val
+                        if nn not in self.nodes:
+                            node = Node(nn, node_prefix, node_class=self.node_classes[node_prefix],
                                         numeric=False)
-                            self.nodes[val] = node
-                    to_link.append([self.nodes[_] for _ in valsplit if _ not in self.node_classes and _ != ''])
-                else:
+                            self.nodes[nn] = node
+                    tl += [self.nodes[node_prefix + '__' + _] for ii, _ in enumerate(valsplit)
+                           if (ii > 0 and _ != '')]
+                    # to_link.append()
+                # else:
                     # node_prefix = node_name.split('__', maxsplit=1)[0]
 
-                    if node_name not in self.nodes:
-                        node = Node(node_name, node_prefix, node_class=self.node_classes[node_prefix],
-                                    numeric=self.node_is_numeric[node_prefix])
-                        self.nodes[node_name] = node
-                    to_link.append([self.nodes[node_name]])
+                if node_name not in self.nodes:
+                    node = Node(node_name, node_prefix, node_class=self.node_classes[node_prefix],
+                                numeric=self.node_is_numeric[node_prefix])
+                    self.nodes[node_name] = node
+                tl.append(self.nodes[node_name])
+                # to_link.append([])
+                to_link.append(set(tl))
 
             for _1 in to_link[0]:
                 for _2 in to_link[1]:
-                    self.add_edge(_1, _2, w1, w2)
+                    if _1 != _2:
+                        self.add_edge(_1, _2, w1, w2)
 
         to_delete = []
         for node_name in tqdm(self.nodes, desc='Prepare aliased randomizer for each node'):
