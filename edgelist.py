@@ -220,12 +220,12 @@ class EdgeList:
         return  self.edgelist
 
 if __name__ == '__main__':
-    dfpath = 'pipeline/datasets/dblp_acm/dblp_acm-heuristic-er.csv'
+    dfpath = 'pipeline/datasets/itunes_amazon/itunes_amazon-master.csv'
     df = pd.read_csv(dfpath)
 
-    edgefile = 'pipeline/experiments/dblp_acm-edges-heur.txt'
+    edgefile = 'pipeline/experiments/itunes_amazon-edges-norm.txt'
 
-    pref = ['3#__tn', '3$__tt','5$__idx', '4$__cid']
+    pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
     el = EdgeList(df, edgefile, pref)
 
