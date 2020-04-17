@@ -12,14 +12,6 @@ import csv
 
 from EmbDI.logging import *
 
-WITH_RID_NO = 0
-WITH_RID_FIRST = 1
-WITH_RID_ALL = 2
-
-WITH_CID_NO = 0
-WITH_CID_FIRST = 1
-WITH_CID_ALL = 2
-
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
 
@@ -453,8 +445,6 @@ def clean_embeddings_file(embeddings_file, dictionary):
 
 def return_default_values(config):
     default_values = {
-        'with_rid': WITH_RID_FIRST,
-        'with_cid': WITH_CID_ALL,
         'ntop': 10,
         'ncand': 1,
         'max_rank': 3,
@@ -594,28 +584,6 @@ def check_config_validity(config):
         raise ValueError('Unknown training algorithm {}.'.format(config['training_algorithm']))
     if config['learning_method'] not in ['skipgram', 'CBOW']:
         raise ValueError('Unknown learning method {}'.format(config['learning_method']))
-    if config['with_cid'] not in ['first', 'all', 'no', WITH_CID_ALL, WITH_CID_FIRST, WITH_CID_NO]:
-        raise ValueError('Unknown with_cid strategy {}'.format(config['with_cid']))
-    else:
-        if config['with_cid'] == 'first':
-            config['with_cid'] = WITH_CID_FIRST
-        if config['with_cid'] == 'all':
-            config['with_cid'] = WITH_CID_ALL
-        if config['with_cid'] == 'no':
-            config['with_cid'] = WITH_CID_NO
-    if config['with_rid'] not in ['first', 'all', 'no', WITH_RID_ALL, WITH_RID_FIRST, WITH_RID_NO]:
-        raise ValueError('Unknown with_rid strategy {}'.format(config['with_rid']))
-    else:
-        if config['with_rid'] == 'first':
-            config['with_rid'] = WITH_RID_FIRST
-        elif config['with_rid'] == 'all':
-            config['with_rid'] = WITH_RID_ALL
-        elif config['with_rid'] == 'no':
-            config['with_rid'] = WITH_RID_NO
-        if config['experiment_type'] == 'ER':
-            if config['with_rid'] not in [WITH_RID_FIRST, WITH_RID_ALL]:
-                warnings.warn('ER will fail when no RIDs are present. Setting default value WITH_RID_FIRST.')
-                config['with_rid'] = WITH_RID_FIRST
 
     for key in [
         'backtrack',

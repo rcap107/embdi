@@ -463,7 +463,7 @@ class LSHMerge:
 
 if __name__ == '__main__':
     parameters = {
-        'output_file': 'cameras_testing_pricedekho-shopbot',
+        'output_file': '',
         'concatenate': 'outer',
         'missing_value': 'nan,ukn,none,unknown,-',
         'missing_value_strategy': '',
@@ -471,13 +471,9 @@ if __name__ == '__main__':
         'round_columns': '',
         'auto_merge': False,
         'expand_columns': '',
-        'tokenize_shared': True
-        # 'split_columns': 'auto focus,conitnous shots, face detection,image format,metering,other focus features,'
-        #                  'shooting modes,video format,white balancing',
-        # 'split_delimiter': ',',
-
+        'tokenize_shared': False
     }
-    f1 = '../pipeline/datasets/programming_challenge/www.shopbot.com.au.csv'
+    f1 = '../pipeline/experiments/programming_challenge/www.shopbot.com.au.csv'
     df1 = pd.read_csv(f1, encoding='ISO-8859-1')
     for c in df1.columns:
         if df1[c].dtype == 'object':
