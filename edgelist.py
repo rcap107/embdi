@@ -1,6 +1,4 @@
 import math
-import random
-import warnings
 import pandas as pd
 
 import numpy as np
@@ -9,6 +7,15 @@ from collections import Counter
 from EmbDI.graph import Graph
 
 import sys
+
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
+    parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist.')
+
+    return parser.parse_args()
 
 class EdgeList:
 
@@ -221,11 +228,14 @@ class EdgeList:
         return  self.edgelist
 
 if __name__ == '__main__':
-    dsname = sys.argv[1]
-    dfpath = 'pipeline/datasets/{}/{}-master.csv'.format(dsname, dsname)
+    args = parse_args()
+    # dsname = sys.argv[1]
+    # dfpath = 'pipeline/datasets/{}/{}-master.csv'.format(dsname, dsname)
+    dfpath = args.input_file
     df = pd.read_csv(dfpath)
 
-    edgefile = 'pipeline/experiments/{}-edges-norm.txt'.format(dsname)
+    edgefile = args.output_file
+    # edgefile = 'pipeline/edgelists/{}-edges-norm.txt'.format(dsname)
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 

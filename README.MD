@@ -10,7 +10,8 @@ perform the tasks specified by the user.
  Configuration files are explained in a separate section. The input file must be an edgelist that uses a specific format
  described in its section. 
  * `generate_tests.py` produces the files needed to test embedding quality (`MA`, `MR`, `MC`).
- * `edgelist.py` is used to generate the lists of edges used to build the graph starting from a relational dataset. 
+ * `edgelist.py` is used to generate the lists of edges used to build the graph starting from a relational dataset. This 
+ script is used for backward compatibility. 
  
 #### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory
@@ -169,9 +170,15 @@ Preparing the edgelist
 ---
 EmbDI trains embeddings by building a graph on the basis of an edgelist supplied by the user. 
 
-The file `edgelist.py` generates an edgelist given a csv file.
+The file `edgelist.py` generates an edgelist given a csv file. It takes two required arguments from the command 
+line:
+*  `-i INPUT_FILE, --input_file INPUT_FILE
+                        Path to input csv file to translate.`
+* `-o OUTPUT_FILE, --output_file OUTPUT_FILE
+                        Path to output edgelist.`
 
-The format of the `edgelist.py` is one of the following:
+
+The format of the edgelist is one of the following:
 * `n1,n2,w1,w2` >> node1, node2, weight1to2, weight2to1
 * `n1,n2` >> node1, node2, 1, 1
 * `n1,n2,w1` >> node1, node2, weight1to2 [no link back]

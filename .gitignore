@@ -127,3 +127,4 @@ dmypy.json
 # EMBDI stuff
 mlruns/
 mlruns_bk/
+/.idea/

@@ -584,7 +584,6 @@ def check_config_validity(config):
         raise ValueError('Unknown training algorithm {}.'.format(config['training_algorithm']))
     if config['learning_method'] not in ['skipgram', 'CBOW']:
         raise ValueError('Unknown learning method {}'.format(config['learning_method']))
-
     for key in [
         'backtrack',
         'write_walks',
