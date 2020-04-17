@@ -8,6 +8,7 @@ import numpy as np
 from collections import Counter
 from EmbDI.graph import Graph
 
+import sys
 
 class EdgeList:
 
@@ -220,10 +221,11 @@ class EdgeList:
         return  self.edgelist
 
 if __name__ == '__main__':
-    dfpath = 'pipeline/datasets/itunes_amazon/itunes_amazon-master.csv'
+    dsname = sys.argv[1]
+    dfpath = 'pipeline/datasets/{}/{}-master.csv'.format(dsname, dsname)
     df = pd.read_csv(dfpath)
 
-    edgefile = 'pipeline/experiments/itunes_amazon-edges-norm.txt'
+    edgefile = 'pipeline/experiments/{}-edges-norm.txt'.format(dsname)
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
