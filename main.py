@@ -202,14 +202,14 @@ def testing_driver(configuration):
     '''Simple caller function for the testing functions.'''
     embeddings_file = configuration['embeddings_file']
     df = pd.read_csv(configuration['input_file'])
-    if configuration['mlflow']:
-        with mlflow.start_run(configuration['run_id']):
-            mlflow.log_param('run_name', configuration['embeddings_file'])
+    # if configuration['mlflow']:
+    #     with mlflow.start_run(configuration['run_id']):
+    #         mlflow.log_param('run_name', configuration['embeddings_file'])
     test_driver(embeddings_file, df, configuration)
 
 
 def matching_driver(configuration):
-    mlflow.active_run()
+    # mlflow.active_run()
     embeddings_file = configuration['embeddings_file']
     df = pd.read_csv(configuration['input_file'])
 
@@ -233,8 +233,8 @@ def matching_driver(configuration):
             s = '{} {}\n'.format(*m)
             fp.write(s)
 
-    mlflow.log_artifact(file_col)
-    mlflow.log_artifact(file_row)
+    # mlflow.log_artifact(file_col)
+    # mlflow.log_artifact(file_row)
 
     return file_row
 
@@ -284,6 +284,9 @@ def read_configuration(config_file):
 
 
 def main(file_path=None, dir_path=None, args=None):
+    results = None
+    configuration = None
+
     # Building dir tree required to run the code.
     os.makedirs('pipeline/dump', exist_ok=True)
     os.makedirs('pipeline/walks', exist_ok=True)
@@ -367,6 +370,9 @@ def main(file_path=None, dir_path=None, args=None):
         dt = t_end-t_start
         print('# Time required: {}'.format(dt.total_seconds()))
         if configuration['mlflow']:
+            mlflow.log_params(configuration)
+            if mem_results.res_dict  is not None:
+                mlflow.log_metrics(mem_results.res_dict)
             mlflow.log_metric('time_overall', dt.total_seconds())
             mlflow.end_run()
         clean_dump()

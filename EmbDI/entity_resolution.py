@@ -244,7 +244,7 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     :param n_items:
     :param n_top:
     """
-    mlflow.active_run()
+    # mlflow.active_run()
     matches = _read_matches(matches_file)
 
     in_ground_truth = set()
@@ -316,9 +316,9 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
         'GF': golden_f1,
     }
 
-    mlflow.log_metric('ER_p', golden_precision)
-    mlflow.log_metric('ER_r', recall)
-    mlflow.log_metric('ER_f', golden_f1)
+    # mlflow.log_metric('ER_p', golden_precision)
+    # mlflow.log_metric('ER_r', recall)
+    # mlflow.log_metric('ER_f', golden_f1)
     print('P\tR\tF\tGP\tGR\tGF')
     for _ in result_dict.values():
         print('{:.4f}\t'.format(_*100), end='')

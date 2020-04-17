@@ -319,40 +319,6 @@ def int2base(x, base):
     return ''.join(digits)
 
 
-def dict_compression_flatten(df):
-    """
-    Replace all unique words in the dataframe using dictionary compression. Compression is in base 36 (0-9 digits + A-Z
-     characters) to reduce the size of walks on disk.
-    number of valus
-    :param df:
-    :return: compressed_df, mapping_dictionary
-    """
-    uniques = sorted(list(set(df.values.ravel().tolist())))
-
-    # Expanding strings that contain '_'
-    listed_uniques = {_ for l in uniques for _ in l.split('_')}
-    uniques = sorted(list(listed_uniques))
-
-    # Removing null values from the compression.
-    if '' in uniques: uniques.remove('')
-    if np.nan in uniques: uniques.remove(np.nan)
-
-    # Generating the keys in base 36.
-    keys = ['@{}'.format(int2base(_, len(digs))) for _ in range(len(uniques))]
-    dictionary = dict(zip(uniques, keys))
-
-    # Replacing word by word according to the dictionary.
-    def replace(line, dictionary):
-        s = []
-        for val in line.split('_'):
-            if val in dictionary:
-                s.append(dictionary[val])
-        return '_'.join(s)
-
-    for col in df.columns:
-        df[col] = df[col].apply(replace, dictionary=dictionary)
-    return df, dictionary
-
 
 def dict_compression_edgelist(edgelist, prefixes):
     uniques = sorted(list(set(edgelist.values.ravel().tolist())))
