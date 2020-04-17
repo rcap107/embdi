@@ -457,7 +457,7 @@ def return_default_values(config):
         'indexing': 'basic',
         'epsilon': 0.1,
         'num_trees': 250,
-        'compression': 'True',
+        'compression': 'False',
         'n_sentences': 'default',
         'walks_strategy': 'basic',
         'learning_method': 'skipgram',

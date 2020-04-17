@@ -129,7 +129,7 @@ Default values are hardcoded in `EmbDI.utils.py`. Their values are the following
     'backtrack' = True
     'training_algorithm' = 'word2vec'
     'write_walks' = True
-    'flatten' = True
+    'flatten' = ''
     'indexing' = 'basic'
     'epsilon' = 0.1
     'num_trees' = 250
@@ -214,6 +214,8 @@ sentence, otherwise it will not be saved.
 
 It is possible to flatten all nodes using flatten:all in the configuration file. Alternatively, 
 nodes can be flattened based on their type by listing the prefixes to expand separated by a comma. 
+For example, if the prefixes are `tt, tn, idx, cid` like in the standard csv-translation case, by putting `tt` only the
+nodes with prefix `tt` will be flattened. 
 
 
 Experiment logging
@@ -419,4 +421,16 @@ lsh.get_sample_blocks(5)
 replacement = lsh.get_replacement('normalized_edit_distance', .4)
 ```
 
+Reference
+---
+If you use EmbDI in your work, please cite it as follows: 
 
+```
+ @inproceedings{EURECOM+6231, year = {2020}, 
+ title = {{C}reating embeddings of heterogeneous relational datasets for data integration tasks}, 
+ author = {{C}appuzzo, {R}iccardo and {P}apotti, {P}aolo and {T}hirumuruganathan, {S}aravanan}, 
+ booktitle = {{SIGMOD}/{PODS} 2020, 
+ {ACM} {I}nternational {C}onference on {M}anagement of {D}ata, 14-19 {J}une 2020, 
+ {P}ortland, {O}regon, {USA}}, address = {{P}ortland, {UNITED} {STATES}}, 
+ month = {06}, url = {http://www.eurecom.fr/publication/6231} } 
+```
