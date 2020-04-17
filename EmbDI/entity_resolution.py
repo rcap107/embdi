@@ -1,34 +1,39 @@
 import argparse
+import csv
 import datetime as dt
-import warnings
+import pickle
 from operator import itemgetter
 
 import gensim.models as models
 import mlflow
-# from datasketch import MinHash, MinHashLSH
-
-from EmbDI.blocking import execute_blocking
-
-from EmbDI.utils import *
-
-import csv
-
-import pickle
-
 from tqdm import tqdm
 
+from EmbDI.blocking import execute_blocking
+from EmbDI.utils import *
 
-NGT_NOT_FOUND = ANNOY_NOT_FOUND = False
+# from datasketch import MinHash, MinHashLSH
+
+
+NGT_NOT_FOUND = ANNOY_NOT_FOUND = FAISS_NOT_FOUND = False
+
 try:
     import ngtpy
 except ModuleNotFoundError:
     warnings.warn('ngtpy not found. NGT indexing will not be available.')
     NGT_NOT_FOUND = True
+
+try:
+    import faiss
+except ModuleNotFoundError:
+    warnings.warn('faiss not found. faiss indexing will not be available.')
+    FAISS_NOT_FOUND = True
+
 try:
     from gensim.similarities.index import AnnoyIndexer
 except ImportError:
     warnings.warn('AnnoyIndexer not found. Annoy indexing will not be available.')
     ANNOY_NOT_FOUND = True
+
 
 
 def parse_args():
@@ -69,6 +74,9 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
     if strategy == 'ngt' and NGT_NOT_FOUND:
         warnings.warn('Chosen strategy = \'NGT\', but the module is not installed. Falling back to basic.')
         strategy = 'basic'
+    if strategy == 'faiss' and FAISS_NOT_FOUND:
+        warnings.warn('Chosen strategy = \'faiss\', but the module is not installed. Falling back to basic.')
+        strategy = 'basic'
 
     if strategy == 'basic':
         model = models.KeyedVectors.load_word2vec_format(model_file, unicode_errors='ignore')
@@ -84,8 +92,6 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
 
             candidates = candidates[:n_candidates]
             most_similar[n] = candidates
-            # print('\rBuilding similarity structure: {:0.1f} - {}/{} tuples'.format(c / len(nodes) * 100, c, len(nodes)),
-            #       end='')
             c += 1
         print('')
 
@@ -179,31 +185,45 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
             c += 1
         print('')
 
-    elif strategy == 'minhash':
-        raise NotImplementedError()
-        assert df is not None
-        assert isinstance(df, pd.DataFrame)
-        print('Using basic MinHash blocking.')
+    elif strategy == 'faiss':
+        print('Using faiss indexing.')
+        # ngt_index_path = 'pipeline/dump/ngt_index.nn'
+        words = []
+        with open(model_file, 'r') as fp:
+            n, dim = map(int, fp.readline().split())
+            mat = []
+            index = faiss.IndexFlatL2(dim)
+            for idx, line in enumerate(fp):
+                k, v = line.rstrip().split(' ', maxsplit=1)
+                vector = np.array(list(map(float, v.split(' '))), ndmin=1).astype('float32')
+                mat.append(vector)
+                words.append(k)
 
-        blocking_candidates = minhash_blocking(df, viable_lines, n_items)
-        model = models.KeyedVectors.load_word2vec_format(model_file, unicode_errors='ignore')
-        for n in blocking_candidates:
-            idx = int(n.split('_')[1])
-            bucket = blocking_candidates[n]
+        mat = np.array(mat)
+        index.add(mat)
+
+        most_similar = {}
+
+        D, I = index.search(mat, k=n_top+1)
+        # D, I = index.search(query, size=n_top, epsilon=epsilon)
+        # mm = [item[0] for item in ms[1:]]
+        # mm = list(map(words.__getitem__, mm))
+        for n in tqdm(nodes):
+            idx = int(n.split('__')[1])
+            mm = I[idx]
             if idx < n_items:
-                bucket = [_ for _ in bucket if int(_.split('_')[1]) >= n_items]
+                candidates = [_ for _ in mm if idx >= n_items]
             else:
-                bucket = [_ for _ in bucket if int(_.split('_')[1]) < n_items]
+                candidates = [_ for _ in mm if idx < n_items]
 
-            if len(bucket) > 0:
-                mm = [model.most_similar_to_given(n, bucket)]
-            else:
-                continue
-            most_similar[n] = mm
-            print('\rBuilding similarity structure: {:0.1f} - {}/{} tuples'.format(c / len(nodes) * 100, c, len(nodes)),
-                  end='')
-            c += 1
+            candidates = candidates[:n_candidates]
+            most_similar[n] = ['idx__{}'.format(_) for _ in candidates]
+        # print('\rBuilding similarity structure: {:0.1f} - {}/{} tuples'.format(c / len(nodes) * 100, c, len(nodes)),
+        #       end='')
+        c += 1
         print('')
+
+
 
     else:
         raise ValueError('Unknown strategy {0}'.format(strategy))
@@ -369,10 +389,6 @@ def entity_resolution(input_file: str, configuration: dict, df: pd.DataFrame = N
                                               df=df)
     if task == 'test':
         dict_result = compare_ground_truth_only(most_similar, matches_file, n_items, n_top)
-        # csvfile = open('results_{}.csv'.format(configuration['output_file']), 'w')
-        # csvwriter = csv.writer(csvfile, delimiter=',')
-        # csvwriter.writerow(dict_result.keys())
-        # csvwriter.writerow([_ * 100 for _ in dict_result.values()])
     elif task == 'match':
         matches = perform_matching(most_similar)
     else:
