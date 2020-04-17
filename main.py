@@ -175,7 +175,6 @@ def training_driver(configuration):
             if configuration['compression']:  # Execute compression if required.
                 df, dictionary = dict_compression_edgelist(df, prefixes=prefixes)
                 el = df.values.tolist()
-                # df, dictionary = dict_compression_flatten(df)
             else:
                 dictionary = None
                 el = edgelist
@@ -189,7 +188,6 @@ def training_driver(configuration):
             del graph # Graph is not needed anymore, so it is deleted to reduce memory cost
         else:
             if configuration['compression']:  # Execute compression if required.
-                raise NotImplementedError
                 prefixes, edgelist = read_edgelist(configuration['input_file'])
                 df, dictionary = dict_compression_edgelist(df, prefixes=prefixes)
             else:

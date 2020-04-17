@@ -15,8 +15,6 @@ from EmbDI.logging import *
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
 
-SPECIAL_PREFIXES = ['__', '!!']
-
 POSSIBLE_TASKS = ['train', 'test', 'match', 'refinement', 'train-test', 'train-match', 'debug']
 
 
@@ -360,8 +358,8 @@ def dict_compression_edgelist(edgelist, prefixes):
     uniques = sorted(list(set(edgelist.values.ravel().tolist())))
 
     # Expanding strings that contain '_'
-    prefixes = [_ if _[:2] not in SPECIAL_PREFIXES else _[2:] for _ in prefixes]
-    listed_uniques = {_ for l in uniques for idx, _ in enumerate(l.split('_')) if idx > 0 and _ not in prefixes}
+    prefixes = [_[4:] for _ in prefixes]
+    listed_uniques = {_ for l in uniques for idx, _ in enumerate(l.split('_')) if idx > 0 and _ != ''}
     uniques = sorted(list(listed_uniques))
 
     # Removing null values from the compression.
@@ -375,11 +373,11 @@ def dict_compression_edgelist(edgelist, prefixes):
     # Replacing word by word according to the dictionary.
     def replace(line, dictionary, prefixes):
         s = []
-        for val in line.split('_'):
-            if val in dictionary:
-                s.append(dictionary[val])
-            elif val in prefixes:
+        for idx, val in enumerate(line.split('_')):
+            if val in prefixes:
                 s.append(val+'_')
+            elif val in dictionary:
+                s.append(dictionary[val])
         return '_'.join(s)
 
     for col in edgelist.columns:
@@ -420,18 +418,19 @@ def clean_embeddings_file(embeddings_file, dictionary):
             for i, line in enumerate(fp):
                 if i > 0:
                     key, vector = line.strip().split(' ', maxsplit=1)
-                    prefix, word = key.split('_', maxsplit=1)
+                    prefix, word = key.split('__', maxsplit=1)
                     if word.startswith('@'):
                         if word in dictionary:
                             match = dictionary[word]
-                            s = '{} {}'.format(match, vector) + '\n'
+                            s = '{} {}'.format(prefix + '__' + match, vector) + '\n'
                             fp2.write(s)
                         else:
                             wlist = []
                             for w in word.split('@'):
                                 if len(w) > 0:
-                                    wlist.append(dictionary['@'+w])
-                            k = '_'.join(wlist)
+                                    _t = '@' + w.strip('_')
+                                    wlist.append(dictionary[_t])
+                            k = prefix + '__' + '_'.join(wlist)
                             s = '{} {}'.format(k, vector) + '\n'
                             fp2.write(s)
                     else:
