@@ -32,6 +32,7 @@ class Node:
         for i, _ in enumerate(['isfirst', 'isroot', 'isappear']):
             self.node_class[_] = bool(int(bb[i]))
 
+
     def set_frequency(self, frequency):
         self.frequency = frequency
 
@@ -202,6 +203,7 @@ class Graph:
                     raise ValueError('Unknown to-flatten type {}.'.format(_))
 
     def _extract_prefix(self, prefixes):
+        valid = False
         for prefix in prefixes:
             prefix_properties, pref = prefix.split('__')
             strnum = prefix_properties[1]
@@ -212,10 +214,16 @@ class Graph:
                 self.node_classes[pref] = int(rwclass)
                 if int(rwclass) >= 4:
                     self.possible_first.append(pref)
+            if int(rwclass)%2 == 1:
+                # self.isappear.append(prefix)
+                valid = False
             if strnum not in ['#', '$']:
                 raise ValueError('Unknown type prefix {}'.format(strnum))
             else:
                 self.node_is_numeric[pref] = True if strnum == '#' else False
+        if not valid:
+            raise ValueError('No node class with "isappear"==True is present. '
+                             'All random walks will be empty. Terminating. ')
 
     def __init__(self, edgelist, prefixes, sim_list=None, flatten=[]):
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
@@ -230,6 +238,7 @@ class Graph:
         self.edges = set()
         self.node_classes = {}
         self.node_is_numeric = {}
+        self.isappear = []
         self.to_flatten = flatten
         self.cell_list = []
         self.possible_first = []
