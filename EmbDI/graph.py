@@ -216,7 +216,7 @@ class Graph:
                     self.possible_first.append(pref)
             if int(rwclass)%2 == 1:
                 # self.isappear.append(prefix)
-                valid = False
+                valid = True
             if strnum not in ['#', '$']:
                 raise ValueError('Unknown type prefix {}'.format(strnum))
             else:
