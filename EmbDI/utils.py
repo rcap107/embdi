@@ -1,5 +1,3 @@
-import os
-import random
 import string
 import subprocess
 import warnings
@@ -7,8 +5,6 @@ import warnings
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-
-import csv
 
 from EmbDI.logging import *
 
@@ -349,18 +345,6 @@ def dict_compression_edgelist(edgelist, prefixes):
     for col in edgelist.columns:
         edgelist[col] = edgelist[col].apply(replace, dictionary=dictionary, prefixes=prefixes)
     return edgelist, {v:k for k,v in dictionary.items()}
-
-
-def dict_decompression(df, dictionary):
-    def replace(line, dictionary):
-        if line in dictionary:
-            return dictionary[line]
-
-    d = dict(zip(dictionary.values(), dictionary.keys()))
-    for col in range(len(df.columns)):
-        df.iloc[:, col] = df.iloc[:, col].apply(replace, dictionary=d)
-    return df, d
-
 
 def dict_decompression_flatten(df, dictionary):
     def replace(line, dictionary):

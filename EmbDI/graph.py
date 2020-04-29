@@ -1,6 +1,5 @@
 import math
 import random
-import warnings
 
 import numpy as np
 
@@ -105,6 +104,7 @@ class Node:
         self.neighbors = None
 
     def rebuild(self):
+        raise NotImplementedError
         if np.nan in self.left:
             self.left.remove(np.nan)
         if '' in self.left:
@@ -256,7 +256,7 @@ class Graph:
             print('# All values will be tokenized. ')
 
         # pbar = tqdm()
-        for line in tqdm(edgelist, desc='Loading edgelist.'):
+        for line in tqdm(edgelist, desc='Loading edgelist_file.'):
             n1 = line[0]
             n2 = line[1]
 

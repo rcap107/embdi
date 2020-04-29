@@ -61,7 +61,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
                 else:
                     l.append(_)
 
-        # edgelist = [dictionary[_] for __ in edgelist for _ in __[:2] if _ in dictionary]
+        # edgelist_file = [dictionary[_] for __ in edgelist_file for _ in __[:2] if _ in dictionary]
     g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten)
     t_end = datetime.datetime.now()
     dt = t_end - t_start
@@ -375,7 +375,7 @@ def main(file_path=None, dir_path=None, args=None):
                 mlflow.log_metrics(mem_results.res_dict)
             mlflow.log_metric('time_overall', dt.total_seconds())
             mlflow.end_run()
-        clean_dump()
+        # clean_dump()
 
 if __name__ == '__main__':
     args = parse_args()

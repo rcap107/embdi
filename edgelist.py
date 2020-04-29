@@ -6,14 +6,12 @@ import numpy as np
 from collections import Counter
 from EmbDI.graph import Graph
 
-import sys
-
 import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
-    parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist.')
+    parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist_file.')
 
     return parser.parse_args()
 
