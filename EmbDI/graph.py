@@ -5,6 +5,16 @@ import numpy as np
 
 from tqdm import tqdm
 
+import warnings
+
+try:
+    import networkx as nx
+    NX_NOT_FOUND = False
+except ModuleNotFoundError:
+    warnings.warn('NetworkX not found. Graph conversion unavailable')
+    NX_NOT_FOUND = True
+
+
 class Node:
     """
         Cell class used to describe the nodes that build the graph.
@@ -102,6 +112,7 @@ class Node:
         self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
+
 
     def rebuild(self):
         raise NotImplementedError
@@ -341,3 +352,13 @@ class Graph:
         # self.edges = None  # remove the edges list since to save memory
         if sim_list:
             self.add_similarities(sim_list)
+
+
+    def convert_to_nx(self):
+        if NX_NOT_FOUND:
+            raise ImportError('NetworkX not found.')
+        else:
+            nxg = nx.Graph()
+            for edge in self.edges:
+                nxg.add_edge(edge.node_from, edge.node_to)
+            return nxg
