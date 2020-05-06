@@ -8,6 +8,8 @@ from sklearn.decomposition import PCA
 
 from EmbDI.logging import *
 
+import os
+
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
 
@@ -78,6 +80,22 @@ def apply_PCA(embeddings_file, reduced_file, n_components):
 
     print('Written on file {}.'.format(reduced_file))
 
+
+def remove_prefixes(prefixes, model_file):
+    newf, _ = os.path.splitext(model_file)
+    newf += '_cleaned.emb'
+    with open(model_file, 'r') as fin:
+        with open(newf, 'w') as fo:
+            for idx, line in enumerate(fin):
+                if idx > 0:
+                    pre, rest = line.split('__', maxsplit=1)
+                    if pre in prefixes:
+                        fo.write(rest)
+                    else:
+                        fo.write(line)
+                else:
+                    fo.write(line)
+    return newf
 
 def read_similarities(sim_file):
     sims = pd.read_csv(sim_file)
@@ -179,14 +197,14 @@ def split_embeddings(embeddings_file, dataset_info, n_dimensions, configuration)
     return list_splits, syn_file
 
 
-def apply_rotation(src_emb, tgt_emb, emb_dim, synonym_file=None, eval_file=None):
+def apply_rotation(src_emb, tgt_emb, emb_dim, synonym_file=None, eval_file=None, n_refinement=2):
     python_version = '3'
     path_to_run = './'
     py_name = './MUSE-master/supervised.py'
 
     args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name)]
 
-    n_refinement = '1'
+    n_ref = str(n_refinement)
     exp_path = './pipeline'
     exp_name = 'test'
 
@@ -209,8 +227,8 @@ def apply_rotation(src_emb, tgt_emb, emb_dim, synonym_file=None, eval_file=None)
         src_emb,
         '--tgt_emb',
         tgt_emb,
-        '--n_refinement',
-        n_refinement,
+        '--n_ref',
+        n_ref,
         '--export',
         'txt',
         '--cuda',
@@ -420,7 +438,8 @@ def return_default_values(config):
         'refinement_task': 'rotation',
         'mlflow': False,
         'repl_numbers': False,
-        'repl_strings': False
+        'repl_strings': False,
+        'sampling_factor':0.001
     }
 
     for k in default_values:
@@ -524,6 +543,13 @@ def check_config_validity(config):
         raise ValueError('Expected integer ncand value.')
     if not 0 < config['ncand'] <= config['ntop']:
         raise ValueError('Number of candidates must be between 0 and n_top.')
+
+    try:
+        config['sampling_factor'] = float(config['sampling_factor'])
+    except ValueError:
+        raise ValueError('Expected real sampling_factor value.')
+    if not 1 > config['sampling_factor'] >= 0:
+        raise ValueError('Sampling factor must be in [0,1).')
 
     if config['walks_strategy'] not in ['basic', 'replacement']:
         raise ValueError('Unknown walks strategy {}.'.format(config['walks_strategy']))

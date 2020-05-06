@@ -135,7 +135,8 @@ def embeddings_generation(walks, configuration, dictionary):
                      dimensions=int(configuration['n_dimensions']),
                      window_size=int(configuration['window_size']),
                      training_algorithm=configuration['training_algorithm'],
-                     learning_method=configuration['learning_method'])
+                     learning_method=configuration['learning_method'],
+                     sampling_factor=configuration['sampling_factor'])
     if configuration['compression']: newf = clean_embeddings_file(t, dictionary)
     else: newf = t
     t2 = datetime.datetime.now()
