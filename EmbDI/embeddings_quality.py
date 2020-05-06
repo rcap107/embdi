@@ -212,7 +212,12 @@ def embeddings_quality(embeddings_file, configuration):
                 mlflow.log_metric(k, result_con[k])
 
     result_dict = dict(chain.from_iterable(d.items() for d in (result_row, result_col, result_con)))
+    _r = ['nmc_avg', 'nmr_avg', 'nmcon_avg', 'eq_avg']
     result_dict['eq_avg'] = avg_results
+    print('\t'.join(_r))
+    for k in _r:
+        print(result_dict[k], end='\t')
+    print()
 
     return result_dict
 

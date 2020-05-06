@@ -72,14 +72,14 @@ def gen_no_match_row(df, test_dir, test_number, target_columns):
         # uniq_col = [_ for _ in uniq_col if (_ != np.nan) and (_ != '')]
         test_count = 0
         full_count = 0
-        while test_count < test_number:
-            print(test_count)
+        while full_count < test_number:
+            # print(test_count)
         # for test_count in range(test_number):
             if full_count > 5*test_number:
                 break
             full_count += 1
             target_right = np.random.choice(range(len(df)), 1)
-            correct = df.iloc[target_right]
+            correct = df[target_columns].iloc[target_right]
             if correct.isnull().values.any():
                 # Null values in the target line, retrying.
                 test_count -= 1
@@ -254,14 +254,14 @@ if __name__ == '__main__':
     # Read dataset
     f = 'imdb_movielens'
     print(f)
-    df = pd.read_csv('pipeline/datasets/{}/{}-heuristic.csv'.format(f, f), engine='python')
+    df = pd.read_csv('pipeline/datasets/{}/{}-master.csv'.format(f, f), engine='python')
     # Drop all rows that contain null values
-    df = df.dropna()
+    # df = df.dropna()
     #
     # If necessary, sample the dataset.
     df1 = df.sample(frac=0.05)
     print(len(df1))
-    flag = '-heuristic'
+    flag = 'update'
     # Create the directory where all tests will be written into.
     test_dir = 'pipeline/test_dir/' + f + '{}'.format(flag) + '/'
     os.makedirs(test_dir, exist_ok=True)
@@ -304,14 +304,14 @@ if __name__ == '__main__':
     #     # ['class', 'name']
     # ]
 
-    '''id,title,authors,venue,year'''
-
-    fd = [
-        ['venue', 'title'],
-        ['venue', 'authors'],
-        ['year', 'title']
-    ]
-
+    # '''id,title,authors,venue,year'''
+    #
+    # fd = [
+    #     ['venue', 'title'],
+    #     ['venue', 'authors'],
+    #     ['year', 'title']
+    # ]
+    # beer
     # '''beer_name,brew_factory_name,style,abv'''
     #
     # fd = [
@@ -319,7 +319,7 @@ if __name__ == '__main__':
     #     ['style', 'beer_name'],
     #     ['abv', 'beer_name']
     # ]
-    #
+    # fodors zagats
     # '''addr,city,class,name,phone,type'''
     # fd = [
     #     ['city', 'addr'],
@@ -352,7 +352,8 @@ if __name__ == '__main__':
     # ]
 
     # imdb movielens
-    '''actor_1,actor_2,actor_3,color,content_rating,director,genres,original_language,production_companies,production_countries,release_date_rounded,status,title,vote_average,year'''
+
+    cols = '''actor_1,actor_2,actor_3,director,original_language,production_countries,title,year'''.split(',')
     fd = [
         # ['original_language', 'director'],
         # ['director', 'actor_1'],
@@ -384,6 +385,6 @@ if __name__ == '__main__':
     # Number of sentences to generate for each test
     n_sentences = 1000
 
-    gen_no_match_col(fd, df1, test_dir, n_sentences, sentence_len=test_length)
-    gen_no_match_row(df1, test_dir, n_sentences, df.columns)
+    # gen_no_match_col(fd, df1, test_dir, n_sentences, sentence_len=test_length)
+    gen_no_match_row(df1, test_dir, n_sentences, cols)
     gen_no_match_concept(match_concept, df1, test_dir, n_sentences, sentence_len=5)

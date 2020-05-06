@@ -2,12 +2,16 @@ from EmbDI.embeddings_quality import embeddings_quality
 from EmbDI.entity_resolution import entity_resolution
 from EmbDI.schema_matching import schema_matching, match_columns
 from EmbDI.logging import *
+from EmbDI.utils import remove_prefixes
+import os
 
 def test_driver(embeddings_file, df, configuration=None):
     test_type = configuration['experiment_type']
     info_file = configuration['dataset_info']
     if test_type == 'EQ':
-        mem_results.res_dict = embeddings_quality(embeddings_file, configuration)
+        newf = remove_prefixes(configuration['flatten'], embeddings_file)
+        mem_results.res_dict = embeddings_quality(newf, configuration)
+        os.remove(newf)
     elif test_type == 'ER':
         mem_results.res_dict = entity_resolution(embeddings_file, configuration, df=df, info_file=info_file)
     elif test_type == 'SM':
