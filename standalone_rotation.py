@@ -35,7 +35,7 @@ def write_syn_file(common_values, dset_name, frac=0.7):
 
 
 if __name__ == '__main__':
-    dset_name = 'amazon_google'
+    dset_name = 'itunes_amazon'
     # src_emb = 'pipeline/embeddings/amazon-alone-edgelist.emb'.format(dset_name)
     # tgt_emb = 'pipeline/embeddings/google-alone-edgelist.emb'.format(dset_name)
     src_emb = 'pipeline/embeddings/split/{}-rotation_split1.emb'.format(dset_name)
@@ -44,7 +44,9 @@ if __name__ == '__main__':
     common_values = generate_syn_file(src_emb, tgt_emb)
     write_syn_file(common_values, dset_name)
 
+    train = 'pipeline/replacements/{}-fakem.txt'.format(dset_name)
     # train = 'pipeline/replacements/{}-train.txt'.format(dset_name)
     test = 'pipeline/replacements/{}-test.txt'.format(dset_name)
+    train = 'pipeline/replacements/{}-g.txt'.format(dset_name)
     ground_truth = 'pipeline/replacements/{}-gt.txt'.format(dset_name)
-    apply_rotation(src_emb, tgt_emb, 300, ground_truth, test)
+    apply_rotation(src_emb, tgt_emb, 300, train, ground_truth)

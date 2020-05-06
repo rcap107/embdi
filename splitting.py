@@ -100,9 +100,9 @@ def split(dsfile, info_file, embeddings_file):
         fp_emb.close()
 
 if __name__ == '__main__':
-    embeddings_file = 'pipeline/embeddings/amazon_google-edgelist-without-compression.emb'
-    dsfile = 'pipeline/datasets/amazon_google/amazon_google-master.csv'
-    output_file = 'pipeline/experiments/rotation/amazon_google-rotation'
-    dataset_info = 'pipeline/info/info-amazon_google.txt'
+    embeddings_file = 'pipeline/embeddings/itunes_amazon-baserot.emb'
+    dsfile = 'pipeline/datasets/itunes_amazon/itunes_amazon-master.csv'
+    output_file = 'pipeline/experiments/rotation/itunes_amazon-rotation'
+    dataset_info = 'pipeline/info/info-itunes_amazon.txt'
 
     split(dsfile, dataset_info, embeddings_file)
