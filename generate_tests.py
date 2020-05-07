@@ -252,16 +252,16 @@ def gen_no_match_concept(combinations, df: pd.DataFrame, test_dir, n_sentences, 
 
 if __name__ == '__main__':
     # Read dataset
-    f = 'imdb_movielens'
+    f = 'fodors_zagats'
     print(f)
     df = pd.read_csv('pipeline/datasets/{}/{}-master.csv'.format(f, f), engine='python')
     # Drop all rows that contain null values
     # df = df.dropna()
     #
     # If necessary, sample the dataset.
-    df1 = df.sample(frac=0.05)
+    df1 = df.sample(frac=0.5)
     print(len(df1))
-    flag = 'update'
+    flag = ''
     # Create the directory where all tests will be written into.
     test_dir = 'pipeline/test_dir/' + f + '{}'.format(flag) + '/'
     os.makedirs(test_dir, exist_ok=True)
@@ -278,33 +278,19 @@ if __name__ == '__main__':
             if _1 != _2:
                 nmc_col_combinations.append([_1, _2])
 
-    # '''Sno, Album_Name, Artist_Name, Song_Name, Price, Time, Released, Label, Copyright, Genre'''
+
+    # dblp-acm
+
+    # cols='author_1,author_2,author_3,author_4,title,venue,year'.split(',')
     # fd = [
-    #     ['Artist_Name', 'Album_Name'],
-    #     ['Artist_Name', 'Song_Name'],
-    #     ['Album_Name', 'Song_Name'],
-    #     ['Genre', 'Album_Name'],
+    #     ['venue', 'title'],
+    #     ['venue', 'author_1'],
+    #     ['year', 'title']
     # ]
 
-    # '''ID,Title,Episodes,Producers,Genres,Type,Year,Rating'''
-    # fd = [
-    #     ['Episodes','Type'],
-    #     ['Genres', 'Type'],
-    #     ['Genres', 'Title'],
-    #     ['Producers', 'Title'],
-    # ]
+    # dblp-scholar
 
-    # '''id, name, addr, city, phone, type,class'''
-    # fd = [
-    #     ['city', 'addr'],
-    #     ['city', 'name'],
-    #     ['type', 'addr'],
-    #     ['type', 'class'],
-    #     ['type', 'name'],
-    #     # ['class', 'name']
-    # ]
-
-    # '''id,title,authors,venue,year'''
+    # cols='''title,authors,venue,year'''.split(',')
     #
     # fd = [
     #     ['venue', 'title'],
@@ -312,7 +298,7 @@ if __name__ == '__main__':
     #     ['year', 'title']
     # ]
     # beer
-    # '''beer_name,brew_factory_name,style,abv'''
+    # cols='''beer_name,brew_factory_name,style,abv'''.split(',')
     #
     # fd = [
     #     ['brew_factory_name', 'beer_name'],
@@ -320,21 +306,23 @@ if __name__ == '__main__':
     #     ['abv', 'beer_name']
     # ]
     # fodors zagats
-    # '''addr,city,class,name,phone,type'''
-    # fd = [
-    #     ['city', 'addr'],
-    #     ['type','addr'],
-    # ]
+    cols='''addr,city,class,name,phone,type'''.split(',')
+    fd = [
+        ['city', 'addr'],
+        ['type','addr'],
+    ]
 
-    # '''title,category,brand,modelno,price'''
+    # walmart_amazon
+    # cols='''title,category,brand,modelno,price'''.split(',')
     #
     # fd = [
     #     ['category', 'title'],
     #     ['brand', 'title'],
     #     ['brand', 'modelno']
     # ]
+
     #   itunes amazon
-    # '''album_name,artist_name,copyright,genre,price,released,song_name,time'''
+    # cols='''album_name,artist_name,copyright,genre,price,released,song_name,time'''.split(',')
     #
     # fd = [
     #     ['artist_name', 'album_name'],
@@ -345,7 +333,7 @@ if __name__ == '__main__':
     # ]
 
     # amazon google
-    # '''manufacturer,price,title'''
+    # cols='''manufacturer,price,title'''.split(',')
     #
     # fd = [
     #     ['manufacturer', 'title']
@@ -353,22 +341,15 @@ if __name__ == '__main__':
 
     # imdb movielens
 
-    cols = '''actor_1,actor_2,actor_3,director,original_language,production_countries,title,year'''.split(',')
-    fd = [
-        # ['original_language', 'director'],
-        # ['director', 'actor_1'],
-        ['director', 'title'],
-        ['actor_1', 'title'],
-        ['original_language', 'title']
-    ]
-
-    # refxl
-    # '''authors,id,journal,publication_type,title,year'''
-    #
+    # cols = '''actor_1,actor_2,actor_3,director,original_language,production_countries,title,year'''.split(',')
     # fd = [
-    #     ['year', 'title'],
-    #     ['authors', 'title']
+    #     # ['original_language', 'director'],
+    #     # ['director', 'actor_1'],
+    #     ['director', 'title'],
+    #     ['actor_1', 'title'],
+    #     ['original_language', 'title']
     # ]
+
 
     # msd-pre
     # '''title,release,artist_name,duration,year'''
@@ -385,6 +366,6 @@ if __name__ == '__main__':
     # Number of sentences to generate for each test
     n_sentences = 1000
 
-    # gen_no_match_col(fd, df1, test_dir, n_sentences, sentence_len=test_length)
+    gen_no_match_col(fd, df1, test_dir, n_sentences, sentence_len=test_length)
     gen_no_match_row(df1, test_dir, n_sentences, cols)
     gen_no_match_concept(match_concept, df1, test_dir, n_sentences, sentence_len=5)
