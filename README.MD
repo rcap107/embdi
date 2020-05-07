@@ -12,7 +12,7 @@ perform the tasks specified by the user.
  * `generate_tests.py` produces the files needed to test embedding quality (`MA`, `MR`, `MC`).
  * `edgelist.py` is used to generate the lists of edges used to build the graph starting from a relational dataset. This 
  script is used for backward compatibility. 
- 
+
 #### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory
 labeled `pipeline`. All data input/output will assume the presence of a directory with this name. 
@@ -40,6 +40,10 @@ root
 
 Additional directories are present in the project directory: they contain additional (not required) code or are needed
 for preprocessing or analysis. 
+
+Resources
+---
+Datasets and edgelists used for most of the tests can be downloaded from the link https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm
 
 main.py
 ---
