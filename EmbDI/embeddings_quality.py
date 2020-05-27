@@ -144,7 +144,10 @@ def embeddings_quality(embeddings_file, configuration):
     test_dir = configuration['test_dir']
     test_dir = test_dir.strip('/') + '/'
 
-    wv = models.KeyedVectors.load_word2vec_format(embeddings_file, unicode_errors='ignore')
+    if configuration['training_algorithm'] == 'fasttext':
+        wv = models.KeyedVectors.load(embeddings_file, mmap='r')
+    else:
+        wv = models.KeyedVectors.load_word2vec_format(embeddings_file, unicode_errors='ignore')
     sum_total = 0
     count_tests = 0
     result_col = {}
