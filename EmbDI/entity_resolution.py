@@ -1,5 +1,4 @@
 import argparse
-import csv
 import datetime as dt
 import pickle
 from operator import itemgetter
@@ -10,8 +9,6 @@ from tqdm import tqdm
 
 from EmbDI.blocking import execute_blocking
 from EmbDI.utils import *
-
-# from datasketch import MinHash, MinHashLSH
 
 
 NGT_NOT_FOUND = ANNOY_NOT_FOUND = FAISS_NOT_FOUND = False
@@ -329,36 +326,6 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     return result_dict
 
 
-def minhash_blocking(df, viable_lines, n_items):
-    msh = MinHashLSH(threshold=0.5)
-
-    query_hashes = {}
-    for pos, idx in enumerate(viable_lines):
-        ii, vec = idx.split(' ',maxsplit=1)
-        idx_clean = int(ii.split('_')[1])
-        row = df.iloc[idx_clean]
-        set1 = set(map(str, row.tolist()))
-        set1 = [__ for _ in set1 for __ in _.split('_')]
-        m1 = MinHash()
-        for it in set1:
-            m1.update(it.encode('utf-8'))
-        item_name = ii
-        msh.insert(item_name, m1)
-        # if idx_clean < n_items:
-        query_hashes[item_name] = m1
-        print('\rBuilding minhash: {:0.1f} - {}/{} tuples'.format(pos / len(viable_lines) * 100, pos, len(viable_lines)),
-              end='')
-    print('')
-    blocking_candidates = {}
-
-    for idx in query_hashes:
-        r = msh.query(query_hashes[idx])
-        if r[0] == idx:
-            r = r[1:]
-        blocking_candidates[idx] = r
-
-    return blocking_candidates
-
 def perform_matching(most_similar):
     matches = []
     for idx in most_similar:
@@ -460,7 +427,7 @@ def _prepare_tests(model_file):
 if __name__ == '__main__':
     args = parse_args()
 
-    experiment_name = 'entity_resolution'
+    experiment_name = 'ER'
     id_exp = mlflow.set_experiment(experiment_name)
 
     for val in [1]:
