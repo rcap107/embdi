@@ -88,9 +88,13 @@ def remove_prefixes(prefixes, model_file):
         with open(newf, 'w') as fo:
             for idx, line in enumerate(fin):
                 if idx > 0:
-                    pre, rest = line.split('__', maxsplit=1)
-                    if pre in prefixes:
-                        fo.write(rest)
+                    split = line.split('__', maxsplit=1)
+                    if len(split) == 2:
+                        pre, rest = split
+                        if pre in prefixes:
+                            fo.write(rest)
+                        else:
+                            fo.write(line)
                     else:
                         fo.write(line)
                 else:

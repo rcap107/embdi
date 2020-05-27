@@ -22,10 +22,10 @@ class RandomWalk:
         current_node = G.nodes[current_node_name]
         sentence_step = 0
         while sentence_step < sentence_len - 1:
-            # if G.uniform:
-            #     current_node_name = current_node.get_random_neighbor()
-            # else:
-            current_node_name = current_node.get_weighted_random_neighbor()
+            if G.uniform:
+                current_node_name = current_node.get_random_neighbor()
+            else:
+                current_node_name = current_node.get_weighted_random_neighbor()
             if repl_numbers:
                 current_node_name = self.replace_numeric_value(current_node_name, G.nodes)
             if repl_strings:
