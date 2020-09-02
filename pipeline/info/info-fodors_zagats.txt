@@ -1,0 +1,2 @@
+pipeline/experiments/fodors-zagats/exp_data/tableA.csv,533
+pipeline/experiments/fodors-zagats/exp_data/tableB.csv,331
