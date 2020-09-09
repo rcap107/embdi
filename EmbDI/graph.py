@@ -6,6 +6,9 @@ import numpy as np
 from tqdm import tqdm
 
 import warnings
+import datetime
+
+from EmbDI.utils import *
 
 try:
     import networkx as nx
@@ -362,3 +365,45 @@ class Graph:
             for edge in self.edges:
                 nxg.add_edge(edge.node_from, edge.node_to)
             return nxg
+
+def graph_generation(configuration, edgelist, prefixes, dictionary=None):
+    """
+    Generate the graph for the given dataframe following the specifications in configuration.
+    :param df: dataframe to transform in graph.
+    :param configuration: dictionary with all the run parameters
+    :return: the generated graph
+    """
+    # Read external info file to perform replacement.
+    if configuration['walks_strategy'] == 'replacement':
+        print('# Reading similarity file {}'.format(configuration['similarity_file']))
+        list_sim = read_similarities(configuration['similarity_file'])
+    else:
+        list_sim = None
+
+    if 'flatten' in configuration:
+        if configuration['flatten'].lower() not in  ['all', 'false']:
+            flatten = configuration['flatten'].strip().split(',')
+        elif configuration['flatten'].lower() == 'false':
+            flatten = []
+        else:
+            flatten = 'all'
+    else:
+        flatten = []
+    t_start = datetime.datetime.now()
+    print(OUTPUT_FORMAT.format('Starting graph construction', t_start.strftime(TIME_FORMAT)))
+    if dictionary:
+        for __ in edgelist:
+            l = []
+            for _ in __:
+                if _ in dictionary:
+                    l.append(dictionary[_])
+                else:
+                    l.append(_)
+
+    g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten)
+    t_end = datetime.datetime.now()
+    dt = t_end - t_start
+    print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
+    print(OUTPUT_FORMAT.format('Time required to build graph:', dt.total_seconds()))
+    metrics.time_graph = dt.total_seconds()
+    return g

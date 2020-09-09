@@ -6,7 +6,7 @@ from EmbDI.graph import Node
 from tqdm import tqdm
 
 import random
-
+import mlflow
 
 class RandomWalk:
     def __init__(self, G, starting_node_name, sentence_len, backtrack, repl_strings=True, repl_numbers=True,
@@ -228,3 +228,49 @@ def split_remaining_sentences(freq_row, freq_col):
         fraction_row = rescaling_factor / (rescaling_factor + 1)
         fraction_column = 1 - fraction_row
         return fraction_row, fraction_column
+
+
+def random_walks_generation(configuration, df, graph):
+    """
+    Traverse the graph using different random walks strategies.
+    :param configuration: run parameters to be used during the generation
+    :param df: input dataframe
+    :param graph: graph generated starting from the input dataframe
+    :return: the collection of random walks
+    """
+    t1 = datetime.datetime.now()
+    # Find values in common between the datasets.
+    if configuration['intersection']:
+        print('# Finding overlapping values. ')
+        # Expansion works better when all tokens are considered, rather than only the overlapping ones.
+        if configuration['flatten']:
+            warnings.warn('Executing intersection while flatten = True.')
+        # Find the intersection
+        intersection = find_intersection_flatten(df, configuration['dataset_info'])
+        if len(intersection) == 0:
+            warnings.warn('Datasets have no tokens in common. Falling back to no-intersection.')
+            intersection = None
+        else:
+            print('# Number of common values: {}'.format(len(intersection)))
+    else:
+        print('# Skipping search of overlapping values. ')
+        intersection = None
+        # configuration['with_rid'] = WITH_RID_FIRST
+
+    # Generating walks.
+    walks = generate_walks(configuration, graph, intersection=intersection)
+    t2 = datetime.datetime.now()
+    dt = t2 - t1
+
+    if configuration['mlflow']:
+        with mlflow.start_run(run_id=configuration['run_id']):
+            # Reporting the intersection flag.
+            if intersection is None:
+                mlflow.log_param('intersection', False)
+            else:
+                mlflow.log_param('intersection', True)
+            mlflow.log_metric('generated_walks', len(walks))
+            mlflow.log_metric('time_walks', dt.total_seconds())
+    metrics.time_walks = dt.total_seconds()
+    metrics.generated_walks = len(walks)
+    return walks
