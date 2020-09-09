@@ -494,7 +494,7 @@ def check_config_validity(config):
                 raise IOError('Embeddings file {} not found'.format(config['embeddings_file']))
         if config['experiment_type'] in ['ER', 'SM']:
             if not config['match_file'] or (config['match_file'] != '' and not os.path.exists(config['match_file'])):
-                raise IOError('Embeddings file {} not found. '
+                raise IOError('Test file {} not found. '
                               'Tests require a valid Ground Truth file.'.format(config['embeddings_file']))
 
         elif config['experiment_type'] == 'EQ':

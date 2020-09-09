@@ -227,13 +227,10 @@ class EdgeList:
 
 if __name__ == '__main__':
     args = parse_args()
-    # dsname = sys.argv[1]
-    # dfpath = 'pipeline/datasets/{}/{}-master.csv'.format(dsname, dsname)
     dfpath = args.input_file
     df = pd.read_csv(dfpath)
 
     edgefile = args.output_file
-    # edgefile = 'pipeline/edgelists/{}-edges-norm.txt'.format(dsname)
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 

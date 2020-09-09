@@ -146,13 +146,15 @@ def generate_walks(parameters, graph, intersection=None):
 
     if parameters['write_walks']: fp_walks = open(walks_file, 'w')
 
-    if 'basic' in strategies:
-        print(OUTPUT_FORMAT.format('Generating basic random walks.', str_start_time))
-        sentence_counter = 0
+    print(OUTPUT_FORMAT.format('Generating basic random walks.', str_start_time))
+    sentence_counter = 0
 
-        count_cells = 0
+    count_cells = 0
+    if random_walks_per_node > 0:
+
         pbar = tqdm(desc='Sentence generation progress', total=len(graph.cell_list)*random_walks_per_node)
         # for cell in tqdm(graph.cell_list):
+
         for cell in graph.cell_list:
             if cell in intersection:
                 r = []
@@ -177,37 +179,37 @@ def generate_walks(parameters, graph, intersection=None):
                 pbar.update(random_walks_per_node)
         pbar.close()
 
-        needed = n_sentences - sentence_counter
-        # cells = list(graph.cell_list)
-        if needed > 0:
-            with tqdm(total=needed, desc='Completing fraction of random walks') as pbar:
-                for count_cells in range(needed):
-            # while needed > count_cells:
-                    cell = random.choice(graph.cell_list)
-                    if cell in intersection:
-                        w = RandomWalk(graph, cell, sentence_length, backtrack,
-                                       repl_numbers=parameters['repl_numbers'],
-                                       repl_strings=parameters['repl_strings'])
-                        sen = [w.get_walk()]
-                        # sen.append(w.get_reversed_walk())
-                        # sen = []
-                        # sen.append(list(w.get_sampled_walk(w.get_walk())))
-                        # sen.append(list(w.get_sampled_walk(w.get_reversed_walk())))
+    needed = n_sentences - sentence_counter
+    # cells = list(graph.cell_list)
+    if needed > 0:
+        with tqdm(total=needed, desc='Completing fraction of random walks') as pbar:
+            for count_cells in range(needed):
+        # while needed > count_cells:
+                cell = random.choice(graph.cell_list)
+                if cell in intersection:
+                    w = RandomWalk(graph, cell, sentence_length, backtrack,
+                                   repl_numbers=parameters['repl_numbers'],
+                                   repl_strings=parameters['repl_strings'])
+                    sen = [w.get_walk()]
+                    # sen.append(w.get_reversed_walk())
+                    # sen = []
+                    # sen.append(list(w.get_sampled_walk(w.get_walk())))
+                    # sen.append(list(w.get_sampled_walk(w.get_reversed_walk())))
 
-                        for r in sen:
-                            if parameters['write_walks']:
-                                ws = ' '.join(r)
-                                s = ws  + '\n'
-                                fp_walks.write(s)
-                            else:
-                                sentences += r
-                        sentence_counter += len(r)
-                        pbar.update(1)
+                    for r in sen:
+                        if parameters['write_walks']:
+                            ws = ' '.join(r)
+                            s = ws  + '\n'
+                            fp_walks.write(s)
+                        else:
+                            sentences += r
+                    sentence_counter += len(r)
+                    pbar.update(1)
 
-        sentence_distribution['basic'] = sentence_counter
-        start_time = datetime.datetime.now()
-        str_start_time = start_time.strftime(TIME_FORMAT)
-        print(OUTPUT_FORMAT.format('Generation of random walks completed', str_start_time))
+    sentence_distribution['basic'] = sentence_counter
+    start_time = datetime.datetime.now()
+    str_start_time = start_time.strftime(TIME_FORMAT)
+    print(OUTPUT_FORMAT.format('Generation of random walks completed', str_start_time))
 
     if parameters['write_walks']:
         fp_walks.close()
