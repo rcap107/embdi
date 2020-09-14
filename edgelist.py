@@ -236,4 +236,5 @@ if __name__ == '__main__':
 
     el = EdgeList(df, edgefile, pref)
 
+    # Loading the graph to make sure it can load the edgelist.
     g = Graph(el.get_edgelist(), prefixes=pref)

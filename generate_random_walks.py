@@ -1,9 +1,27 @@
+'''
+This script is used to generate random walks starting from a given edgelist without the overhead required when running
+the full algorithm. The parameters used here are the same as what is used in the main algorithm, so please refer to the
+readme for more details.
+
+@author: riccardo cappuzzo
+
+'''
+
 from EmbDI.utils import *
 from EmbDI.graph import graph_generation
 from EmbDI.sentence_generation_strategies import random_walks_generation
 import pandas as pd
 
+import argparse
 
+def parse_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input_file', required=True)
+    parser.add_argument('-o','--output_file', required=True)
+    parser.add_argument('')
+
+
+# Default parameters
 configuration = {
     'walks_strategy': 'basic',
     'flatten': 'all',

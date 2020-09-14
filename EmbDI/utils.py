@@ -424,7 +424,7 @@ def return_default_values(config):
         'backtrack': 'True',
         'training_algorithm': 'word2vec',
         'write_walks': 'true',
-        'flatten': 'True',
+        'flatten': 'all',
         'indexing': 'basic',
         'epsilon': 0.1,
         'num_trees': 250,
