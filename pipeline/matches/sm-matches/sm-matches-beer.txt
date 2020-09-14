@@ -1,0 +1,4 @@
+0_abv,1_abv
+0_beer_name,1_beer_name
+0_brew_factory_name,1_brew_factory_name
+0_style,1_style

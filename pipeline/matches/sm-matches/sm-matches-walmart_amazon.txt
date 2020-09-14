@@ -1,0 +1,5 @@
+0_brand,1_brand
+0_category,1_category
+0_modelno,1_modelno
+0_price,1_price
+0_title,1_title

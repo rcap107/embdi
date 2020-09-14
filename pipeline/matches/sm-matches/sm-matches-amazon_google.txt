@@ -1,0 +1,3 @@
+0_manufacturer,1_manufacturer
+0_price,1_price
+0_title,1_title

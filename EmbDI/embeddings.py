@@ -1,7 +1,7 @@
 import gensim.models as models
 import numpy as np
 import pandas as pd
-from gensim.models import Word2Vec, FastText
+from gensim.models import Word2Vec, FastText, Doc2Vec
 import multiprocessing as mp
 
 
@@ -34,6 +34,22 @@ def learn_embeddings(output_embeddings_file, walks, write_walks, dimensions, win
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
         else:
             model = Word2Vec(sentences=walks, size=dimensions, window=window_size, min_count=2, sg=sg, workers=workers,
+                             sample=sampling_factor)
+            model.wv.save_word2vec_format(output_embeddings_file, binary=False)
+    elif training_algorithm == 'doc2vec':
+        if learning_method == 'skipgram':
+            sg = 1
+        elif learning_method == 'CBOW':
+            sg = 0
+        else:
+            raise ValueError('Unknown learning method {}'.format(learning_method))
+        if write_walks:
+            model = Doc2Vec(corpus_file=walks, size=dimensions, window=window_size, min_count=2, sg=sg,
+                             workers=workers,
+                             sample=sampling_factor)
+            model.wv.save_word2vec_format(output_embeddings_file, binary=False)
+        else:
+            model = Doc2Vec(sentences=walks, size=dimensions, window=window_size, min_count=2, sg=sg, workers=workers,
                              sample=sampling_factor)
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
     elif training_algorithm == 'fasttext':

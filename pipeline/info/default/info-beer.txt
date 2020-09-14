@@ -1,0 +1,2 @@
+pipeline/experiments/beer/exp_data/tableA.csv,4345
+pipeline/experiments/beer/exp_data/tableB.csv,3000

@@ -1,0 +1,1 @@
+my_anime_list.csv,4000

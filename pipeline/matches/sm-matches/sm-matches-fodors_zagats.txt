@@ -1,0 +1,6 @@
+0_addr,1_addr
+0_city,1_city
+0_class,1_class
+0_name,1_name
+0_phone,1_phone
+0_type,1_type

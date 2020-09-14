@@ -9,11 +9,11 @@ import warnings
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     from EmbDI.embeddings import learn_embeddings
-    from EmbDI.sentence_generation_strategies import generate_walks
+    from EmbDI.sentence_generation_strategies import random_walks_generation
     from EmbDI.utils import *
 
     from EmbDI.testing_functions import test_driver, match_driver
-    from EmbDI.graph import Graph
+    from EmbDI.graph import graph_generation, Graph
     from EmbDI.logging import *
 
 
@@ -23,99 +23,9 @@ def parse_args():
     group.add_argument('-f','--config_file', action='store', default=None)
     group.add_argument('-d','--config_dir', action='store', default=None)
     parser.add_argument('--mlflow', action='store_true', default=False)
+    parser.add_argument('--no_info', action='store_true', default=False)
     args = parser.parse_args()
     return args
-
-
-def graph_generation(configuration, edgelist, prefixes, dictionary=None):
-    """
-    Generate the graph for the given dataframe following the specifications in configuration.
-    :param df: dataframe to transform in graph.
-    :param configuration: dictionary with all the run parameters
-    :return: the generated graph
-    """
-    # Read external info file to perform replacement.
-    if configuration['walks_strategy'] == 'replacement':
-        print('# Reading similarity file {}'.format(configuration['similarity_file']))
-        list_sim = read_similarities(configuration['similarity_file'])
-    else:
-        list_sim = None
-
-    if 'flatten' in configuration:
-        if configuration['flatten'].lower() not in  ['all', 'false']:
-            flatten = configuration['flatten'].strip().split(',')
-        elif configuration['flatten'].lower() == 'false':
-            flatten = []
-        else:
-            flatten = 'all'
-    else:
-        flatten = []
-    t_start = datetime.datetime.now()
-    print(OUTPUT_FORMAT.format('Starting graph construction', t_start.strftime(TIME_FORMAT)))
-    if dictionary:
-        for __ in edgelist:
-            l = []
-            for _ in __:
-                if _ in dictionary:
-                    l.append(dictionary[_])
-                else:
-                    l.append(_)
-
-        # edgelist_file = [dictionary[_] for __ in edgelist_file for _ in __[:2] if _ in dictionary]
-    g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten)
-    t_end = datetime.datetime.now()
-    dt = t_end - t_start
-    print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
-    print(OUTPUT_FORMAT.format('Time required to build graph:', dt.total_seconds()))
-    metrics.time_graph = dt.total_seconds()
-    return g
-
-
-def random_walks_generation(configuration, df, graph):
-    """
-    Traverse the graph using different random walks strategies.
-    :param configuration: run parameters to be used during the generation
-    :param df: input dataframe
-    :param graph: graph generated starting from the input dataframe
-    :return: the collection of random walks
-    """
-    t1 = datetime.datetime.now()
-    # Find values in common between the datasets.
-    if configuration['intersection']:
-        print('# Finding overlapping values. ')
-        # Expansion works better when all tokens are considered, rather than only the overlapping ones.
-        if configuration['flatten']:
-            warnings.warn('Executing intersection while flatten = True.')
-        # Find the intersection
-        intersection = find_intersection_flatten(df, configuration['dataset_info'])
-        if len(intersection) == 0:
-            warnings.warn('Datasets have no tokens in common. Falling back to no-intersection.')
-            intersection = None
-        else:
-            print('# Number of common values: {}'.format(len(intersection)))
-    else:
-        print('# Skipping search of overlapping values. ')
-        intersection = None
-        # configuration['with_rid'] = WITH_RID_FIRST
-
-    # Generating walks.
-    walks = generate_walks(configuration, graph, intersection=intersection)
-    t2 = datetime.datetime.now()
-    dt = t2 - t1
-
-    if configuration['mlflow']:
-        with mlflow.start_run(run_id=configuration['run_id']):
-            # Reporting the intersection flag.
-            if intersection is None:
-                mlflow.log_param('intersection', False)
-            else:
-                mlflow.log_param('intersection', True)
-            mlflow.log_metric('generated_walks', len(walks))
-            mlflow.log_metric('time_walks', dt.total_seconds())
-    metrics.time_walks = dt.total_seconds()
-    metrics.generated_walks = len(walks)
-    return walks
-
 
 def embeddings_generation(walks, configuration, dictionary):
     """
