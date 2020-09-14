@@ -20,7 +20,8 @@ License
 EmbDI
 =======
 EmbDI is a Python library developed to perform Entity Resolution (ER) and Schema Matching (SM) tasks by employing
-word embeddings.
+word embeddings. To test how well does the model encode information, we also implemented a set of Embeddings Quality (EQ)
+tests. 
 
 The repository includes a `main` script and a collection of additional scripts used to generate the files needed to
 perform the tasks specified by the user.  
@@ -322,6 +323,9 @@ The matches file for the SM case (here, for the DBLP_Scholar dataset) looks like
 SM tasks take as inputs datasets whose columns were renamed to "label_dataset_n_[column_name]". For example,
 the header of the DBLP-ACM dataset will become 
 `0_author_1,0_author_2,0_author_3,0_author_4,0_title,0_venue,0_year,1_author_1,1_author_2,1_author_3,1_author_4,1_title,1_venue,1_year`.
+To properly concatenate the dataset, it is possible to use the `data_preprocessing` model provided here using the `horizon` 
+parameter. 
+
 
 All following lines should contain the ground truth matches. If a column can be matched arbitrarily to multiple
 columns, multiple matches are allowed. As in the ER case, however, only the closest ones will be considered.
@@ -386,6 +390,10 @@ are removed, words are concatenated into one single string.
 * rounding of numerical fields: numerical fields (user-supplied, if needed) are rounded to the given number of digits
 after the decimal point
 * concatenation of datasets: the input datasets are concatenated using one of the given methods: `{horizon,inner,outer}`
+  *  `horizon` will concatenate the datasets in such a way that no column in the first dataset will contain values coming 
+  from the second dataset (they will be replaced by NULLs). **This is the format required to perform Schema Matching**.
+  *  `inner` will concatenate common columns and drop columns that are not present in both datasets. 
+  *  `outer` will concatenate common columns and keep the remaining columns, filling missing values with NULLs. 
 * token merging: similar tokens (according to multiple similarity measures) are merged into one to increase the amount
 of overlap between the two tables. MinHash LSH merging is supported. Tokens that satisfy the LSH threshold and the
 distance threshold are merged into a new one.
