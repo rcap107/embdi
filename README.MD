@@ -118,11 +118,12 @@ In the example below, lines starting with `*` are optional and, if missing, will
 
 ```
 # Input configuration:
-task: {train, test, match, refinement, train-test, train-match}
+task: {train, test, match, train-test, train-match}
 input_file: path/to/edgelist/edgelist.txt
 output_file: name_of_output_file
 experiment_type: {EQ, ER, SM}
 match_file: path/to/match/file.txt [required for SM, ER]
+dataset_file:path/to/dataset/file.csv [required for SM]
 test_dir: path/to/EQ/tests/ [required for EQ]
 similarity_file: path/to/similarity/file.txt [Needed to apply replacement, ignored otherwise]
 embeddings_file: path/to/embeddings/file.emb [This field will be ignored if the task requires training]
@@ -130,13 +131,14 @@ walks_file: path/to/walks/file/file.walks [A valid walks file will bypass the gr
 
 # Walks configuration:
 *sentence_length: length_of_sentences
-*n_sentences: {number_of_sentences, default}
+*n_sentences: {(int) number_of_sentences, default}
 *follow_sub: {true, false}
 *smoothing_method: {no, smooth, inverse_smooth, log, piecewise} [Refer to the section on smoothing for more details]
 *backtrack: {True, False}
-*write_walks: {True, False} [If True, walks will be dumped on drive. This will take marginally longer.]
+*write_walks: {True, False} [If True, walks will be dumped on drive. This will take marginally longer and reduce the memory cost.]
 *repl_strings: {True, False} [If True, a similarity file will be needed to perfrom replacement]
 *repl_numbers: {True, False}
+*flatten: {(str) prefix_of_nodes_to_flatten, all, ''} [The graph algorithm will split all nodes with a prefix listed here]
 
 # Embeddings configuration:
 *learning_method: {CBOW, skipgram}
