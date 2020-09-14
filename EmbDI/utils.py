@@ -496,6 +496,11 @@ def check_config_validity(config):
             if not config['match_file'] or (config['match_file'] != '' and not os.path.exists(config['match_file'])):
                 raise IOError('Test file {} not found. '
                               'Tests require a valid Ground Truth file.'.format(config['embeddings_file']))
+            if config['experiment_type'] == 'SM':
+                if 'dataset_file' not in config or (
+                        config['dataset_file'] != '' and not os.path.exists(config['dataset_file'])):
+                    raise IOError('Dataset file {} not found. '
+                                  'SM tests require a valid dataset file.'.format(config['dataset_file']))
 
         elif config['experiment_type'] == 'EQ':
             if not config['test_dir'] or (config['test_dir'] != '' and not os.path.exists(config['test_dir'])):

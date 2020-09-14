@@ -19,7 +19,7 @@ def test_driver(embeddings_file, df, configuration=None):
     elif test_type == 'ER':
         mem_results.res_dict = entity_resolution(embeddings_file, configuration, df=df, info_file=info_file)
     elif test_type == 'SM':
-        mem_results.res_dict = schema_matching(df, embeddings_file, configuration)
+        mem_results.res_dict = schema_matching(embeddings_file, configuration)
     else:
         raise ValueError('Unknown test type.')
 

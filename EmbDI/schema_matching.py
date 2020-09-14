@@ -5,6 +5,7 @@ from operator import itemgetter
 import gensim.models as models
 import mlflow
 
+import pandas as pd
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -41,8 +42,11 @@ def _clean_embeddings(emb_file, matches):
         viable_idx = []
         for idx, row in enumerate(fp):
             r = row.split(' ', maxsplit=1)[0]
+            # r = 'cid__' + r
+            if r.startswith('cid__'):
+                r = r.strip('cid__')
             if r in gt:
-                viable_idx.append(row)
+                viable_idx.append(row.strip('cid__'))
 
         # viable_idx = [row for idx, row in enumerate(fp) if (row.split(' ', maxsplit=1)[0] in gt)]
 
@@ -110,8 +114,10 @@ def _extract_candidates(wv, dataset):
         for _2 in range(0, len(dataset.columns)):
             if _1 == _2:
                 continue
-            c1 = dataset.columns[_1]
-            c2 = dataset.columns[_2]
+            c1 = f'{dataset.columns[_1]}'
+            c2 = f'{dataset.columns[_2]}'
+            # c1 = f'cid__{dataset.columns[_1]}'
+            # c2 = f'cid__{dataset.columns[_2]}'
             try:
                 rank = wv.distance(c1, c2)
                 tup = (c1, c2, rank)
@@ -160,7 +166,8 @@ def match_columns(dataset, embeddings_file):
     return match_results
 
 
-def schema_matching(dataset, embeddings_file, configuration):
+def schema_matching(embeddings_file, configuration):
+    dataset = pd.read_csv(configuration['dataset_file'])
     print('# Executing SM tests.')
     match_file = configuration['match_file']
     ground_truth = read_matches(match_file)
@@ -189,7 +196,8 @@ def schema_matching(dataset, embeddings_file, configuration):
     if gt > 0:
         recall = count_hits/gt
     else:
-        warnings.warn('No hits found. Are you sure the SM ground truth file {} is correct?'.format(match_file))
+        warnings.warn(f'No hits found. There may be a problem with the ground truth file {match_file},\n '
+                      f'or with the input dataset {configuration["dataset_file"]}.')
         recall = 0
     try:
         f1_score = 2 * (precision * recall) / (precision + recall)
