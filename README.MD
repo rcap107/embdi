@@ -322,8 +322,6 @@ The matches file for the SM case (here, for the DBLP_Scholar dataset) looks like
 SM tasks take as inputs datasets whose columns were renamed to "label_dataset_n_[column_name]". For example,
 the header of the DBLP-ACM dataset will become 
 `0_author_1,0_author_2,0_author_3,0_author_4,0_title,0_venue,0_year,1_author_1,1_author_2,1_author_3,1_author_4,1_title,1_venue,1_year`.
-In this format, columns will be offset in such a way that:
-* The columns in the first dataset will contain values 
 
 All following lines should contain the ground truth matches. If a column can be matched arbitrarily to multiple
 columns, multiple matches are allowed. As in the ER case, however, only the closest ones will be considered.
