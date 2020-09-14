@@ -13,7 +13,7 @@ def average_word_embds(row, model):
     return np.average(n, axis=0)
 
 
-embeddings_file = '/home/spoutnik23/PycharmProjects/EmbDI/pipeline/embeddings/eqtest/amazon_google-ER-master-flatten.embs'
+embeddings_file = 'pipeline/embeddings/eqtest/amazon_google-ER-master-flatten.embs'
 
 df = pd.read_csv('pipeline/datasets/amazon_google/amazon_google-master.csv')
 
