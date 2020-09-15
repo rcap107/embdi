@@ -13,45 +13,10 @@ import os
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
 
-POSSIBLE_TASKS = ['train', 'test', 'match', 'refinement', 'train-test', 'train-match', 'debug']
+POSSIBLE_TASKS = ['train', 'test', 'match', 'train-test', 'train-match', 'debug']
 
 
 digs = string.digits + string.ascii_uppercase
-
-
-def merge_files(split_files, result_file):
-    values_by_file = {}
-    for file in split_files:
-        val = {}
-        with open(file, 'r') as fp:
-            lines = fp.readlines()
-            n_dim = lines[0].split()[1]
-            for line in lines[1:]:
-                key, values = line.split(maxsplit=1)
-                val[key] = np.array([float(_) for _ in values.split()])
-        values_by_file[file] = val
-
-    averaged = {}
-    for l1 in values_by_file:
-        for l2 in values_by_file:
-            if l1 != l2:
-                val_1 = values_by_file[l1]
-                val_2 = values_by_file[l2]
-                for key in val_1:
-                    if key in averaged:
-                        continue
-                    if key in val_2:
-                        averaged[key] = np.mean([val_1[key], val_2[key]], axis=0)
-                    else:
-                        averaged[key] = val_1[key]
-
-    with open(result_file, 'w') as fp:
-        fp.write('{} {}\n'.format(len(averaged), n_dim))
-
-        for key in averaged:
-            fp.write('{} '.format(key))
-            fp.write(' '.join(['{:.5f}'.format(_) for _ in averaged[key].tolist()]) + '\n')
-    print('Merged embeddings written on file {}'.format(result_file))
 
 
 def apply_PCA(embeddings_file, reduced_file, n_components):
@@ -79,195 +44,6 @@ def apply_PCA(embeddings_file, reduced_file, n_components):
             fp.write('{} '.format(key) + ' '.join([str(_) for _ in mat_fit[n, :]]) + '\n')
 
     print('Written on file {}.'.format(reduced_file))
-
-
-def remove_prefixes(prefixes, model_file):
-    newf, _ = os.path.splitext(model_file)
-    newf += '_cleaned.emb'
-    with open(model_file, 'r') as fin:
-        with open(newf, 'w') as fo:
-            for idx, line in enumerate(fin):
-                if idx > 0:
-                    split = line.split('__', maxsplit=1)
-                    if len(split) == 2:
-                        pre, rest = split
-                        if pre in prefixes:
-                            fo.write(rest)
-                        else:
-                            fo.write(line)
-                    else:
-                        fo.write(line)
-                else:
-                    fo.write(line)
-    return newf
-
-def read_similarities(sim_file):
-    sims = pd.read_csv(sim_file)
-    if len(sims.columns) == 2:
-        sims['distance'] = 1
-    return sims.values.tolist()
-
-
-def isrid(val):
-    stripped = val.strip('idx_')
-    try:
-        s = int(stripped)
-        return s
-    except ValueError:
-        return None
-
-
-def split_embeddings(embeddings_file, dataset_info, n_dimensions, configuration):
-    f_info = open(dataset_info, 'r')
-    dataset_start = 0
-    dataset_end = 0
-
-    fp_emb = open(embeddings_file, 'r')
-    list_splits = []
-
-    with open(dataset_info, 'r') as fp:
-        _, n_lines = fp.readline().strip().split(',')
-
-    n_lines = int(n_lines)
-    dataset_end = n_lines
-    df = pd.read_csv(configuration['input_file'])
-
-    df1 = df[:n_lines]
-    df2 = df[n_lines:]
-
-    common_values = set()
-
-    for idx, _df in enumerate([df1, df2]):
-        fp_emb.seek(0)
-
-        for col in _df.columns:
-            _df[col] = _df[col].astype('object')
-        uniques = list(set(_df.values.ravel()))
-        new = []
-        for c in uniques:
-            try:
-                float_c = float(c)
-                try:
-                    new_c = str(int(float_c))
-                except OverflowError:
-                    new_c = str(c)
-            except ValueError:
-                new_c = str(c)
-            new.append(new_c)
-        uniques = new
-        for val in uniques:
-            common_values.add(val)
-        temp_name = os.path.basename(configuration['output_file']) + '_split{}'.format(idx+1)
-        fname = 'pipeline/dump/{}.emb'.format(temp_name)
-        print('Writing on file {}'.format(fname))
-        fp = open(fname, 'w')
-        c1 = 0
-
-        lines = []
-
-        for idx, line in enumerate(fp_emb):
-            if idx > 0:
-                t = line.split()[0]
-
-                if len(line.split()) != n_dimensions + 1:
-                    warnings.warn('Wrong number of values on line {}'.format(idx))
-                    # print(line)
-                    continue
-                trid = isrid(t)
-                if trid is not None:
-                    if dataset_start <= trid < dataset_end:
-                        lines.append(line)
-                        c1 += 1
-                else:
-                    if t in uniques or t in _df.columns:
-                        lines.append(line)
-                        c1 += 1
-        dataset_start = n_lines
-        dataset_end = len(df)
-        fp.write('{} {}\n'.format(c1, n_dimensions))
-        for _ in lines:
-            fp.write(_)
-        list_splits.append(fname)
-        fp.close()
-    fp_emb.close()
-
-    syn_ = configuration['output_file'] + '.syn'
-    syn_file = 'pipeline/dump/{}.syn'.format(syn_)
-    with open(syn_file, 'w') as fp:
-        for val in common_values:
-            s = '{} {}\n'.format(val, val)
-            fp.write(s)
-
-    return list_splits, syn_file
-
-
-def apply_rotation(src_emb, tgt_emb, emb_dim, synonym_file=None, eval_file=None, n_refinement=2):
-    raise NotImplementedError
-    python_version = '3'
-    path_to_run = './'
-    py_name = './MUSE-master/supervised.py'
-
-    args = ["python{}".format(python_version), "{}{}".format(path_to_run, py_name)]
-
-    n_ref = str(n_refinement)
-    exp_path = './pipeline'
-    exp_name = 'test'
-
-    l_exp = [int(_.strip('_')) for _ in os.listdir(exp_path + '/' + exp_name)]
-    if len(l_exp) == 0:
-        l_exp = [1]
-    exp_id = '_' + str(max(l_exp) + 1)
-
-    src_lang = src_emb.split('.')[0].rsplit('/', maxsplit=1)[1]
-    tgt_lang = tgt_emb.split('.')[0].rsplit('/', maxsplit=1)[1]
-
-    src_rotated = exp_path + '/' + exp_name + '/' + exp_id + '/' + 'vectors-' + src_lang + '.txt'
-    tgt_rotated = exp_path + '/' + exp_name + '/' + exp_id + '/' + 'vectors-' + tgt_lang + '.txt'
-
-    training_method = synonym_file
-    path_eval = eval_file
-
-    params = [
-        '--src_emb',
-        src_emb,
-        '--tgt_emb',
-        tgt_emb,
-        '--n_ref',
-        n_ref,
-        '--export',
-        'txt',
-        '--cuda',
-        'False',
-        '--emb_dim',
-        str(emb_dim),
-        '--dico_train',
-        training_method,
-        '--dico_eval',
-        path_eval,
-        '--verbose',
-        '1',
-        '--exp_path',
-        exp_path,
-        '--exp_name',
-        exp_name,
-        '--exp_id',
-        exp_id,
-        '--src_lang',
-        src_lang,
-        '--tgt_lang',
-        tgt_lang
-    ]
-
-    args += params
-
-    res = subprocess.Popen(args, stdout=subprocess.PIPE)
-    try:
-        output, error_ = res.communicate()
-    except AssertionError:
-        print('Error')
-        exit(1)
-
-    return src_rotated, tgt_rotated
 
 
 def clean_dump():
@@ -336,7 +112,6 @@ def int2base(x, base):
     digits.reverse()
 
     return ''.join(digits)
-
 
 
 def dict_compression_edgelist(edgelist, prefixes):
@@ -440,7 +215,6 @@ def return_default_values(config):
         'experiment_type': 'ER',
         'intersection': 'false',
         'walks_file': None,
-        'refinement_task': 'rotation',
         'mlflow': False,
         'repl_numbers': False,
         'repl_strings': False,
@@ -628,8 +402,6 @@ def check_args_validity(args):
         raise IOError('Input file not found.')
     if not os.path.exists(args.dataset_info):
         raise IOError('Info file not found.')
-    if args.rotation and not os.path.exists(args.eval_file):
-        raise IOError('Rotation cannot be performed without an evaluation file.')
     if args.key_as_rid and not args.concatenate:
         raise ValueError('Key as rid requires concatenation.')
     if args.walks_strategy == 'replacement' and not os.path.exists(args.similarity_file):

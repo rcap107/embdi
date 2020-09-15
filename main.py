@@ -153,6 +153,7 @@ def matching_driver(configuration):
 def refinement_driver(configuration):
     '''Function used to drive refinement tasks. At the moment, only rotation is implemented. 
     '''
+    raise NotImplementedError
     ref_task = configuration['refinement_task']
     if ref_task == 'rotation':
         match_file = matching_driver(configuration)
@@ -267,8 +268,6 @@ def main(file_path=None, dir_path=None, args=None):
             log_params()
         elif configuration['task'] == 'match':
             matching_driver(configuration)
-        elif configuration['task'] == 'refinement':
-            refinement_driver(configuration)
         elif configuration['task'] == 'train-test':
             configuration = training_driver(configuration)
             results = testing_driver(configuration)
