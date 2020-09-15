@@ -19,6 +19,27 @@ POSSIBLE_TASKS = ['train', 'test', 'match', 'train-test', 'train-match', 'debug'
 digs = string.digits + string.ascii_uppercase
 
 
+def remove_prefixes(prefixes, model_file):
+    newf, _ = os.path.splitext(model_file)
+    newf += '_cleaned.emb'
+    with open(model_file, 'r') as fin:
+        with open(newf, 'w') as fo:
+            for idx, line in enumerate(fin):
+                if idx > 0:
+                    split = line.split('__', maxsplit=1)
+                    if len(split) == 2:
+                        pre, rest = split
+                        if pre in prefixes:
+                            fo.write(rest)
+                        else:
+                            fo.write(line)
+                    else:
+                        fo.write(line)
+                else:
+                    fo.write(line)
+    return newf
+
+
 def apply_PCA(embeddings_file, reduced_file, n_components):
     keys = []
 
