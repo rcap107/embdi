@@ -202,6 +202,7 @@ def split_embeddings(embeddings_file, dataset_info, n_dimensions, configuration)
 
 
 def apply_rotation(src_emb, tgt_emb, emb_dim, synonym_file=None, eval_file=None, n_refinement=2):
+    raise NotImplementedError
     python_version = '3'
     path_to_run = './'
     py_name = './MUSE-master/supervised.py'

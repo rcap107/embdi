@@ -1,13 +1,11 @@
 import argparse
 import datetime as dt
 import pickle
-from operator import itemgetter
 
 import gensim.models as models
 import mlflow
 from tqdm import tqdm
 
-from EmbDI.blocking import execute_blocking
 from EmbDI.utils import *
 
 
@@ -108,31 +106,6 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
                 candidates = [_ for _ in mm if int(_.split('__')[1]) >= n_items]
             else:
                 candidates = [_ for _ in mm if int(_.split('__')[1]) < n_items]
-
-            candidates = candidates[:n_candidates]
-            most_similar[n] = candidates
-            print('\rBuilding similarity structure: {:0.1f} - {}/{} tuples'.format(c / len(nodes) * 100, c, len(nodes)),
-                  end='')
-            c += 1
-        print('')
-
-    elif strategy == 'lsh':
-        print('Using DeepER LSH blocking.')
-        blocking_candidates = execute_blocking(model_file)
-        model = models.KeyedVectors.load_word2vec_format(model_file, unicode_errors='ignore')
-        for n in blocking_candidates:
-            ms = []
-            bucket = blocking_candidates[n]
-            for cand in bucket:
-                ms.append((cand, model.similarity(n, cand)))
-            ms.sort(key=itemgetter(1), reverse=True)
-
-            mm = [item[0] for item in ms]
-            idx = int(n.split('_')[1])
-            if idx < n_items:
-                candidates = [_ for _ in mm if idx >= n_items]
-            else:
-                candidates = [_ for _ in mm if idx < n_items]
 
             candidates = candidates[:n_candidates]
             most_similar[n] = candidates
