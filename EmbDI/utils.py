@@ -210,6 +210,13 @@ def clean_embeddings_file(embeddings_file, dictionary):
     # os.remove(embeddings_file)
     return newf
 
+def read_similarities(sim_file):
+    sims = pd.read_csv(sim_file)
+    if len(sims.columns) == 2:
+        sims['distance'] = 1
+    return sims.values.tolist()
+
+
 
 def return_default_values(config):
     default_values = {

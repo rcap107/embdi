@@ -375,6 +375,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     """
     # Read external info file to perform replacement.
     if configuration['walks_strategy'] == 'replacement':
+        raise NotImplementedError
         print('# Reading similarity file {}'.format(configuration['similarity_file']))
         list_sim = read_similarities(configuration['similarity_file'])
     else:

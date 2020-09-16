@@ -205,7 +205,6 @@ def main(file_path=None, dir_path=None, args=None):
     os.makedirs('pipeline/embeddings', exist_ok=True)
     os.makedirs('pipeline/generated-matches', exist_ok=True)
 
-    # TODO turn this into configuration parameter
     # Finding the configuration file paths.
     if args:
         if args.config_dir:

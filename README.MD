@@ -64,11 +64,13 @@ for preprocessing or analysis.
 Resources
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
-Both base and processed datasets are available for download, together with the edgelists. To avoid inflating the size of
-the repository, these resources can be found at: `https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm`
+Base datasets are available for download, together with the ER version of the combined dataset. Datasets to be used in
+the SM task can be built by using the `data_preprocessing.py` script starting from the base datasets according to the 
+instructions specified below. 
+To avoid inflating the size of the repository, these resources can be found at: 
+`https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm`
 
-
-Additionally, the tests used for the Embeddings Quality section are also provided in the same location.
+Additionally, the tests used for the Embeddings Quality (EQ) section are also provided in the same location.
 
 Configuration files, info files and ER match files were left in this repository in `pipeline/config_files/default`,
 `pipeline/info` and `pipeline/matches/default`.
@@ -81,13 +83,14 @@ subset of the pipeline steps depending on the parameters found in the `task` fie
 
 The script requires one of two command line parameters:
 * `-d`, `--config-dir` require the path to a directory that should contain configuration files. All valid files will be
-executed alphabetically. All files present in the provided directory that do not start with `default` and that are not
-directories themselves will be considered as "valid".
+executed in alphabetical. All files present in the provided directory that do not start with the string `default` and 
+that are not directories themselves will be considered as "valid".
+
 ```
 python main.py -d path/to/config/dir/
 ```
 
-* `-f`, `--config-file` should be used instead to run only the provided configuration file.
+* `-f`, `--config-file` should be used to run only a single configuration file.
 
 ```
 python main.py -f path/to/config/file
@@ -102,7 +105,6 @@ output file. No further operations are performed on the output file.
 configuration file.
 * `match`: given a complete embeddings file (in text form), execute ER and SM and save on a file the matches, without
 testing their correctness. These matches can then be used for other tasks.
-* `refinement`: perform rotation on the supplied datasets.
 * `train-test`: train new embeddings and immediately run tests on them.
 * `train-match`: train new embeddings and immediately produce matches.
 
@@ -125,16 +127,16 @@ experiment_type: {EQ, ER, SM}
 match_file: path/to/match/file.txt [required for SM, ER]
 dataset_file:path/to/dataset/file.csv [required for SM]
 test_dir: path/to/EQ/tests/ [required for EQ]
-similarity_file: path/to/similarity/file.txt [Needed to apply replacement, ignored otherwise]
+similarity_file: path/to/similarity/file.txt [Needed to apply replacement, ignored otherwise] CURRENTLY NOT IMPLEMENTED
 embeddings_file: path/to/embeddings/file.emb [This field will be ignored if the task requires training]
 walks_file: path/to/walks/file/file.walks [A valid walks file will bypass the graph and walks generation]
 
 # Walks configuration:
 *sentence_length: length_of_sentences
 *n_sentences: {(int) number_of_sentences, default}
-*follow_sub: {true, false}
+*follow_sub: {true, false} [If the strategy is Replacement, when a substitute is found, jump on the substitute.]
 *smoothing_method: {no, smooth, inverse_smooth, log, piecewise} [Refer to the section on smoothing for more details]
-*backtrack: {True, False}
+*backtrack: {True, False} [Allow backtracking, i.e. given step n in a RW, it is possible to go back to the node in step n-1]
 *write_walks: {True, False} [If True, walks will be dumped on drive. This will take marginally longer and reduce the memory cost.]
 *repl_strings: {True, False} [If True, a similarity file will be needed to perfrom replacement]
 *repl_numbers: {True, False}
@@ -150,6 +152,10 @@ walks_file: path/to/walks/file/file.walks [A valid walks file will bypass the gr
 *ncand: n_candidates_from_ntop
 *max_rank: cutoff_rank_for_SM
 
+# Miscellaneous:
+*indexing: {basic, ngt, faiss, annoy} [Choose which indexing method to use in the ER task]
+*epsilon: [parameter used by the ngt indexer]
+*num_trees: [parameter used by the annoy indexer]
 ```
 
 #### Default values
@@ -219,17 +225,16 @@ The format of the edgelist is one of the following:
 * `n1,n2,w1` >> node1, node2, weight1to2 [no link back]
 
 The first line of the edgelist must contain all the prefixes that define node types (such as RID, CID,
-tokens). Prefixes must be written using a specific format:
+tokens). 
+
+Prefixes must be written using a specific format:
 `[1-7][#-$]__node_type_name`
 
-The first character should be a numeric value in the range `1-7`, which will denote the class of the node type.
-The second character is used to distinguish nodes that contain numeric values (with symbol `#`) from those that
+- The first character should be a numeric value in the range `1-7`, which will denote the `class` of the node type.
+- The second character is used to distinguish nodes that contain numeric values (with symbol `#`) from those that
 contain categorical information (`$`).
 
-
-
-The class will influence the behavior
-of the random walks generation algorithm.
+The `class` will influence the behavior of the random walks generation algorithm.
 
 There are 7 possible classes based on the truth table reported below. `first` means that the node may be chosen
 as first value in a sentence. `root` means that the node will be added to the pool of nodes to start from when
@@ -247,9 +252,9 @@ sentence, otherwise it will not be saved.
 |   6   |   +   |   +  |    -    |
 |   7   |   +   |   +  |    +    |
 
-It is possible to flatten all nodes using flatten:all in the configuration file. Alternatively,
+It is possible to flatten all nodes using `flatten:all` in the configuration file. Alternatively,
 nodes can be flattened based on their type by listing the prefixes to expand separated by a comma.
-For example, if the prefixes are `tt, tn, idx, cid` like in the standard csv-translation case, by putting `tt` only the
+For example, if the prefixes are `tt, tn, idx, cid` like in the standard csv-translation case, by putting `flatten:tt` only the
 nodes with prefix `tt` will be flattened.
 
 
@@ -262,29 +267,10 @@ All results are accessible by using the mlflow library in the root directory:
 
 By default, the UI will be available on ```localhost:5000``` on the local machine.
 
+In the current implementation, mlflow is off by default. 
+
 Additional files
 ----
-#### Similarity file
-The **similarity file** contains candidates for replacement with the structure, optionally with their similarity in the
-range [0,1]. If no distance is supplied, it is assumed to be 1 (word1 == word2).
-
-```
-...
-word1_dataset1,word1_dataset2,similarity1
-word2_dataset1,word2_dataset2,similarity2
-...
-```
-
-Example:
-
-```
-...
-english,en, 0.8
-french,fr, 0.8
-italian,it, 0.8
-...
-```
-
 #### Matches file
 The **matches file** is the ground truth to be used when performing ER or SM tasks.
 The system will expect a known format for the ground truth.
@@ -332,6 +318,43 @@ parameter.
 All following lines should contain the ground truth matches. If a column can be matched arbitrarily to multiple
 columns, multiple matches are allowed. As in the ER case, however, only the closest ones will be considered.
 This behavior will change in a future version of the code.
+
+##### Note on results
+It may happen that results differ slightly between different runs. In our experience, there may be some variance in the 
+ ER results because of the random walks generation, as well as the embeddings training procedure.
+
+In SM, the difference might become larger due to the fact that there are only a few "matches", so even a single miss 
+will drop the precision by a large amount.
+
+We observed that different random walks lead to slightly different embeddings. In our matching algorithms we use k-nn 
+to find the best candidates, and the ranking may be influenced by how the embeddings are positioned in different runs. 
+
+
+
+
+#### Similarity file
+**Currently under work, unavailable.**
+The **similarity file** contains candidates for replacement with the structure, optionally with their similarity in the
+range [0,1]. If no distance is supplied, it is assumed to be 1 (word1 == word2).
+
+```
+...
+word1_dataset1,word1_dataset2,similarity1
+word2_dataset1,word2_dataset2,similarity2
+...
+```
+
+Example:
+
+```
+...
+english,en, 0.8
+french,fr, 0.8
+italian,it, 0.8
+...
+```
+
+
 
 Generation of tests
 ---
@@ -466,16 +489,31 @@ lsh.get_sample_blocks(5)
 replacement = lsh.get_replacement('normalized_edit_distance', .4)
 ```
 
+#### Preparing datasets for the SM task
+To perform Schema Matching, EmbDI will expect datasets formatted according to a specific structure. 
+Columns should be renamed to unique values (e.g. `[0_author_1, 0_author_2]` and `[1_author_1, 1_author_2]`) in such a 
+way that  the concatenation does not put together values from different datasets. This can be achieved by setting the 
+parameter `concatenate: horizon` in the data preprocessing pipeline explained above.
+
+The result will be a dataset in which all tuples belonging to Dataset 1 will contain values in Dataset 1's columns, and 
+nulls in Dataset 2's columns; similarly, tuples in D2 will contain nulls in D1's columns, and the proper values in D2's 
+columns.
+
+![](Schema%20Matching%20in%20EmbDI%20explanation.png)
+
 Reference
 ---
 If you use EmbDI in your work, please cite it as follows:
 
 ```
- @inproceedings{EURECOM+6231, year = {2020},
- title = {{C}reating embeddings of heterogeneous relational datasets for data integration tasks},
- author = {{C}appuzzo, {R}iccardo and {P}apotti, {P}aolo and {T}hirumuruganathan, {S}aravanan},
- booktitle = {{SIGMOD}/{PODS} 2020,
- {ACM} {I}nternational {C}onference on {M}anagement of {D}ata, 14-19 {J}une 2020,
- {P}ortland, {O}regon, {USA}}, address = {{P}ortland, {UNITED} {STATES}},
- month = {06}, url = {http://www.eurecom.fr/publication/6231} }
-```
+@article{Cappuzzo_2020,
+   title={Creating Embeddings of Heterogeneous Relational Datasets for Data Integration Tasks},
+   ISBN={9781450367356},
+   url={http://dx.doi.org/10.1145/3318464.3389742},
+   DOI={10.1145/3318464.3389742},
+   journal={Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data},
+   publisher={ACM},
+   author={Cappuzzo, Riccardo and Papotti, Paolo and Thirumuruganathan, Saravanan},
+   year={2020},
+   month={May}
+}```
