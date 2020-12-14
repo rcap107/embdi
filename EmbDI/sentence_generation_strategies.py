@@ -6,26 +6,34 @@ from EmbDI.graph import Node
 from tqdm import tqdm
 
 import random
-import mlflow
+# import mlflow
+
+import multiprocessing as mp
+
+import cProfile, pstats
+
+global G
 
 class RandomWalk:
-    def __init__(self, G, starting_node_name, sentence_len, backtrack, repl_strings=True, repl_numbers=True,
+    def __init__(self, graph_nodes, starting_node_name, sentence_len, backtrack, uniform, repl_strings=True, repl_numbers=True,
                  follow_replacement=False):
         # self.walk = []
-        starting_node = G.nodes[starting_node_name]
+        starting_node = graph_nodes[starting_node_name]
         first_node_name = starting_node.get_random_start()
         if first_node_name != starting_node_name:
             self.walk = [first_node_name, starting_node_name]
         else:
             self.walk = [starting_node_name]
         current_node_name = starting_node_name
-        current_node = G.nodes[current_node_name]
+        current_node = graph_nodes[current_node_name]
         sentence_step = 0
         while sentence_step < sentence_len - 1:
-            if G.uniform:
+            # if False:
+            if uniform:
                 current_node_name = current_node.get_random_neighbor()
             else:
                 current_node_name = current_node.get_weighted_random_neighbor()
+
             if repl_numbers:
                 current_node_name = self.replace_numeric_value(current_node_name, G.nodes)
             if repl_strings:
@@ -150,22 +158,35 @@ def generate_walks(parameters, graph, intersection=None):
     sentence_counter = 0
 
     count_cells = 0
+    # pool_size = 2
+    pool_size = mp.cpu_count()
+    def cb(result):
+        r.append(result.get_walk())
+
+    profiler = cProfile.Profile()
+    profiler.enable()
     if random_walks_per_node > 0:
 
         pbar = tqdm(desc='Sentence generation progress', total=len(graph.cell_list)*random_walks_per_node)
         # for cell in tqdm(graph.cell_list):
-
+        # with mp.Pool(pool_size) as pool:
+        # pool = mp.Pool(pool_size)
         for cell in graph.cell_list:
             if cell in intersection:
-                r = []
+                r=[]
                 for _r in range(random_walks_per_node):
+
+                    # pool.apply_async(RandomWalk, (graph, cell, sentence_length, backtrack,),kwds=
+                    #                 {'repl_numbers' : parameters['repl_numbers'],
+                    #                 'repl_strings' : parameters['repl_strings']},
+                    #                  callback=cb)
+
                     w = RandomWalk(graph, cell, sentence_length, backtrack,
                                    repl_numbers=parameters['repl_numbers'],
                                    repl_strings=parameters['repl_strings'])
+
                     r.append(w.get_walk())
-                    # r.append(w.get_reversed_walk())
-                    # r.append(list(w.get_sampled_walk(w.get_walk())))
-                    # r.append(list(w.get_sampled_walk(w.get_reversed_walk())))
+
                 if parameters['write_walks']:
                     if len(r) > 0:
                         ws = [' '.join(_) for _ in r]
@@ -177,6 +198,10 @@ def generate_walks(parameters, graph, intersection=None):
                 sentence_counter += random_walks_per_node
                 count_cells += 1
                 pbar.update(random_walks_per_node)
+
+        # pool.close()
+        # pool.join()
+        #
         pbar.close()
 
     needed = n_sentences - sentence_counter
@@ -196,14 +221,14 @@ def generate_walks(parameters, graph, intersection=None):
                     # sen.append(list(w.get_sampled_walk(w.get_walk())))
                     # sen.append(list(w.get_sampled_walk(w.get_reversed_walk())))
 
-                    for r in sen:
+                    for s in sen:
                         if parameters['write_walks']:
-                            ws = ' '.join(r)
+                            ws = ' '.join(s)
                             s = ws  + '\n'
                             fp_walks.write(s)
                         else:
-                            sentences += r
-                    sentence_counter += len(r)
+                            sentences += s
+                    sentence_counter += len(sen)
                     pbar.update(1)
 
     sentence_distribution['basic'] = sentence_counter
@@ -211,12 +236,18 @@ def generate_walks(parameters, graph, intersection=None):
     str_start_time = start_time.strftime(TIME_FORMAT)
     print(OUTPUT_FORMAT.format('Generation of random walks completed', str_start_time))
 
+
+    profiler.disable()
+    stats = pstats.Stats(profiler).sort_stats('tottime')
+    stats.print_stats(20)
+
     if parameters['write_walks']:
         fp_walks.close()
         return walks_file
     else:
         return sentences
 
+    raise ValueError
 
 def split_remaining_sentences(freq_row, freq_col):
     if freq_row == freq_col == 0:
