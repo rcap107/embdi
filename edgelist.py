@@ -12,6 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
     parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist_file.')
+    parser.add_argument('--info_file', required=False, type=str, default=None, help='Path to info file with df boundaries.')
 
     return parser.parse_args()
 
@@ -52,6 +53,21 @@ class EdgeList:
         elif self.smoothing_method == 'no':
             return self.f_no_smoothing()
 
+    def convert_cell_value(self, original_value):
+        if original_value == '':
+            return None
+        if original_value != original_value:
+            return None
+        try:
+            float_c = float(original_value)
+            if math.isnan(float_c):
+                return None
+            cell_value = str(int(float_c))
+        except ValueError:
+            cell_value = str(original_value)
+        except OverflowError:
+            cell_value = str(original_value)
+        return cell_value
 
     def _parse_smoothing_method(self, smoothing_method):
         if smoothing_method.startswith('smooth'):
@@ -111,8 +127,71 @@ class EdgeList:
         else:
             self.smoothing_method = smoothing_method
 
+    @staticmethod
+    def find_intersection_flatten(df, info_file):
+        print('Searching intersecting values. ')
+        with open(info_file, 'r') as fp:
+            line = fp.readline()
+            n_items = int(line.split(',')[1])
+        df1 = df[:n_items]
+        df2 = df[n_items:]
+        #     Code to perform word-wise intersection
+        # s1 = set([str(_) for word in df1.values.ravel().tolist() for _ in word.split('_')])
+        # s2 = set([str(_) for word in df2.values.ravel().tolist() for _ in word.split('_')])
+        print('Working on df1.')
+        s1 = set([str(_) for _ in df1.values.ravel().tolist()])
+        print('Working on df2.')
+        s2 = set([str(_) for _ in df2.values.ravel().tolist()])
 
-    def __init__(self, df, edgefile, prefixes, smoothing_method='no', flatten=False):
+        intersection = s1.intersection(s2)
+
+        return list(intersection)
+
+    def evaluate_frequencies(self, flatten, intersection):
+        if flatten and intersection:
+            split_values = []
+            for val in df.values.ravel().tolist():
+                if val not in intersection:
+                    try:
+                        split = val.split('_')
+                    except AttributeError:
+                        split = [str(val)]
+                else:
+                    split = [str(val)]
+                split_values += split
+            frequencies = dict(Counter(split_values))
+        elif flatten:
+            split_values = []
+            for val in df.values.ravel().tolist():
+                try:
+                    split = val.split('_')
+                except AttributeError:
+                    split = [str(val)]
+                split_values += split
+            frequencies = dict(Counter(split_values))
+        else:
+            frequencies = dict(Counter(df.values.ravel().tolist()))
+
+        frequencies.pop('', None)
+        frequencies.pop(np.nan, None)
+
+        return frequencies
+
+    @staticmethod
+    def prepare_split(cell_value, flatten, intersection):
+        if flatten and intersection:
+            if cell_value in intersection:
+                valsplit = [cell_value]
+            else:
+                valsplit = cell_value.split('_')
+        elif flatten:
+            valsplit = cell_value.split('_')
+        else:
+            valsplit = [cell_value]
+        return valsplit
+
+
+    def __init__(self, df, edgefile, prefixes, info_file=None, smoothing_method='no', flatten=False):
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
         in the graph, built according to the parameters passed to the function.
 
@@ -130,32 +209,17 @@ class EdgeList:
 
         for col in df.columns:
             try:
-            # if True:
                 df[col].dropna(axis=0).astype(float).astype(str)
                 numeric_columns.append(col)
             except ValueError:
                 pass
 
-        # values, counts = np.unique(df.values.ravel(), return_counts=True)  # Count unique values to find word frequency.
-        if flatten:
-            split_values = []
-            for val in df.values.ravel().tolist():
-                try:
-                    split = val.split('_')
-
-                except AttributeError:
-                    split = [str(val)]
-                split_values += split
-            frequencies = dict(Counter(split_values))
-
-            frequencies.pop('', None)
-            frequencies.pop(np.nan, None)
-
+        if info_file:
+            intersection = self.find_intersection_flatten(df, info_file)
         else:
-            frequencies = dict(Counter(df.values.ravel().tolist()))
+            intersection = []
 
-            frequencies.pop('', None)
-            frequencies.pop(np.nan, None)
+        frequencies = self.evaluate_frequencies(flatten, intersection)
 
         count_rows = 1
         with open(edgefile, 'w') as fp:
@@ -167,23 +231,14 @@ class EdgeList:
                 # Create a node for the current row id.
                 for col in df.columns:
                     try:
-                        cell_value = row[col]
-                        if cell_value == '':
-                            continue
-                        try:
-                            float_c = float(cell_value)
-                            if math.isnan(float_c):
-                                continue
-                            cell_value = str(int(float_c))
-                        except ValueError:
-                            cell_value = str(row[col])
-                        except OverflowError:
-                            cell_value = str(row[col])
+                        og_value = row[col]
 
-                        if flatten:
-                            valsplit = cell_value.split('_')
-                        else:
-                            valsplit = [cell_value]
+                        cell_value = self.convert_cell_value(og_value)
+                        if not cell_value:
+                            continue
+
+                        valsplit = self.prepare_split(cell_value, flatten, intersection)
+
                         for split in valsplit:
                             try:
                                 smoothed_f = self.smooth_freq(frequencies[split])
@@ -228,13 +283,17 @@ class EdgeList:
 if __name__ == '__main__':
     args = parse_args()
     dfpath = args.input_file
-    df = pd.read_csv(dfpath)
-
     edgefile = args.output_file
+
+    if args.info_file:
+        info = args.info_file
+    else:
+        info = None
+    df = pd.read_csv(dfpath)
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
-    el = EdgeList(df, edgefile, pref)
+    el = EdgeList(df, edgefile, pref, info, flatten=True)
 
     # Loading the graph to make sure it can load the edgelist.
     g = Graph(el.get_edgelist(), prefixes=pref)
