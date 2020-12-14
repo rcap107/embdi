@@ -73,7 +73,7 @@ def return_combined(row, wv, n_dimensions):
     return vector
 
 
-def generate_concatenated_file(df: pd.DataFrame, old_emb_file, prefix, n_dimensions=100):
+def generate_concatenated_file(df, old_emb_file, prefix, n_dimensions=100):
     wv = models.KeyedVectors.load_word2vec_format(old_emb_file, unicode_errors='ignore')
     print('Model built from file {}'.format(old_emb_file))
 

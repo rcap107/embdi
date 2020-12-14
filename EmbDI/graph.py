@@ -23,8 +23,6 @@ class Node:
         Cell class used to describe the nodes that build the graph.
     """
     def __init__(self, name, type, node_class, numeric):
-        # if type not in ['cell', 'rid', 'attr']:
-        #     raise ValueError('Type unrecognized.')
         self.random_neigh = None
         self.neighbors = dict()
         self.neighbor_names = []
@@ -85,7 +83,8 @@ class Node:
 
     def get_random_start(self):
         if len(self.startfrom) > 0:
-            return np.random.choice(self.startfrom, size=1)[0]
+            # return np.random.choice(self.startfrom, size=1)[0]
+            return self.startfrom[int(random.random() * len(self.startfrom))]
         else:
             return self.name
 
@@ -93,7 +92,10 @@ class Node:
         return self.random_neigh()
 
     def get_random_neighbor(self):
-        return np.random.choice(self.neighbor_names, size=1)[0]
+        # return np.random.choice(self.neighbor_names, size=1)[0]
+        # return self.neighbor_names[np.random.randint(0, len(self.neighbor_names))]
+        return self.neighbor_names[int(random.random() * self.number_neighbors)]
+
         # return random.choice(self.neighbor_names)
 
     def add_neighbor(self, neighbor, weight):
@@ -109,10 +111,12 @@ class Node:
         return random.choices(self.similar_tokens, weights=self.similar_distance, k=1)[0]
 
 
-    def normalize_neighbors(self):
+    def normalize_neighbors(self, uniform):
         self.neighbor_names = np.array(list(self.neighbors.keys()))
+        self.number_neighbors = len(self.neighbor_names)
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
-        self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
+        if not uniform:
+            self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
@@ -348,7 +352,7 @@ class Graph:
                 raise ValueError('Node {} has no neighbors'.format(node_name))
                 # to_delete.append(n)
             else:
-                self.nodes[node_name].normalize_neighbors()
+                self.nodes[node_name].normalize_neighbors(uniform=self.uniform)
         print('')
         for node_name in to_delete:
             self.nodes.pop(node_name)
