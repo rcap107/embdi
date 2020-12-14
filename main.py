@@ -1,10 +1,13 @@
 import argparse
 import datetime
 
-import mlflow
-import mlflow.tracking as tracking
-import mlflow.exceptions as mlexceptions
+# import mlflow
+# import mlflow.tracking as tracking
+# import mlflow.exceptions as mlexceptions
 import warnings
+
+import cProfile
+import pstats
 
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
@@ -105,6 +108,7 @@ def training_driver(configuration):
                 dictionary = None
             configuration['write_walks'] = True
             walks = configuration['walks_file']
+        # return configuration
         configuration = embeddings_generation(walks, configuration, dictionary)
     return configuration
 
@@ -277,7 +281,7 @@ def main(file_path=None, dir_path=None, args=None):
         t_end = datetime.datetime.now()
         print(OUTPUT_FORMAT.format('Ending run.', t_end))
         dt = t_end-t_start
-        print('# Time required: {}'.format(dt.total_seconds()))
+        print('# Time required: {:.0} s'.format(dt.total_seconds()))
         if configuration['mlflow']:
             mlflow.log_params(configuration)
             if mem_results.res_dict  is not None:
@@ -288,4 +292,9 @@ def main(file_path=None, dir_path=None, args=None):
 
 if __name__ == '__main__':
     args = parse_args()
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     main(args=args)
+    # profiler.disable()
+    # stats = pstats.Stats(profiler).sort_stats('tottime')
+    # stats.print_stats(20)
