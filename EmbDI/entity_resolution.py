@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from EmbDI.utils import *
 
-
 NGT_NOT_FOUND = ANNOY_NOT_FOUND = FAISS_NOT_FOUND = False
 
 try:
@@ -76,7 +75,7 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
     if strategy == 'basic':
         model = models.KeyedVectors.load_word2vec_format(model_file, unicode_errors='ignore')
 
-        for n in tqdm(nodes):
+        for n in tqdm(nodes, desc='# ER - Finding node matches: '):
             ms = model.most_similar(str(n), topn=n_top)
             mm = [item[0] for item in ms]
             idx = int(n.split('__')[1])
@@ -200,7 +199,7 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
 
     t_end = dt.datetime.now()
     diff = t_end - t_start
-    print('Time required to build sim struct: {}'.format(diff.total_seconds()))
+    print('# Time required to build sim struct: {:.2} seconds'.format(diff.total_seconds()))
     pickle.dump(most_similar, open('most_similar.pickle', 'wb'))
 
     return most_similar
@@ -275,26 +274,23 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     except ZeroDivisionError:
         golden_f1 = 0
 
-    print('Total candidates tested: {}'.format(total_candidates))
-    print('{} cases where no candidates were found'.format(no_candidate_found))
+    print('# Total candidates tested: {}'.format(total_candidates))
+    print('# {} cases where no candidates were found'.format(no_candidate_found))
     result_dict = {
-        'P': precision,
-        'R': recall,
-        'F': f1_score,
+        'P' : precision,
+        'R' : recall,
+        'F' : f1_score,
         'GP': golden_precision,
         'GR': recall,
         'GF': golden_f1,
     }
 
-    # mlflow.log_metric('ER_p', golden_precision)
-    # mlflow.log_metric('ER_r', recall)
-    # mlflow.log_metric('ER_f', golden_f1)
-    print('P\tR\tF\tGP\tGR\tGF')
+    print('\nP\tR\tF\tGP\tGR\tGF')
     for _ in result_dict.values():
         print('{:.4f}\t'.format(_*100), end='')
     print('\r')
     # print(s.format([_*100 for _ in ]))
-    print('Correct: {}\nWrong: {}\nTotal items: {}\nTotal matches: {}'.format(count_hit, count_miss,
+    print('\n# Correct: {}\n# Wrong: {}\n# Total items: {}\n# Total matches: {}'.format(count_hit, count_miss,
                                                                               iteration_counter, len(matches)))
     return result_dict
 
@@ -338,7 +334,7 @@ def entity_resolution(input_file: str, configuration: dict, df: pd.DataFrame = N
     str_start_time = t1.strftime(TIME_FORMAT)
     t_end = dt.datetime.now()
     diff = t_end - t_start
-    print('Time required to execute the ER task: {}'.format(diff.total_seconds()))
+    print('# Time required to execute the ER task: {}'.format(diff.total_seconds()))
 
     if configuration['mlflow']:
         mlflow.active_run()
@@ -395,14 +391,3 @@ def _prepare_tests(model_file):
             fp.write(_)
 
     return f, viable_idx
-
-
-if __name__ == '__main__':
-    args = parse_args()
-
-    experiment_name = 'ER'
-    id_exp = mlflow.set_experiment(experiment_name)
-
-    for val in [1]:
-        with mlflow.start_run():
-            entity_resolution(args.input_file, args.matches_file, val, args.n_candidates, args.info_file)

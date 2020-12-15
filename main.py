@@ -1,13 +1,11 @@
 import argparse
 import datetime
 
-# import mlflow
-# import mlflow.tracking as tracking
-# import mlflow.exceptions as mlexceptions
+import mlflow
+import mlflow.tracking as tracking
+import mlflow.exceptions as mlexceptions
 import warnings
 
-import cProfile
-import pstats
 
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
@@ -16,7 +14,7 @@ with warnings.catch_warnings():
     from EmbDI.utils import *
 
     from EmbDI.testing_functions import test_driver, match_driver
-    from EmbDI.graph import graph_generation, Graph
+    from EmbDI.graph import graph_generation
     from EmbDI.logging import *
 
 
@@ -41,9 +39,9 @@ def embeddings_generation(walks, configuration, dictionary):
     t1 = datetime.datetime.now()
     output_file = configuration['run-tag']
 
-    print(OUTPUT_FORMAT.format('Training embeddings', t1))
+    print(OUTPUT_FORMAT.format('Training embeddings', t1.strftime(TIME_FORMAT)))
     t = 'pipeline/embeddings/' + output_file + '.emb'
-    print('File: {}'.format(t))
+    print('# Writing embeddings in file: {}'.format(t))
     learn_embeddings(t, walks, write_walks=configuration['write_walks'],
                      dimensions=int(configuration['n_dimensions']),
                      window_size=int(configuration['window_size']),
@@ -236,7 +234,7 @@ def main(file_path=None, dir_path=None, args=None):
             config_dir = os.path.dirname(config_file)
 
     else:
-        raise ValueError('Missing file_path or config_path')
+        raise ValueError('Missing file_path or config_path.')
 
 
     for idx, file in enumerate(sorted(valid_files)):
@@ -244,7 +242,8 @@ def main(file_path=None, dir_path=None, args=None):
         print('# File {} out of {}'.format(idx+1, len(valid_files)))
         print('# Configuration file: {}'.format(file))
         t_start = datetime.datetime.now()
-        print(OUTPUT_FORMAT.format('Starting run.', t_start))
+        print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
+        print( )
         # Parsing the configuration file.
         configuration = read_configuration(config_dir + '/' + file)
         # Checking the correctness of the configuration, setting default values for missing values.
@@ -279,9 +278,9 @@ def main(file_path=None, dir_path=None, args=None):
             configuration = training_driver(configuration)
             matching_driver(configuration)
         t_end = datetime.datetime.now()
-        print(OUTPUT_FORMAT.format('Ending run.', t_end))
+        print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
         dt = t_end-t_start
-        print('# Time required: {:.0} s'.format(dt.total_seconds()))
+        print('# Time required: {:.2} s'.format(dt.total_seconds()))
         if configuration['mlflow']:
             mlflow.log_params(configuration)
             if mem_results.res_dict  is not None:
@@ -292,9 +291,4 @@ def main(file_path=None, dir_path=None, args=None):
 
 if __name__ == '__main__':
     args = parse_args()
-    # profiler = cProfile.Profile()
-    # profiler.enable()
     main(args=args)
-    # profiler.disable()
-    # stats = pstats.Stats(profiler).sort_stats('tottime')
-    # stats.print_stats(20)

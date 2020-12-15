@@ -48,10 +48,6 @@ def _clean_embeddings(emb_file, matches):
             if r in gt:
                 viable_idx.append(row.strip('cid__'))
 
-        # viable_idx = [row for idx, row in enumerate(fp) if (row.split(' ', maxsplit=1)[0] in gt)]
-
-        # viable_idx = [_ for _ in viable_idx if len(_.split(' ')) > 1]
-
     f = 'pipeline/dump/sm_dump.emb'
     with open(f, 'w', encoding='utf-8') as fp:
         fp.write('{} {}\n'.format(len(viable_idx), dimensions))

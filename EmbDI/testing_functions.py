@@ -9,16 +9,21 @@ def test_driver(embeddings_file, df, configuration=None):
     test_type = configuration['experiment_type']
     info_file = configuration['dataset_info']
     if test_type == 'EQ':
+        # print('#'*80)
+        print('# EMBEDDINGS QUALITY')
         if configuration['training_algorithm'] == 'fasttext':
             newf = embeddings_file
             mem_results.res_dict = embeddings_quality(newf, configuration)
         else:
-            newf = remove_prefixes(configuration['flatten'], embeddings_file)
+            newf = remove_prefixes(configuration['input_file'], embeddings_file)
             mem_results.res_dict = embeddings_quality(newf, configuration)
             os.remove(newf)
     elif test_type == 'ER':
+        print('# ENTITY RESOLUTION')
+
         mem_results.res_dict = entity_resolution(embeddings_file, configuration, df=df, info_file=info_file)
     elif test_type == 'SM':
+        print('# SCHEMA MATCHING')
         mem_results.res_dict = schema_matching(embeddings_file, configuration)
     else:
         raise ValueError('Unknown test type.')
