@@ -6,18 +6,11 @@ from EmbDI.graph import Node
 from tqdm import tqdm
 
 import random
-# import mlflow
-
-import multiprocessing as mp
-
-import cProfile, pstats
-
-global G
+import mlflow
 
 class RandomWalk:
     def __init__(self, graph_nodes, starting_node_name, sentence_len, backtrack, uniform, repl_strings=True, repl_numbers=True,
                  follow_replacement=False):
-        # self.walk = []
         starting_node = graph_nodes[starting_node_name]
         first_node_name = starting_node.get_random_start()
         if first_node_name != starting_node_name:
@@ -35,9 +28,9 @@ class RandomWalk:
                 current_node_name = current_node.get_weighted_random_neighbor()
 
             if repl_numbers:
-                current_node_name = self.replace_numeric_value(current_node_name, G.nodes)
+                current_node_name = self.replace_numeric_value(current_node_name, graph_nodes)
             if repl_strings:
-                current_node_name, replaced_node= self.replace_string_value(G.nodes[current_node_name])
+                current_node_name, replaced_node= self.replace_string_value(graph_nodes[current_node_name])
             else:
                 replaced_node = current_node_name
             if not backtrack and current_node_name == self.walk[-1]:
@@ -45,7 +38,7 @@ class RandomWalk:
             if follow_replacement:
                 current_node_name = replaced_node
 
-            current_node = G.nodes[current_node_name]
+            current_node = graph_nodes[current_node_name]
             if not current_node.node_class['isappear']:
                 continue
             else:
@@ -111,7 +104,6 @@ def extract_numeric_rep(value, keys_array):
     new_val = np.around(np.random.normal(loc=value, scale=1))
     cc = 0
 
-    # idx = (np.abs(keys_array - value)).argmin()
     try:
         tmp = int(new_val)
     except OverflowError:
@@ -119,8 +111,6 @@ def extract_numeric_rep(value, keys_array):
     while new_val not in keys_array and str(new_val) not in keys_array and \
             str(tmp) not in keys_array and float(tmp) not in keys_array:
         if cc > 1:
-            # print(new_val)
-            # print(value)
             return value
         new_val = np.around(np.random.normal(loc=value, scale=1))
         cc += 1
@@ -135,7 +125,7 @@ def generate_walks(parameters, graph, intersection=None):
     backtrack = parameters['backtrack']
 
     if intersection is None:
-        intersection = graph.cell_list
+        intersection = set(graph.cell_list)
         n_cells = len(intersection)
     else:
         n_cells = len(intersection)
@@ -145,43 +135,25 @@ def generate_walks(parameters, graph, intersection=None):
 
     # ########### Random walks ############
     # print('Generating random walks.')
-    # cells_list = list(cells)
 
-    t2 = datetime.datetime.now()
-    str_start_time = t2.strftime(TIME_FORMAT)
 
     walks_file = 'pipeline/walks/' + parameters['output_file'] + '.walks'
 
     if parameters['write_walks']: fp_walks = open(walks_file, 'w')
-
+    t2 = datetime.datetime.now()
+    str_start_time = t2.strftime(TIME_FORMAT)
     print(OUTPUT_FORMAT.format('Generating basic random walks.', str_start_time))
     sentence_counter = 0
 
     count_cells = 0
-    # pool_size = 2
-    pool_size = mp.cpu_count()
-    def cb(result):
-        r.append(result.get_walk())
 
-    profiler = cProfile.Profile()
-    profiler.enable()
     if random_walks_per_node > 0:
-
-        pbar = tqdm(desc='Sentence generation progress', total=len(graph.cell_list)*random_walks_per_node)
-        # for cell in tqdm(graph.cell_list):
-        # with mp.Pool(pool_size) as pool:
-        # pool = mp.Pool(pool_size)
-        for cell in graph.cell_list:
+        pbar = tqdm(desc='# Sentence generation progress: ', total=len(graph.cell_list)*random_walks_per_node)
+        for cell in random.choices(graph.cell_list, k=len(graph.cell_list)):
             if cell in intersection:
                 r=[]
                 for _r in range(random_walks_per_node):
-
-                    # pool.apply_async(RandomWalk, (graph, cell, sentence_length, backtrack,),kwds=
-                    #                 {'repl_numbers' : parameters['repl_numbers'],
-                    #                 'repl_strings' : parameters['repl_strings']},
-                    #                  callback=cb)
-
-                    w = RandomWalk(graph, cell, sentence_length, backtrack,
+                    w = RandomWalk(graph.nodes, cell, sentence_length, backtrack,graph.uniform,
                                    repl_numbers=parameters['repl_numbers'],
                                    repl_strings=parameters['repl_strings'])
 
@@ -198,28 +170,22 @@ def generate_walks(parameters, graph, intersection=None):
                 sentence_counter += random_walks_per_node
                 count_cells += 1
                 pbar.update(random_walks_per_node)
-
-        # pool.close()
-        # pool.join()
-        #
         pbar.close()
 
     needed = n_sentences - sentence_counter
-    # cells = list(graph.cell_list)
     if needed > 0:
-        with tqdm(total=needed, desc='Completing fraction of random walks') as pbar:
+        t_comp = datetime.datetime.now()
+        str_comp_time = t_comp.strftime(TIME_FORMAT)
+        print(OUTPUT_FORMAT.format('Completing fraction of random walks.', str_comp_time))
+
+        with tqdm(total=needed, desc='# Sentence generation progress: ') as pbar:
             for count_cells in range(needed):
-        # while needed > count_cells:
                 cell = random.choice(graph.cell_list)
                 if cell in intersection:
-                    w = RandomWalk(graph, cell, sentence_length, backtrack,
+                    w = RandomWalk(graph.nodes, cell, sentence_length, backtrack, graph.uniform,
                                    repl_numbers=parameters['repl_numbers'],
                                    repl_strings=parameters['repl_strings'])
                     sen = [w.get_walk()]
-                    # sen.append(w.get_reversed_walk())
-                    # sen = []
-                    # sen.append(list(w.get_sampled_walk(w.get_walk())))
-                    # sen.append(list(w.get_sampled_walk(w.get_reversed_walk())))
 
                     for s in sen:
                         if parameters['write_walks']:
@@ -235,19 +201,13 @@ def generate_walks(parameters, graph, intersection=None):
     start_time = datetime.datetime.now()
     str_start_time = start_time.strftime(TIME_FORMAT)
     print(OUTPUT_FORMAT.format('Generation of random walks completed', str_start_time))
-
-
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('tottime')
-    stats.print_stats(20)
+    print()
 
     if parameters['write_walks']:
         fp_walks.close()
         return walks_file
     else:
         return sentences
-
-    raise ValueError
 
 def split_remaining_sentences(freq_row, freq_col):
     if freq_row == freq_col == 0:
@@ -273,22 +233,23 @@ def random_walks_generation(configuration, df, graph):
     """
     t1 = datetime.datetime.now()
     # Find values in common between the datasets.
-    if configuration['intersection']:
-        print('# Finding overlapping values. ')
-        # Expansion works better when all tokens are considered, rather than only the overlapping ones.
-        if configuration['flatten']:
-            warnings.warn('Executing intersection while flatten = True.')
-        # Find the intersection
-        intersection = find_intersection_flatten(df, configuration['dataset_info'])
-        if len(intersection) == 0:
-            warnings.warn('Datasets have no tokens in common. Falling back to no-intersection.')
-            intersection = None
-        else:
-            print('# Number of common values: {}'.format(len(intersection)))
-    else:
-        print('# Skipping search of overlapping values. ')
-        intersection = None
-        # configuration['with_rid'] = WITH_RID_FIRST
+    # if configuration['intersection']:
+    #     raise NotImplementedE
+    #     print('# Finding overlapping values. ')
+    #     # Expansion works better when all tokens are considered, rather than only the overlapping ones.
+    #     if configuration['flatten']:
+    #         warnings.warn('Executing intersection while flatten = True.')
+    #     # Find the intersection
+    #     intersection = find_intersection_flatten(df, configuration['dataset_info'])
+    #     if len(intersection) == 0:
+    #         warnings.warn('Datasets have no tokens in common. Falling back to no-intersection.')
+    #         intersection = None
+    #     else:
+    #         print('# Number of common values: {}'.format(len(intersection)))
+    # else:
+    #     print('# Skipping search of overlapping values. ')
+    #     intersection = None
+    intersection = None
 
     # Generating walks.
     walks = generate_walks(configuration, graph, intersection=intersection)
