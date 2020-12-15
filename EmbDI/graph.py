@@ -169,7 +169,7 @@ class Graph:
         :return: n_sentences
         """
         n = len(self.nodes)*factor//sentence_length
-        print('# Computing default number of sentences.\n{} sentences will be generated.'.format(n))
+        print('# {} sentences will be generated.'.format(n))
         return n
 
     def add_edge(self, node_from, node_to, weight_forward, weight_back=None):
@@ -269,17 +269,17 @@ class Graph:
             print('# Flatten = all, all strings will be expanded.')
             self.to_flatten = self.node_classes
         elif len(self.to_flatten) > 0:
-            print('# Expanding columns {}.'.format(self.to_flatten))
+            print('# Expanding columns: [{}].'.format(', '.join(self.to_flatten)))
         else:
             print('# All values will be tokenized. ')
 
         # pbar = tqdm()
-        for line in tqdm(edgelist, desc='Loading edgelist_file.'):
+        for line in tqdm(edgelist, desc='# Loading edgelist_file.'):
             n1 = line[0]
             n2 = line[1]
 
             if n1 is np.nan or n2 is np.nan:
-                raise ValueError('{} or {} are NaNs'.format(n1,n2))
+                raise ValueError('{} or {} are NaNs.'.format(n1,n2))
 
             to_link = []
 
@@ -345,7 +345,9 @@ class Graph:
                         self.add_edge(_1, _2, w1, w2)
 
         to_delete = []
-        for node_name in tqdm(self.nodes, desc='Prepare aliased randomizer for each node'):
+        if len(self.nodes) == 0:
+            raise ValueError(f'No nodes found in edgelist!')
+        for node_name in tqdm(self.nodes, desc='# Preparing aliased randomizer.'):
             if self.nodes[node_name].node_class['isroot']:
                 self.cell_list.append(node_name)
             if len(self.nodes[node_name].neighbors) == 0:
@@ -353,7 +355,6 @@ class Graph:
                 # to_delete.append(n)
             else:
                 self.nodes[node_name].normalize_neighbors(uniform=self.uniform)
-        print('')
         for node_name in to_delete:
             self.nodes.pop(node_name)
         # self.edges = None  # remove the edges list since to save memory
@@ -394,6 +395,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
             flatten = 'all'
     else:
         flatten = []
+
     t_start = datetime.datetime.now()
     print(OUTPUT_FORMAT.format('Starting graph construction', t_start.strftime(TIME_FORMAT)))
     if dictionary:
@@ -409,6 +411,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     t_end = datetime.datetime.now()
     dt = t_end - t_start
     print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
-    print(OUTPUT_FORMAT.format('Time required to build graph:', dt.total_seconds()))
+    print(OUTPUT_FORMAT.format('Time required to build graph:', f'{dt.total_seconds():.2} seconds.'))
+    print()
     metrics.time_graph = dt.total_seconds()
     return g

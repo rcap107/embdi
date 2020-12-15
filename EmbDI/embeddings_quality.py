@@ -5,6 +5,7 @@ import gensim.models as models
 import mlflow
 import warnings
 from itertools import chain
+from EmbDI.utils import *
 
 def _test_no_match_columns(model, list_files):
     correct = 0
@@ -32,6 +33,8 @@ def _test_no_match_columns(model, list_files):
                     if expected == result:
                         correct += 1
                         run_correct += 1
+                    else:
+                        _=1
                 except ValueError:
                     pass
                 total += 1

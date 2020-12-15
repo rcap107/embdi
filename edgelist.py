@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
-    el = EdgeList(df, edgefile, pref, info, flatten=True)
+    el = EdgeList(df, edgefile, pref, info, flatten=False)
 
     # Loading the graph to make sure it can load the edgelist.
     g = Graph(el.get_edgelist(), prefixes=pref)
