@@ -101,7 +101,7 @@ def find_intersection_flatten(df, info_file):
 
     intersection = s1.intersection(s2)
 
-    return list(intersection)
+    return intersection
 
 
 def compute_n_tokens(df_file):
@@ -399,6 +399,17 @@ def check_config_validity(config):
             print('Epsilon must be a float.')
             raise ValueError
 
+    if config['intersection']:
+        if 'dataset_file' not in config:
+            raise ValueError('A dataset file must be provided to perform intersection. ')
+        if not os.path.exists(config['dataset_file']):
+            raise IOError('Dataset file {} not found.'.format(config['dataset_file']))
+
+    if 'flatten' in config:
+        try:
+            _convert_to_bool(config, 'flatten')
+        except ValueError:
+            pass
 
     #### Path checks
     if not os.path.exists(config['input_file']):
@@ -407,6 +418,12 @@ def check_config_validity(config):
         raise IOError('Info file {} not found.'.format(config['dataset_info']))
     if config['walks_strategy'] == 'replacement' and not os.path.exists(config['similarity_file']):
         raise IOError('Replacement strategy requires a similarity file.')
+    if 'walks_file' in config:
+        if not os.path.exists(config['walks_file']):
+            raise IOError('Walks file {} not found.'.format(config['walks_file']))
+        if os.path.getsize(config['walks_file']) == 0:
+            raise IOError('Walks file is empty.')
+
 
     ###### WARNINGS
     if int(config['n_dimensions']) != 300:
