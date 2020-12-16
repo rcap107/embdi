@@ -46,5 +46,5 @@ graph = graph_generation(configuration, edgelist, prefixes, dictionary=None)
 if configuration['n_sentences'] == 'default':
     #  Compute the number of sentences according to the rule of thumb.
     configuration['n_sentences'] = graph.compute_n_sentences(int(configuration['sentence_length']))
-walks = random_walks_generation(configuration, df, graph)
+walks = random_walks_generation(configuration, graph)
 

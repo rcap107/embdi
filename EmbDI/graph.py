@@ -32,7 +32,7 @@ class Node:
         self.similar_tokens = [name]
         self.similar_distance = [1.0]
         self.startfrom = []
-        self.isfirst = self.isroot = self.isappear = bool(0)
+        # self.isfirst = self.isroot = self.isappear = bool(0)
         self.node_class = {}
         self._extract_class(node_class)
         self.numeric = numeric
@@ -115,8 +115,9 @@ class Node:
         self.neighbor_names = np.array(list(self.neighbors.keys()))
         self.number_neighbors = len(self.neighbor_names)
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
-        if not uniform:
-            self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
+
+        # if not uniform:
+        self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
@@ -207,6 +208,14 @@ class Graph:
     def get_graph(self):
         return self
 
+    def produce_intersection(self, intersecting_nodes):
+        intersection = set()
+        for node in self.nodes:
+            prefix, name = node.split('__')
+            if name in intersecting_nodes:
+                intersection.add(node)
+        return intersection
+
     def _get_node_type(self, node):
         for pre in self.node_classes:
             if node.startswith(pre + '__'):
@@ -225,15 +234,15 @@ class Graph:
         for prefix in prefixes:
             prefix_properties, pref = prefix.split('__')
             strnum = prefix_properties[1]
-            rwclass = prefix_properties[0]
-            if int(rwclass) not in range(8):
+            rwclass = int(prefix_properties[0])
+            if rwclass not in range(8):
                 raise ValueError('Unknown class {}'.format(rwclass))
             else:
-                self.node_classes[pref] = int(rwclass)
-                if int(rwclass) >= 4:
+                self.node_classes[pref] = rwclass
+                if rwclass >= 4:
                     self.possible_first.append(pref)
             if int(rwclass)%2 == 1:
-                # self.isappear.append(prefix)
+                self.isappear.append(prefix)
                 valid = True
             if strnum not in ['#', '$']:
                 raise ValueError('Unknown type prefix {}'.format(strnum))
@@ -247,7 +256,6 @@ class Graph:
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
         in the graph, built according to the parameters passed to the function.
 
-        :param df: dataframe to convert into graph
         :param sim_list: optional, list of pairs of similar values
         :param smoothing_method: one of {no, smooth, inverse_smooth, log, inverse}
         :param flatten: if present and different from "all", expand the strings of all nodes whose type is in the list.
@@ -270,6 +278,8 @@ class Graph:
             self.to_flatten = self.node_classes
         elif len(self.to_flatten) > 0:
             print('# Expanding columns: [{}].'.format(', '.join(self.to_flatten)))
+        elif not flatten:
+            print('# All values will be tokenized. ')
         else:
             print('# All values will be tokenized. ')
 
@@ -386,7 +396,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     else:
         list_sim = None
 
-    if 'flatten' in configuration:
+    if 'flatten' in configuration and configuration['flatten']:
         if configuration['flatten'].lower() not in  ['all', 'false']:
             flatten = configuration['flatten'].strip().split(',')
         elif configuration['flatten'].lower() == 'false':

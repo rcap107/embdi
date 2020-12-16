@@ -71,10 +71,10 @@ def training_driver(configuration):
     then random walks are generated and the result is passed to the embeddings training algorithm. 
 
     '''
+    edgelist_df = pd.read_csv(configuration['input_file'], dtype=str, index_col=False)
+    edgelist_df = edgelist_df[edgelist_df.columns[:2]]
+    edgelist_df.dropna(inplace=True)
 
-    df = pd.read_csv(configuration['input_file'], dtype=str, index_col=False)
-    df = df[df.columns[:2]]
-    df.dropna(inplace=True)
     run_tag = configuration['output_file']
     configuration['run-tag'] = run_tag
     # with mlflow.start_run(run_id=configuration['run_id']):
@@ -84,9 +84,10 @@ def training_driver(configuration):
         if configuration['walks_file'] is None:
             prefixes, edgelist = read_edgelist(configuration['input_file'])
 
-            if configuration['compression']:  # Execute compression if required.
-                df, dictionary = dict_compression_edgelist(df, prefixes=prefixes)
-                el = df.values.tolist()
+            if configuration['compression']:
+                # Execute compression if required.
+                edgelist_df, dictionary = dict_compression_edgelist(edgelist_df, prefixes=prefixes)
+                el = edgelist_df.values.tolist()
             else:
                 dictionary = None
                 el = edgelist
@@ -96,12 +97,12 @@ def training_driver(configuration):
             if configuration['n_sentences'] == 'default':
                 #  Compute the number of sentences according to the rule of thumb.
                 configuration['n_sentences'] = graph.compute_n_sentences(int(configuration['sentence_length']))
-            walks = random_walks_generation(configuration, df, graph)
+            walks = random_walks_generation(configuration, graph)
             del graph # Graph is not needed anymore, so it is deleted to reduce memory cost
         else:
             if configuration['compression']:  # Execute compression if required.
                 prefixes, edgelist = read_edgelist(configuration['input_file'])
-                df, dictionary = dict_compression_edgelist(df, prefixes=prefixes)
+                edgelist_df, dictionary = dict_compression_edgelist(edgelist_df, prefixes=prefixes)
             else:
                 dictionary = None
             configuration['write_walks'] = True
