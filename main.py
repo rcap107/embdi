@@ -250,6 +250,8 @@ def main(file_path=None, dir_path=None, args=None):
     os.makedirs('pipeline/walks', exist_ok=True)
     os.makedirs('pipeline/embeddings', exist_ok=True)
     os.makedirs('pipeline/generated-matches', exist_ok=True)
+    os.makedirs('pipeline/logging', exist_ok=True)
+
 
     # Finding the configuration file paths.
     if args:

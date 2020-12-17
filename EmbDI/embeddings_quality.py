@@ -22,7 +22,7 @@ def _test_no_match_columns(model, list_files):
                 try:
                     terms = ast.literal_eval(line)
                 except ValueError:
-                    warnings.warn('Problem encountered while reading line {}'.format(line))
+                    # warnings.warn('Problem encountered while reading line {}'.format(line))
                     continue
                 terms = [str(_) for _ in terms]
                 expected = terms[-1]

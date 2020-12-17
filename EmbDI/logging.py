@@ -17,7 +17,7 @@ def log_params():
             writer.writerow(header)
             writer.writerow(list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))
     else:
-        with open('pipeline/' + params.par_dict['output_file'] + '.results', 'a') as fp:
+        with open('pipeline/logging/' + params.par_dict['output_file'] + '.results', 'a') as fp:
             writer = csv.writer(fp, delimiter=',')
             # writer.writerow(list(configuration.keys()))
             writer.writerow(list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))
