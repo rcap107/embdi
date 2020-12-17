@@ -20,6 +20,7 @@ with warnings.catch_warnings():
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--unblocking', action='store_true', default=False)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-f','--config_file', action='store', default=None)
     group.add_argument('-d','--config_dir', action='store', default=None)
@@ -197,6 +198,48 @@ def read_configuration(config_file):
                 config[key] = value
     return config
 
+def full_run(config_dir, config_file):
+    # Parsing the configuration file.
+    configuration = read_configuration(config_dir + '/' + config_file)
+    # Checking the correctness of the configuration, setting default values for missing values.
+    configuration = check_config_validity(configuration)
+
+    if configuration['mlflow']:
+        mlclient = tracking.MlflowClient()
+        # Preparing the mlflow experiment.
+        try:
+            exp_id = mlclient.create_experiment(configuration['experiment_type'])
+        except mlexceptions.MlflowException:
+            experiment = mlclient.get_experiment_by_name(configuration['experiment_type'])
+            exp_id = experiment.experiment_id
+        run = mlclient.create_run(experiment_id=exp_id)
+        configuration['run_id'] = run.info.run_id
+
+    # Running the task specified in the configuration file.
+    params.par_dict = configuration
+
+    if configuration['task'] == 'train':
+        configuration = training_driver(configuration)
+    elif configuration['task'] == 'test':
+        results = testing_driver(configuration)
+        log_params()
+    elif configuration['task'] == 'match':
+        matching_driver(configuration)
+    elif configuration['task'] == 'train-test':
+        configuration = training_driver(configuration)
+        results = testing_driver(configuration)
+        log_params()
+    elif configuration['task'] == 'train-match':
+        configuration = training_driver(configuration)
+        matching_driver(configuration)
+    if configuration['mlflow']:
+        mlflow.log_params(configuration)
+        if mem_results.res_dict  is not None:
+            mlflow.log_metrics(mem_results.res_dict)
+        mlflow.log_metric('time_overall', dt.total_seconds())
+        mlflow.end_run()
+
+
 
 def main(file_path=None, dir_path=None, args=None):
     results = None
@@ -216,9 +259,11 @@ def main(file_path=None, dir_path=None, args=None):
         else:
             config_dir = None
             config_file = args.config_file
+        unblocking = args.unblocking
     else:
         config_dir = dir_path
         config_file = file_path
+        unblocking = False
 
     # Extracting valid files
     if config_dir:
@@ -237,58 +282,41 @@ def main(file_path=None, dir_path=None, args=None):
     else:
         raise ValueError('Missing file_path or config_path.')
 
-
-    for idx, file in enumerate(sorted(valid_files)):
-        print('#' * 80)
-        print('# File {} out of {}'.format(idx+1, len(valid_files)))
-        print('# Configuration file: {}'.format(file))
-        t_start = datetime.datetime.now()
-        print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
-        print( )
-        # Parsing the configuration file.
-        configuration = read_configuration(config_dir + '/' + file)
-        # Checking the correctness of the configuration, setting default values for missing values.
-        configuration = check_config_validity(configuration)
-
-        if configuration['mlflow']:
-            mlclient = tracking.MlflowClient()
-            # Preparing the mlflow experiment.
+    if unblocking:
+        print('######## IGNORING EXCEPTIONS ########')
+        for idx, file in enumerate(sorted(valid_files)):
             try:
-                exp_id = mlclient.create_experiment(configuration['experiment_type'])
-            except mlexceptions.MlflowException:
-                experiment = mlclient.get_experiment_by_name(configuration['experiment_type'])
-                exp_id = experiment.experiment_id
-            run = mlclient.create_run(experiment_id=exp_id)
-            configuration['run_id'] = run.info.run_id
+                print('#' * 80)
+                print('# File {} out of {}'.format(idx+1, len(valid_files)))
+                print('# Configuration file: {}'.format(file))
+                t_start = datetime.datetime.now()
+                print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
+                print( )
 
-        # Running the task specified in the configuration file.
-        params.par_dict = configuration
+                full_run(config_dir, file)
 
-        if configuration['task'] == 'train':
-            configuration = training_driver(configuration)
-        elif configuration['task'] == 'test':
-            results = testing_driver(configuration)
-            log_params()
-        elif configuration['task'] == 'match':
-            matching_driver(configuration)
-        elif configuration['task'] == 'train-test':
-            configuration = training_driver(configuration)
-            results = testing_driver(configuration)
-            log_params()
-        elif configuration['task'] == 'train-match':
-            configuration = training_driver(configuration)
-            matching_driver(configuration)
-        t_end = datetime.datetime.now()
-        print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
-        dt = t_end-t_start
-        print('# Time required: {:.2} s'.format(dt.total_seconds()))
-        if configuration['mlflow']:
-            mlflow.log_params(configuration)
-            if mem_results.res_dict  is not None:
-                mlflow.log_metrics(mem_results.res_dict)
-            mlflow.log_metric('time_overall', dt.total_seconds())
-            mlflow.end_run()
-        # clean_dump()
+                t_end = datetime.datetime.now()
+                print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
+                dt = t_end-t_start
+                print('# Time required: {:.2} s'.format(dt.total_seconds()))
+            except Exception as e:
+                print(f'Run {file} has failed. ')
+                print(e)
+    else:
+        for idx, file in enumerate(sorted(valid_files)):
+            print('#' * 80)
+            print('# File {} out of {}'.format(idx+1, len(valid_files)))
+            print('# Configuration file: {}'.format(file))
+            t_start = datetime.datetime.now()
+            print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
+            print( )
+
+            full_run(config_dir, file)
+
+            t_end = datetime.datetime.now()
+            print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
+            dt = t_end-t_start
+            print('# Time required: {:.2} s'.format(dt.total_seconds()))
 
 if __name__ == '__main__':
     args = parse_args()
