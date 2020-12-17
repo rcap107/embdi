@@ -418,7 +418,7 @@ def check_config_validity(config):
         raise IOError('Info file {} not found.'.format(config['dataset_info']))
     if config['walks_strategy'] == 'replacement' and not os.path.exists(config['similarity_file']):
         raise IOError('Replacement strategy requires a similarity file.')
-    if 'walks_file' in config:
+    if 'walks_file' in config and config['walks_file']:
         if not os.path.exists(config['walks_file']):
             raise IOError('Walks file {} not found.'.format(config['walks_file']))
         if os.path.getsize(config['walks_file']) == 0:

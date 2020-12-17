@@ -147,7 +147,7 @@ class EdgeList:
 
         return list(intersection)
 
-    def evaluate_frequencies(self, flatten, intersection):
+    def evaluate_frequencies(self, flatten, df, intersection):
         if flatten and intersection:
             split_values = []
             for val in df.values.ravel().tolist():
@@ -170,10 +170,12 @@ class EdgeList:
                 split_values += split
             frequencies = dict(Counter(split_values))
         else:
-            frequencies = dict(Counter(df.values.ravel().tolist()))
-
+            # frequencies = dict(Counter(df.values.ravel().tolist()))
+            uniques, counts = np.unique([str(_) for _ in df.values.ravel().tolist() if _ == _], return_counts=True)
+            frequencies = dict(zip(uniques, counts))
         frequencies.pop('', None)
         frequencies.pop(np.nan, None)
+
 
         return frequencies
 
@@ -219,7 +221,7 @@ class EdgeList:
         else:
             intersection = []
 
-        frequencies = self.evaluate_frequencies(flatten, intersection)
+        frequencies = self.evaluate_frequencies(flatten, df, intersection)
 
         count_rows = 1
         with open(edgefile, 'w') as fp:
@@ -289,7 +291,7 @@ if __name__ == '__main__':
         info = args.info_file
     else:
         info = None
-    df = pd.read_csv(dfpath)
+    df = pd.read_csv(dfpath, low_memory=False)
 
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
