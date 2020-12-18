@@ -10,8 +10,9 @@ setup(
                                                                                        'gensim',
                                                                                        'datasketch',
                                                                                        'strsim',
-                                                                                       'annoy',
-                                                                                       'ngt']
+                                                                                       'pandas',
+                                                                                       'numpy',
+                                                                                       'scikit-learn']
 )
 
 os.makedirs('pipeline/', exist_ok=True)

@@ -1,5 +1,4 @@
 import string
-import subprocess
 import warnings
 
 import numpy as np
@@ -15,6 +14,7 @@ OUTPUT_FORMAT = '# {:.<60} {}'
 
 POSSIBLE_TASKS = ['train', 'test', 'match', 'train-test', 'train-match', 'debug']
 
+MLFLOW_NOT_FOUND = False
 
 digs = string.digits + string.ascii_uppercase
 
@@ -410,6 +410,10 @@ def check_config_validity(config):
             _convert_to_bool(config, 'flatten')
         except ValueError:
             pass
+
+    if config['mlflow'] and MLFLOW_NOT_FOUND:
+        warnings.warn('Package mlflow was not found. mlflow logging will not be available.')
+        config['mlflow'] = False
 
     #### Path checks
     if not os.path.exists(config['input_file']):

@@ -1,9 +1,6 @@
 import argparse
 import datetime
 
-import mlflow
-import mlflow.tracking as tracking
-import mlflow.exceptions as mlexceptions
 import warnings
 
 
@@ -16,6 +13,14 @@ with warnings.catch_warnings():
     from EmbDI.testing_functions import test_driver, match_driver
     from EmbDI.graph import graph_generation
     from EmbDI.logging import *
+
+try:
+    import mlflow
+    import mlflow.tracking as tracking
+    import mlflow.exceptions as mlexceptions
+except ModuleNotFoundError:
+    warnings.warn('mlflow not found.')
+    MLFLOW_NOT_FOUND = True
 
 
 def parse_args():

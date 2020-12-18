@@ -2,3 +2,6 @@ gensim
 mlflow
 datasketch
 strsim
+scikit-learn
+numpy
+pandas
