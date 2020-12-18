@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-amazon_google.txt
 output_file:amazon_google-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-amazon_google.txt
+match_file:pipeline/matches/er-matches/matches-amazon_google.txt
 dataset_file:pipeline/datasets/amazon_google/amazon_google-master.csv
 ntop:10
 ncand:1

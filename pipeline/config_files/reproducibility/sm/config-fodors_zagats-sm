@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/fodors_zagats
 dataset_file:pipeline/datasets/fodors_zagats/fodors_zagats-master-sm.csv
-match_file:pipeline/matches/sm-matches-fodors_zagats.txt
+match_file:pipeline/matches/sm-matches/sm-matches-fodors_zagats.txt
 ntop:10
 ncand:1
 max_rank:3

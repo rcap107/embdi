@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-itunes_amazon.txt
 output_file:itunes_amazon-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-itunes_amazon.txt
+match_file:pipeline/matches/er-matches/matches-itunes_amazon.txt
 dataset_file:pipeline/datasets/itunes_amazon/itunes_amazon-master.csv
 ntop:10
 ncand:1

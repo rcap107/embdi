@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/dblp_acm
 dataset_file:pipeline/datasets/dblp_acm/dblp_acm-master-sm.csv
-match_file:pipeline/matches/sm-matches-dblp_acm.txt
+match_file:pipeline/matches/sm-matches/sm-matches-dblp_acm.txt
 ntop:10
 ncand:1
 max_rank:3

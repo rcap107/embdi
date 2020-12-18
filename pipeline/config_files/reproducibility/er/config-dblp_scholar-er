@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-dblp_scholar.txt
 output_file:dblp_scholar-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-dblp_scholar.txt
+match_file:pipeline/matches/er-matches/matches-dblp_scholar.txt
 dataset_file:pipeline/datasets/dblp_scholar/dblp_scholar-master.csv
 ntop:10
 ncand:1

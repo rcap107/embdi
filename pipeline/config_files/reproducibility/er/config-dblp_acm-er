@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-dblp_acm.txt
 output_file:dblp_acm-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-dblp_acm.txt
+match_file:pipeline/matches/er-matches/matches-dblp_acm.txt
 dataset_file:pipeline/datasets/dblp_acm/dblp_acm-master.csv
 ntop:10
 ncand:1

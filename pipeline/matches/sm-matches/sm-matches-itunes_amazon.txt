@@ -1,4 +1,8 @@
-0_authors,1_authors
-0_title,1_title
-0_venue,1_venue
-0_year,1_year
+0_album_name,1_album_name
+0_artist_name,1_artist_name
+0_copyright,1_copyright
+0_genre,1_genre
+0_price,1_price
+0_released,1_released
+0_song_name,1_song_name
+0_time,1_time

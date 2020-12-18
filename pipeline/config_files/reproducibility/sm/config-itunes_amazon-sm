@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/itunes_amazon
 dataset_file:pipeline/datasets/itunes_amazon/itunes_amazon-master-sm.csv
-match_file:pipeline/matches/sm-matches-itunes_amazon.txt
+match_file:pipeline/matches/sm-matches/sm-matches-itunes_amazon.txt
 ntop:10
 ncand:1
 max_rank:3

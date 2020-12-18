@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/amazon_google
 dataset_file:pipeline/datasets/amazon_google/amazon_google-master-sm.csv
-match_file:pipeline/matches/sm-matches-amazon_google.txt
+match_file:pipeline/matches/sm-matches/sm-matches-amazon_google.txt
 ntop:10
 ncand:1
 max_rank:3

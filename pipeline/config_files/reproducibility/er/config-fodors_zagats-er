@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-fodors_zagats.txt
 output_file:fodors_zagats-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-fodors_zagats.txt
+match_file:pipeline/matches/er-matches/matches-fodors_zagats.txt
 dataset_file:pipeline/datasets/fodors_zagats/fodors_zagats-master.csv
 ntop:10
 ncand:1

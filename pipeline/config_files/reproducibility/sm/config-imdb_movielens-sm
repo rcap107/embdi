@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/imdb_movielens
 dataset_file:pipeline/datasets/imdb_movielens/imdb_movielens-master-sm.csv
-match_file:pipeline/matches/sm-matches-imdb_movielens.txt
+match_file:pipeline/matches/sm-matches/sm-matches-imdb_movielens.txt
 ntop:10
 ncand:1
 max_rank:3

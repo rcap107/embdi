@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-imdb_movielens.txt
 output_file:imdb_movielens-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-imdb_movielens.txt
+match_file:pipeline/matches/er-matches/matches-imdb_movielens.txt
 dataset_file:pipeline/datasets/imdb_movielens/imdb_movielens-master.csv
 ntop:10
 ncand:1

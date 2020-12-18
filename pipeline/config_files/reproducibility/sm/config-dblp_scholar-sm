@@ -6,7 +6,7 @@ flatten:tt
 experiment_type:SM
 test_dir:pipeline/test_dir/dblp_scholar
 dataset_file:pipeline/datasets/dblp_scholar/dblp_scholar-master-sm.csv
-match_file:pipeline/matches/sm-matches-dblp_scholar.txt
+match_file:pipeline/matches/sm-matches/sm-matches-dblp_scholar.txt
 ntop:10
 ncand:1
 max_rank:3
@@ -19,7 +19,7 @@ n_sentences:default
 walks_strategy:basic
 learning_method:skipgram
 sentence_length:60
-window_size:3
+window_size:5
 n_dimensions:300
 intersection:false
 mlflow:false

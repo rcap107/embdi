@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-beer.txt
 output_file:beer-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-beer.txt
+match_file:pipeline/matches/er-matches/matches-beer.txt
 dataset_file:pipeline/datasets/beer/beer-master.csv
 ntop:10
 ncand:1

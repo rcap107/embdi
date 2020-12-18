@@ -4,7 +4,7 @@ dataset_info:pipeline/info/info-walmart_amazon.txt
 output_file:walmart_amazon-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/matches-walmart_amazon.txt
+match_file:pipeline/matches/er-matches/matches-walmart_amazon.txt
 dataset_file:pipeline/datasets/walmart_amazon/walmart_amazon-master.csv
 ntop:10
 ncand:1
