@@ -5,7 +5,7 @@ from EmbDI.logging import *
 from EmbDI.utils import remove_prefixes
 import os
 
-def test_driver(embeddings_file, df, configuration=None):
+def test_driver(embeddings_file, configuration=None):
     test_type = configuration['experiment_type']
     info_file = configuration['dataset_info']
     if test_type == 'EQ':
@@ -21,7 +21,7 @@ def test_driver(embeddings_file, df, configuration=None):
     elif test_type == 'ER':
         print('# ENTITY RESOLUTION')
 
-        mem_results.res_dict = entity_resolution(embeddings_file, configuration, df=df, info_file=info_file)
+        mem_results.res_dict = entity_resolution(embeddings_file, configuration, info_file=info_file)
     elif test_type == 'SM':
         print('# SCHEMA MATCHING')
         mem_results.res_dict = schema_matching(embeddings_file, configuration)
@@ -33,7 +33,7 @@ def match_driver(embeddings_file, df, configuration):
     test_type = configuration['experiment_type']
     info_file = configuration['dataset_info']
     print('Extracting matched tuples')
-    m_tuples = entity_resolution(embeddings_file, configuration, df=df, info_file=info_file, 
+    m_tuples = entity_resolution(embeddings_file, configuration, info_file=info_file,
                                 task='match')
     # print('Extracting matched columns')
     # m_columns = match_columns(df, embeddings_file)

@@ -416,7 +416,7 @@ def check_config_validity(config):
         config['mlflow'] = False
 
     #### Path checks
-    if not os.path.exists(config['input_file']):
+    if 'train' in config['task'] and not os.path.exists(config['input_file']):
         raise IOError('Input file {} not found.'.format(config['input_file']))
     if not os.path.exists(config['dataset_info']):
         raise IOError('Info file {} not found.'.format(config['dataset_info']))

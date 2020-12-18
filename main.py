@@ -121,11 +121,11 @@ def training_driver(configuration):
 def testing_driver(configuration):
     '''Simple caller function for the testing functions.'''
     embeddings_file = configuration['embeddings_file']
-    df = pd.read_csv(configuration['input_file'])
+    # df = pd.read_csv(configuration['input_file'])
     # if configuration['mlflow']:
     #     with mlflow.start_run(configuration['run_id']):
     #         mlflow.log_param('run_name', configuration['embeddings_file'])
-    test_driver(embeddings_file, df, configuration)
+    test_driver(embeddings_file, configuration)
 
 
 def matching_driver(configuration):

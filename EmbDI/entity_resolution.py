@@ -54,7 +54,7 @@ def _check_symmetry(target, most_similar, n_top):
 
 
 def build_similarity_structure(model_file, viable_lines, n_items, strategy,
-                               n_top=10, n_candidates=1, num_trees=None, epsilon=None, df=None):
+                               n_top=10, n_candidates=1, num_trees=None, epsilon=None):
     t_start = dt.datetime.now()
     most_similar = {}
     c = 1
@@ -306,7 +306,7 @@ def perform_matching(most_similar):
     return matches
 
 
-def entity_resolution(input_file: str, configuration: dict, df: pd.DataFrame = None,
+def entity_resolution(input_file: str, configuration: dict,
                                  task: str = 'test', info_file: str = None):
     t_start = dt.datetime.now()
 
@@ -321,8 +321,7 @@ def entity_resolution(input_file: str, configuration: dict, df: pd.DataFrame = N
         n_items = int(line.split(',')[1])
 
     most_similar = build_similarity_structure(model_file, viable_lines, n_items, strategy, n_top, n_candidates,
-                                              epsilon=configuration['epsilon'], num_trees=configuration['num_trees'],
-                                              df=df)
+                                              epsilon=configuration['epsilon'], num_trees=configuration['num_trees'])
     if task == 'test':
         dict_result = compare_ground_truth_only(most_similar, matches_file, n_items, n_top)
     elif task == 'match':

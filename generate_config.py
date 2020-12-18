@@ -5,14 +5,14 @@ from edgelist import EdgeList
 import pandas as pd
 
 abbreviations = {
-    'bb':'beer',
-    'ia':'itunes_amazon',
+    'bb': 'beer',
+    'ia': 'itunes_amazon',
     'im': 'imdb_movielens',
-    'wa':'walmart_amazon',
-    'fz':'fodors_zagats',
-    'ag':'amazon_google',
-    'ds':'dblp_scholar',
-    'da':'dblp_acm'
+    'wa': 'walmart_amazon',
+    'fz': 'fodors_zagats',
+    'ag': 'amazon_google',
+    'ds': 'dblp_scholar',
+    'da': 'dblp_acm'
     }
 
 
@@ -53,7 +53,7 @@ for ds in abbreviations:
     config['output_file']     = f'{dataset}-ER'
     config['flatten']         = 'tt'
     config['experiment_type'] = 'ER'
-    config['match_file']      = f'pipeline/matches/matches-{dataset}.txt'
+    config['match_file']      = f'pipeline/matches/er-matches/matches-{dataset}.txt'
     config['dataset_file']    = f'pipeline/datasets/{dataset}/{dataset}-master.csv'
     for k in default_values:
         if k not in config:
@@ -115,7 +115,7 @@ for ds in abbreviations:
     config['experiment_type'] = 'SM'
     config['test_dir']        = f'pipeline/test_dir/{dataset}'
     config['dataset_file']    = f'pipeline/datasets/{dataset}/{dataset}-master-sm.csv'
-    config['match_file']      = f'pipeline/matches/sm-matches-{dataset}.txt'
+    config['match_file']      = f'pipeline/matches/sm-matches/sm-matches-{dataset}.txt'
 
 
     for k in default_values:
