@@ -11,4 +11,4 @@ ntop:10
 repl_numbers:false
 embeddings_file:
 test_dir: pipeline/test_dir/dblp_scholar
-n_sentences:100000
+n_sentences:500000
