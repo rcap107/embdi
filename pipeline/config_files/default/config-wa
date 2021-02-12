@@ -11,4 +11,4 @@ ntop:10
 repl_numbers:false
 embeddings_file:
 test_dir: pipeline/test_dir/walmart_amazon
-n_sentences:1000
+n_sentences:default
