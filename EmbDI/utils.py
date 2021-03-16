@@ -441,42 +441,9 @@ def check_config_validity(config):
     return config
 
 
-def check_args_validity(args):
-
-    if not args.n_dimensions > 0:
-        raise ValueError('Number of dimensions must be > 0.')
-    if not args.n_sentences > 0:
-        raise ValueError('Number of sentences must be > 0.')
-    if not args.sentence_length > 0:
-        raise ValueError('Sentence length must be > 0.')
-    if not 0 < args.window_size <= args.sentence_length:
-        raise ValueError('Window size must be between 0 and sentence_length')
-    if args.pca and not 0 < args.n_components <= args.n_dimensions:
-        raise ValueError('Number of PCA components must be between 0 and n_dimensions.')
-    if not args.n_top > 0:
-        raise ValueError('Number of neighbors to be chosen must be > 0.')
-    if not 0 < args.n_candidates <= args.n_top:
-        raise ValueError('Number of candidates must be between 0 and n_top.')
-    if not os.path.exists(args.input_file):
-        raise IOError('Input file not found.')
-    if not os.path.exists(args.dataset_info):
-        raise IOError('Info file not found.')
-    if args.key_as_rid and not args.concatenate:
-        raise ValueError('Key as rid requires concatenation.')
-    if args.walks_strategy == 'replacement' and not os.path.exists(args.similarity_file):
-        raise IOError('Replacement strategy requires a similarity file.')
-    if args.walks_strategy == 'permutation' and not os.path.exists(args.similarity_file):
-        raise IOError('Permutation strategy requires a similarity file.')
-    if (args.rid_connections is not None) and (not os.path.exists(args.rid_connections)):
-        raise IOError('Additional connections require a connections file.')
-    if args.measuring and not os.path.exists(args.matches_file):
-        raise IOError('Results estimation requires a ground truth file. ')
-
-
 def find_frequencies(configuration):
     with open(configuration['dataset_info'], 'r') as fp:
         for i, line in enumerate(fp):
             path, length = line.strip().split(',')
             df = pd.read_csv(path)
             values, counts = np.unique(df.values.ravel(), return_counts=True)
-
