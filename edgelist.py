@@ -8,6 +8,11 @@ from EmbDI.graph import Graph
 
 import argparse
 
+import networkx as nx
+
+import pickle
+import os.path as osp
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
@@ -282,6 +287,42 @@ class EdgeList:
     def get_edgelist(self):
         return  self.edgelist
 
+    def convert_to_dict(self):
+        self.graph_dict = {}
+        for edge in self.edgelist:
+            if len(edge) == 4:
+                n1, n2, w1, w2 = edge
+            elif len(edge) == 3:
+                n1, n2, w1 = edge
+                w2 = 0
+            else:
+                raise ValueError(f'Edge {edge} contains errors.')
+
+            if n1 in self.graph_dict:
+                self.graph_dict[n1][n2] = {'weight': w1}
+            else:
+                self.graph_dict[n1] = {n2: {'weight': w1}}
+
+            if n2 in self.graph_dict:
+                self.graph_dict[n2][n1] = {'weight': w2}
+            else:
+                self.graph_dict[n2] = {n1: {'weight': w2}}
+
+        return self.graph_dict
+
+    def convert_to_numeric(self):
+        i2n = {idx: node_name for idx, node_name in enumerate(self.graph_dict.keys())}
+        n2i = {node_name: idx for idx, node_name in i2n.items()}
+
+        numeric_dict = {}
+
+        for node in self.graph_dict:
+            adj = self.graph_dict[node]
+            new_adj = [n2i[_] for _ in adj]
+            numeric_dict[n2i[node]] = new_adj
+
+        return numeric_dict
+
 if __name__ == '__main__':
     args = parse_args()
     dfpath = args.input_file
@@ -296,6 +337,18 @@ if __name__ == '__main__':
     pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
 
     el = EdgeList(df, edgefile, pref, info, flatten=False)
+
+    el.convert_to_dict()
+    gdict = el.convert_to_numeric()
+
+
+    g_nx = nx.from_dict_of_lists(gdict)
+
+    n, _ = osp.splitext(edgefile)
+    nx_fname = n + '.nx'
+    pkl_fname = n + '.pkl'
+    pickle.dump(g_nx, open(nx_fname, 'wb'))
+    pickle.dump(gdict, open(pkl_fname, 'wb'))
 
     # Loading the graph to make sure it can load the edgelist.
     g = Graph(el.get_edgelist(), prefixes=pref)
