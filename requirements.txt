@@ -5,3 +5,4 @@ strsim
 scikit-learn
 numpy
 pandas
+tqdm
