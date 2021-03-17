@@ -1,5 +1,5 @@
 task:train-test
-input_file:pipeline/edgelists/beer-er-edgelist.txt
+input_file:pipeline/edgelists/beer-edgelist.txt
 dataset_info:pipeline/info/info-beer.txt
 output_file:beer-ER
 flatten:tt

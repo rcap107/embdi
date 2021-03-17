@@ -1,10 +1,11 @@
-task:train-test
+task:test
 input_file:pipeline/edgelists/fodors_zagats-eq-edgelist.txt
+embeddings_file:pipeline/embeddings/fodors_zagats-EQ.emb
 dataset_info:pipeline/info/info-fodors_zagats.txt
 output_file:fodors_zagats-EQ
 flatten:false
 experiment_type:EQ
-test_dir:pipeline/test_dir/fodors_zagats
+test_dir:pipeline/test_dir/fztest
 intersection:true
 dataset_file:pipeline/datasets/fodors_zagats/fodors_zagats-master.csv
 ntop:10

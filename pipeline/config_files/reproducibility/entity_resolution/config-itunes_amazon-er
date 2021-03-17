@@ -1,11 +1,11 @@
 task:train-test
-input_file:pipeline/edgelists/imdb_movielens-er-edgelist.txt
-dataset_info:pipeline/info/info-imdb_movielens.txt
-output_file:imdb_movielens-ER
+input_file:pipeline/edgelists/itunes_amazon-edgelist.txt
+dataset_info:pipeline/info/info-itunes_amazon.txt
+output_file:itunes_amazon-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/er-matches/matches-imdb_movielens.txt
-dataset_file:pipeline/datasets/imdb_movielens/imdb_movielens-master.csv
+match_file:pipeline/matches/er-matches/matches-itunes_amazon.txt
+dataset_file:pipeline/datasets/itunes_amazon/itunes_amazon-master.csv
 ntop:10
 ncand:1
 max_rank:3

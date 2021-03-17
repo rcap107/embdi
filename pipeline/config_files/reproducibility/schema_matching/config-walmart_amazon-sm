@@ -1,11 +1,11 @@
 task:train-test
-input_file:pipeline/edgelists/walmart_amazon-er-edgelist.txt
+input_file:pipeline/edgelists/walmart_amazon-sm-edgelist.txt
 dataset_info:pipeline/info/info-walmart_amazon.txt
-output_file:walmart_amazon-ER
+output_file:walmart_amazon-SM
 flatten:tt
-experiment_type:ER
-match_file:pipeline/matches/er-matches/matches-walmart_amazon.txt
-dataset_file:pipeline/datasets/walmart_amazon/walmart_amazon-master.csv
+experiment_type:SM
+dataset_file:pipeline/datasets/walmart_amazon/walmart_amazon-master-sm.csv
+match_file:pipeline/matches/sm-matches/sm-matches-walmart_amazon.txt
 ntop:10
 ncand:1
 max_rank:3
