@@ -45,9 +45,9 @@ def _test_no_match_columns(model, list_files):
                 warnings.warn('File {} contains no rows.'.format(filename))
             result_dict[filnam] = perc_corr
     try:
-        result_dict['nmc_avg'] = correct/total*100
+        result_dict['MA_avg'] = correct/total*100
     except ZeroDivisionError:
-        result_dict['nmc_avg'] = 0
+        result_dict['MA_avg'] = 0
 
     return result_dict
 
@@ -90,9 +90,9 @@ def _test_no_match_concept(model, list_files):
                 warnings.warn('File {} contains no rows.'.format(filename))
             result_dict[filnam] = perc_corr
     try:
-        result_dict['nmcon_avg'] = correct/total*100
+        result_dict['MC_avg'] = correct/total*100
     except ZeroDivisionError:
-        result_dict['nmcon_avg'] = 0
+        result_dict['MC_avg'] = 0
     return result_dict
 
 
@@ -130,9 +130,9 @@ def _test_no_match_rows(model, list_files):
 
             result_dict[filnam] = perc_corr
     try:
-        result_dict['nmr_avg'] = correct/total*100
+        result_dict['MR_avg'] = correct/total*100
     except ZeroDivisionError:
-        result_dict['nmr_avg'] = 0
+        result_dict['MR_avg'] = 0
     return result_dict
 
 
@@ -173,26 +173,26 @@ def embeddings_quality(embeddings_file, configuration):
     if len(nmc_tests) > 0:
         print('# Testing columns.')
         result_col = _test_no_match_columns(wv, nmc_tests)
-        sum_total += result_col['nmc_avg']
+        sum_total += result_col['MA_avg']
         count_tests += 1
-        print('# nmc_avg: {:.2f}'.format(result_col['nmc_avg']))
+        print('# MA_avg: {:.2f}'.format(result_col['MA_avg']))
     else:
         warnings.warn('No valid nmc tests found. ')
 
     if len(nmr_tests) > 0:
         print('# Testing rows.')
         result_row = _test_no_match_rows(wv, nmr_tests)
-        sum_total += result_row['nmr_avg']
+        sum_total += result_row['MR_avg']
         count_tests += 1
-        print('# nmr_avg: {:.2f}'.format(result_row['nmr_avg']))
+        print('# MR_avg: {:.2f}'.format(result_row['MR_avg']))
     else:
         warnings.warn('No valid nmr tests found. ')
     if len(nmcon_tests) > 0:
         print('# Testing concepts.')
         result_con = _test_no_match_concept(wv, nmcon_tests)
-        sum_total += result_con['nmcon_avg']
+        sum_total += result_con['MC_avg']
         count_tests += 1
-        print('# nmcon_avg: {:.2f}'.format(result_con['nmcon_avg']))
+        print('# MC_avg: {:.2f}'.format(result_con['MC_avg']))
     else:
         warnings.warn('No valid nmcon tests found. ')
     try:
@@ -207,9 +207,9 @@ def embeddings_quality(embeddings_file, configuration):
     if configuration['mlflow']:
         with mlflow.active_run():
             mlflow.log_metric('eq_avg', avg_results)
-            mlflow.log_metric('nmc_avg', result_col['nmc_avg'])
-            mlflow.log_metric('nmcon_avg', result_con['nmcon_avg'])
-            mlflow.log_metric('nmr_avg', result_row['nmr_avg'])
+            mlflow.log_metric('MA_avg', result_col['MA_avg'])
+            mlflow.log_metric('MC_avg', result_con['MC_avg'])
+            mlflow.log_metric('MR_avg', result_row['MR_avg'])
             for k in result_col:
                 mlflow.log_metric(k, result_col[k])
             for k in result_row:
@@ -218,8 +218,8 @@ def embeddings_quality(embeddings_file, configuration):
                 mlflow.log_metric(k, result_con[k])
 
     result_dict = dict(chain.from_iterable(d.items() for d in (result_row, result_col, result_con)))
-    _r = ['nmc_avg', 'nmr_avg', 'nmcon_avg', 'eq_avg']
-    result_dict['eq_avg'] = avg_results
+    _r = ['MA_avg', 'MR_avg', 'MC_avg', 'EQ_avg']
+    result_dict['EQ_avg'] = avg_results
     print('\t'.join(_r))
     for k in _r:
         print(result_dict[k], end='\t')
