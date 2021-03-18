@@ -13,11 +13,14 @@ import networkx as nx
 import pickle
 import os.path as osp
 
+from tqdm import tqdm
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
     parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist_file.')
     parser.add_argument('--info_file', required=False, type=str, default=None, help='Path to info file with df boundaries.')
+    parser.add_argument('--export', required=False, action='store_true', help='Flag for exportin the edgelist in networkx format.')
 
     return parser.parse_args()
 
@@ -176,8 +179,11 @@ class EdgeList:
             frequencies = dict(Counter(split_values))
         else:
             # frequencies = dict(Counter(df.values.ravel().tolist()))
-            uniques, counts = np.unique([str(_) for _ in df.values.ravel().tolist() if _ == _], return_counts=True)
-            frequencies = dict(zip(uniques, counts))
+            # uniques = set([str(_) for _ in df.values.ravel().tolist() if _ == _])
+            # counts = len(uniques)
+            frequencies = dict(Counter([str(_) for _ in df.values.ravel().tolist() if _ == _]))
+
+            # frequencies = dict(zip(uniques, counts))
         frequencies.pop('', None)
         frequencies.pop(np.nan, None)
 
@@ -231,7 +237,7 @@ class EdgeList:
         count_rows = 1
         with open(edgefile, 'w') as fp:
             fp.write(','.join(prefixes) + '\n')
-            for idx, r in df.iterrows():
+            for idx, r in tqdm(df.iterrows()):
                 rid = 'idx__' + str(idx)
 
                 row = r.dropna()
@@ -338,17 +344,15 @@ if __name__ == '__main__':
 
     el = EdgeList(df, edgefile, pref, info, flatten=False)
 
-    el.convert_to_dict()
-    gdict = el.convert_to_numeric()
-
-
-    g_nx = nx.from_dict_of_lists(gdict)
-
-    n, _ = osp.splitext(edgefile)
-    nx_fname = n + '.nx'
-    pkl_fname = n + '.pkl'
-    pickle.dump(g_nx, open(nx_fname, 'wb'))
-    pickle.dump(gdict, open(pkl_fname, 'wb'))
+    if args.export:
+        el.convert_to_dict()
+        gdict = el.convert_to_numeric()
+        g_nx = nx.from_dict_of_lists(gdict)
+        n, _ = osp.splitext(edgefile)
+        nx_fname = n + '.nx'
+        pkl_fname = n + '.pkl'
+        pickle.dump(g_nx, open(nx_fname, 'wb'))
+        pickle.dump(gdict, open(pkl_fname, 'wb'))
 
     # Loading the graph to make sure it can load the edgelist.
-    g = Graph(el.get_edgelist(), prefixes=pref)
+    # g = Graph(el.get_edgelist(), prefixes=pref)
