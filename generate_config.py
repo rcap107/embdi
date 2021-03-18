@@ -84,7 +84,7 @@ for ds in abbreviations:
     config['flatten']         = 'false'
     config['experiment_type'] = 'EQ'
     config['test_dir']        = f'pipeline/test_dir/{dataset}'
-    config['intersection'] = 'true'
+    config['intersection']    = 'true'
     config['dataset_file']    = f'pipeline/datasets/{dataset}/{dataset}-master.csv'
     for k in default_values:
         if k not in config:
