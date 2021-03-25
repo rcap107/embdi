@@ -117,7 +117,6 @@ for ds in abbreviations:
     config['dataset_file']    = f'pipeline/datasets/{dataset}/{dataset}-master-sm.csv'
     config['match_file']      = f'pipeline/matches/sm-matches/sm-matches-{dataset}.txt'
 
-
     for k in default_values:
         if k not in config:
             config[k] = default_values[k]
