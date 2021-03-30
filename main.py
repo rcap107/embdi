@@ -3,7 +3,6 @@ import datetime
 
 import warnings
 
-
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     from EmbDI.embeddings import learn_embeddings
@@ -14,25 +13,17 @@ with warnings.catch_warnings():
     from EmbDI.graph import graph_generation
     from EmbDI.logging import *
 
-try:
-    import mlflow
-    import mlflow.tracking as tracking
-    import mlflow.exceptions as mlexceptions
-except ModuleNotFoundError:
-    warnings.warn('mlflow not found.')
-    MLFLOW_NOT_FOUND = True
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--unblocking', action='store_true', default=False)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-f','--config_file', action='store', default=None)
-    group.add_argument('-d','--config_dir', action='store', default=None)
-    parser.add_argument('--mlflow', action='store_true', default=False)
+    group.add_argument('-f', '--config_file', action='store', default=None)
+    group.add_argument('-d', '--config_dir', action='store', default=None)
     parser.add_argument('--no_info', action='store_true', default=False)
     args = parser.parse_args()
     return args
+
 
 def embeddings_generation(walks, configuration, dictionary):
     """
@@ -54,22 +45,19 @@ def embeddings_generation(walks, configuration, dictionary):
                      training_algorithm=configuration['training_algorithm'],
                      learning_method=configuration['learning_method'],
                      sampling_factor=configuration['sampling_factor'])
-    if configuration['compression']: newf = clean_embeddings_file(t, dictionary)
-    else: newf = t
+    if configuration['compression']:
+        newf = clean_embeddings_file(t, dictionary)
+    else:
+        newf = t
     t2 = datetime.datetime.now()
     dt = t2 - t1
-    if configuration['mlflow']:
-        with mlflow.start_run(run_id=configuration['run_id']):
-            mlflow.log_metric('time_embeddings', dt.total_seconds())
-    str_ttime= t2.strftime(TIME_FORMAT)
+    str_ttime = t2.strftime(TIME_FORMAT)
     print(OUTPUT_FORMAT.format('Embeddings generation complete', str_ttime))
 
     configuration['embeddings_file'] = newf
 
     metrics.time_embeddings = dt.total_seconds()
     return configuration
-
-
 
 
 def training_driver(configuration):
@@ -83,7 +71,6 @@ def training_driver(configuration):
 
     run_tag = configuration['output_file']
     configuration['run-tag'] = run_tag
-    # with mlflow.start_run(run_id=configuration['run_id']):
     # If task requires training, execute all the steps needed to generate the embeddings.
     if configuration['task'] in ['train', 'train-test', 'train-match']:
         # Check if walks have been provided. If not, graph and walks will be generated.
@@ -104,7 +91,7 @@ def training_driver(configuration):
                 #  Compute the number of sentences according to the rule of thumb.
                 configuration['n_sentences'] = graph.compute_n_sentences(int(configuration['sentence_length']))
             walks = random_walks_generation(configuration, graph)
-            del graph # Graph is not needed anymore, so it is deleted to reduce memory cost
+            del graph  # Graph is not needed anymore, so it is deleted to reduce memory cost
         else:
             if configuration['compression']:  # Execute compression if required.
                 prefixes, edgelist = read_edgelist(configuration['input_file'])
@@ -122,14 +109,10 @@ def testing_driver(configuration):
     '''Simple caller function for the testing functions.'''
     embeddings_file = configuration['embeddings_file']
     # df = pd.read_csv(configuration['input_file'])
-    # if configuration['mlflow']:
-    #     with mlflow.start_run(configuration['run_id']):
-    #         mlflow.log_param('run_name', configuration['embeddings_file'])
     test_driver(embeddings_file, configuration)
 
 
 def matching_driver(configuration):
-    # mlflow.active_run()
     embeddings_file = configuration['embeddings_file']
     df = pd.read_csv(configuration['input_file'])
 
@@ -153,39 +136,7 @@ def matching_driver(configuration):
             s = '{} {}\n'.format(*m)
             fp.write(s)
 
-    # mlflow.log_artifact(file_col)
-    # mlflow.log_artifact(file_row)
-
     return file_row
-
-
-def refinement_driver(configuration):
-    '''Function used to drive refinement tasks. At the moment, only rotation is implemented. 
-    '''
-    raise NotImplementedError
-    ref_task = configuration['refinement_task']
-    if ref_task == 'rotation':
-        match_file = matching_driver(configuration)
-        (src_emb, tgt_emb), syn_file = split_embeddings(configuration['embeddings_file'],
-                                            configuration['dataset_info'],
-                                            configuration['n_dimensions'],
-                                            configuration)
-        complete_syn = 'pipeline/dump/complete_syn'
-        with open(complete_syn, 'w') as fp:
-            with open(match_file, 'r') as match_fp:
-                for idx, row in enumerate(match_fp):
-                    fp.write(row)
-
-        src_rotated, tgt_rotated = apply_rotation(src_emb, tgt_emb, emb_dim=configuration['n_dimensions'],
-                                                  synonym_file=complete_syn,
-                                                  eval_file=configuration['match_file'])
-
-        merged_file = configuration['embeddings_file'].rsplit('.', maxsplit=1)[0]
-        merged_file += '_rotated.emb'
-
-        merge_files([src_rotated, tgt_rotated], merged_file)
-    else:
-        raise ValueError('Unknown refinement task {}'.format(ref_task))
 
 
 def read_configuration(config_file):
@@ -196,29 +147,20 @@ def read_configuration(config_file):
             line = line.strip()
             if len(line) == 0 or line[0] == '#': continue
             split_line = line.split(':')
-            if len(split_line) < 2: continue
+            if len(split_line) < 2:
+                continue
             else:
                 key, value = split_line
                 value = value.strip()
                 config[key] = value
     return config
 
+
 def full_run(config_dir, config_file):
     # Parsing the configuration file.
     configuration = read_configuration(config_dir + '/' + config_file)
     # Checking the correctness of the configuration, setting default values for missing values.
     configuration = check_config_validity(configuration)
-
-    if configuration['mlflow']:
-        mlclient = tracking.MlflowClient()
-        # Preparing the mlflow experiment.
-        try:
-            exp_id = mlclient.create_experiment(configuration['experiment_type'])
-        except mlexceptions.MlflowException:
-            experiment = mlclient.get_experiment_by_name(configuration['experiment_type'])
-            exp_id = experiment.experiment_id
-        run = mlclient.create_run(experiment_id=exp_id)
-        configuration['run_id'] = run.info.run_id
 
     # Running the task specified in the configuration file.
     params.par_dict = configuration
@@ -237,13 +179,6 @@ def full_run(config_dir, config_file):
     elif configuration['task'] == 'train-match':
         configuration = training_driver(configuration)
         matching_driver(configuration)
-    if configuration['mlflow']:
-        mlflow.log_params(configuration)
-        if mem_results.res_dict  is not None:
-            mlflow.log_metrics(mem_results.res_dict)
-        mlflow.log_metric('time_overall', dt.total_seconds())
-        mlflow.end_run()
-
 
 
 def main(file_path=None, dir_path=None, args=None):
@@ -256,7 +191,6 @@ def main(file_path=None, dir_path=None, args=None):
     os.makedirs('pipeline/embeddings', exist_ok=True)
     os.makedirs('pipeline/generated-matches', exist_ok=True)
     os.makedirs('pipeline/logging', exist_ok=True)
-
 
     # Finding the configuration file paths.
     if args:
@@ -294,17 +228,17 @@ def main(file_path=None, dir_path=None, args=None):
         for idx, file in enumerate(sorted(valid_files)):
             try:
                 print('#' * 80)
-                print('# File {} out of {}'.format(idx+1, len(valid_files)))
+                print('# File {} out of {}'.format(idx + 1, len(valid_files)))
                 print('# Configuration file: {}'.format(file))
                 t_start = datetime.datetime.now()
                 print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
-                print( )
+                print()
 
                 full_run(config_dir, file)
 
                 t_end = datetime.datetime.now()
                 print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
-                dt = t_end-t_start
+                dt = t_end - t_start
                 print('# Time required: {:.2} s'.format(dt.total_seconds()))
             except Exception as e:
                 print(f'Run {file} has failed. ')
@@ -312,18 +246,19 @@ def main(file_path=None, dir_path=None, args=None):
     else:
         for idx, file in enumerate(sorted(valid_files)):
             print('#' * 80)
-            print('# File {} out of {}'.format(idx+1, len(valid_files)))
+            print('# File {} out of {}'.format(idx + 1, len(valid_files)))
             print('# Configuration file: {}'.format(file))
             t_start = datetime.datetime.now()
             print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
-            print( )
+            print()
 
             full_run(config_dir, file)
 
             t_end = datetime.datetime.now()
             print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
-            dt = t_end-t_start
-            print('# Time required: {:.2} s'.format(dt.total_seconds()))
+            dt = t_end - t_start
+            print('# Time required: {:.2f} s'.format(dt.total_seconds()))
+
 
 if __name__ == '__main__':
     args = parse_args()

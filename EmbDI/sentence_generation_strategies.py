@@ -1,15 +1,15 @@
 import datetime
-
-from EmbDI.utils import *
-from EmbDI.graph import Node
+import random
 
 from tqdm import tqdm
 
-import random
-import mlflow
+from EmbDI.graph import Node
+from EmbDI.utils import *
+
 
 class RandomWalk:
-    def __init__(self, graph_nodes, starting_node_name, sentence_len, backtrack, uniform, repl_strings=True, repl_numbers=True,
+    def __init__(self, graph_nodes, starting_node_name, sentence_len, backtrack, uniform, repl_strings=True,
+                 repl_numbers=True,
                  follow_replacement=False):
         starting_node = graph_nodes[starting_node_name]
         first_node_name = starting_node.get_random_start()
@@ -22,7 +22,7 @@ class RandomWalk:
         sentence_step = len(self.walk)
         while sentence_step < sentence_len:
             if False:
-            # if uniform:
+                # if uniform:
                 current_node_name = current_node.get_random_neighbor()
             else:
                 current_node_name = current_node.get_weighted_random_neighbor()
@@ -30,7 +30,7 @@ class RandomWalk:
             if repl_numbers:
                 current_node_name = self.replace_numeric_value(current_node_name, graph_nodes)
             if repl_strings:
-                current_node_name, replaced_node= self.replace_string_value(graph_nodes[current_node_name])
+                current_node_name, replaced_node = self.replace_string_value(graph_nodes[current_node_name])
             else:
                 replaced_node = current_node_name
             if not backtrack and current_node_name == self.walk[-1]:
@@ -84,7 +84,8 @@ class RandomWalk:
                 new_val = int(new_val)
             except OverflowError:
                 return str(value)
-            while new_val not in nodes.keys() and str(new_val) not in nodes.keys() and float(new_val) not in nodes.keys():
+            while new_val not in nodes.keys() and str(new_val) not in nodes.keys() and float(
+                    new_val) not in nodes.keys():
                 if cc > 1:
                     return str(value)
                 new_val = np.around(np.random.normal(loc=value, scale=1))
@@ -129,13 +130,12 @@ def generate_walks(parameters, graph, intersection=None):
         n_cells = len(intersection)
     else:
         n_cells = len(intersection)
-    random_walks_per_node = n_sentences//n_cells
+    random_walks_per_node = n_sentences // n_cells
 
     sentence_distribution = dict(zip([strat for strat in strategies], [0 for _ in range(len(strategies))]))
 
     # ########### Random walks ############
     # print('Generating random walks.')
-
 
     walks_file = 'pipeline/walks/' + parameters['output_file'] + '.walks'
 
@@ -148,12 +148,12 @@ def generate_walks(parameters, graph, intersection=None):
     count_cells = 0
 
     if random_walks_per_node > 0:
-        pbar = tqdm(desc='# Sentence generation progress: ', total=len(intersection)*random_walks_per_node)
+        pbar = tqdm(desc='# Sentence generation progress: ', total=len(intersection) * random_walks_per_node)
         for cell in intersection:
             # if cell in intersection:
-            r=[]
+            r = []
             for _r in range(random_walks_per_node):
-                w = RandomWalk(graph.nodes, cell, sentence_length, backtrack,graph.uniform,
+                w = RandomWalk(graph.nodes, cell, sentence_length, backtrack, graph.uniform,
                                repl_numbers=parameters['repl_numbers'],
                                repl_strings=parameters['repl_strings'])
 
@@ -164,7 +164,8 @@ def generate_walks(parameters, graph, intersection=None):
                     ws = [' '.join(_) for _ in r]
                     s = '\n'.join(ws) + '\n'
                     fp_walks.write(s)
-                else: pass
+                else:
+                    pass
             else:
                 sentences += r
             sentence_counter += random_walks_per_node
@@ -191,7 +192,7 @@ def generate_walks(parameters, graph, intersection=None):
                 for s in sen:
                     if parameters['write_walks']:
                         ws = ' '.join(s)
-                        s = ws  + '\n'
+                        s = ws + '\n'
                         fp_walks.write(s)
                     else:
                         sentences += s
@@ -209,6 +210,7 @@ def generate_walks(parameters, graph, intersection=None):
         return walks_file
     else:
         return sentences
+
 
 def split_remaining_sentences(freq_row, freq_col):
     if freq_row == freq_col == 0:
@@ -258,15 +260,6 @@ def random_walks_generation(configuration, graph):
     t2 = datetime.datetime.now()
     dt = t2 - t1
 
-    if configuration['mlflow']:
-        with mlflow.start_run(run_id=configuration['run_id']):
-            # Reporting the intersection flag.
-            if intersection is None:
-                mlflow.log_param('intersection', False)
-            else:
-                mlflow.log_param('intersection', True)
-            mlflow.log_metric('generated_walks', len(walks))
-            mlflow.log_metric('time_walks', dt.total_seconds())
     metrics.time_walks = dt.total_seconds()
     metrics.generated_walks = len(walks)
     return walks

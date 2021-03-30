@@ -3,7 +3,6 @@ import datetime as dt
 import pickle
 
 import gensim.models as models
-import mlflow
 from tqdm import tqdm
 
 from EmbDI.utils import *
@@ -213,7 +212,6 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     :param n_items:
     :param n_top:
     """
-    # mlflow.active_run()
     matches = _read_matches(matches_file)
 
     in_ground_truth = set()
@@ -334,12 +332,6 @@ def entity_resolution(input_file: str, configuration: dict,
     t_end = dt.datetime.now()
     diff = t_end - t_start
     print('# Time required to execute the ER task: {}'.format(diff.total_seconds()))
-
-    if configuration['mlflow']:
-        mlflow.active_run()
-        mlflow.log_param('embeddings_file', input_file)
-        mlflow.log_param('ntop', n_top)
-        mlflow.log_param('indexing', strategy)
 
     if task == 'test':
         return dict_result

@@ -1,5 +1,4 @@
 gensim
-mlflow
 datasketch
 strsim
 scikit-learn

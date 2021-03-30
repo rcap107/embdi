@@ -3,9 +3,8 @@ import warnings
 from operator import itemgetter
 
 import gensim.models as models
-import mlflow
-
 import pandas as pd
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -189,6 +188,7 @@ def schema_matching(embeddings_file, configuration):
         precision = count_hits/len(match_results)
     else:
         precision = 0
+
     if gt > 0:
         recall = count_hits/gt
     else:
@@ -200,9 +200,6 @@ def schema_matching(embeddings_file, configuration):
     except ZeroDivisionError:
         f1_score = 0
 
-    # for tup in match_results:
-    #     print(tup)
-    #
     result_dict = {
         'P': precision,
         'R': recall,
@@ -212,12 +209,5 @@ def schema_matching(embeddings_file, configuration):
     for _ in result_dict.values():
         print('{:.4f}\t'.format(_*100), end='')
     print('')
-
-    if configuration['mlflow']:
-        with mlflow.active_run():
-
-            mlflow.log_metric('P', precision)
-            mlflow.log_metric('R', recall)
-            mlflow.log_metric('F', f1_score)
 
     return result_dict

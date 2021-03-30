@@ -2,7 +2,6 @@ import ast
 import os
 
 import gensim.models as models
-import mlflow
 import warnings
 from itertools import chain
 from EmbDI.utils import *
@@ -203,19 +202,6 @@ def embeddings_quality(embeddings_file, configuration):
         avg_results = 0
 
     print('# EQ average: {:.2f}'.format(avg_results))
-
-    if configuration['mlflow']:
-        with mlflow.active_run():
-            mlflow.log_metric('eq_avg', avg_results)
-            mlflow.log_metric('MA_avg', result_col['MA_avg'])
-            mlflow.log_metric('MC_avg', result_con['MC_avg'])
-            mlflow.log_metric('MR_avg', result_row['MR_avg'])
-            for k in result_col:
-                mlflow.log_metric(k, result_col[k])
-            for k in result_row:
-                mlflow.log_metric(k, result_row[k])
-            for k in result_con:
-                mlflow.log_metric(k, result_con[k])
 
     result_dict = dict(chain.from_iterable(d.items() for d in (result_row, result_col, result_con)))
     _r = ['MA_avg', 'MR_avg', 'MC_avg', 'EQ_avg']
