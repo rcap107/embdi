@@ -1,13 +1,10 @@
+import os
 import string
 import warnings
 
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-
-from EmbDI.logging import *
-
-import os
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
@@ -28,7 +25,7 @@ def remove_prefixes(edgelist_file, model_file):
         prefixes = [_.split('__')[1] for _ in node_types]
 
     fin = open(model_file, 'r')
-    fo  = open(newf, 'w')
+    fo = open(newf, 'w')
 
     for idx, line in enumerate(fin):
         if idx > 0:
@@ -107,7 +104,7 @@ def find_intersection_flatten(df, info_file):
 def compute_n_tokens(df_file):
     df = pd.read_csv(df_file, dtype=str)
     n_rows = len(df)
-#    n_values = len(set(df.values.ravel().tolist()))
+    #    n_values = len(set(df.values.ravel().tolist()))
     uniques = []
     n_col = len(df.columns)
     for col in df.columns:
@@ -166,14 +163,15 @@ def dict_compression_edgelist(edgelist, prefixes):
         s = []
         for idx, val in enumerate(line.split('_')):
             if val in prefixes:
-                s.append(val+'_')
+                s.append(val + '_')
             elif val in dictionary:
                 s.append(dictionary[val])
         return '_'.join(s)
 
     for col in edgelist.columns:
         edgelist[col] = edgelist[col].apply(replace, dictionary=dictionary, prefixes=prefixes)
-    return edgelist, {v:k for k,v in dictionary.items()}
+    return edgelist, {v: k for k, v in dictionary.items()}
+
 
 def dict_decompression_flatten(df, dictionary):
     def replace(line, dictionary):
@@ -220,12 +218,12 @@ def clean_embeddings_file(embeddings_file, dictionary):
     # os.remove(embeddings_file)
     return newf
 
+
 def read_similarities(sim_file):
     sims = pd.read_csv(sim_file)
     if len(sims.columns) == 2:
         sims['distance'] = 1
     return sims.values.tolist()
-
 
 
 def return_default_values(config):
@@ -256,13 +254,14 @@ def return_default_values(config):
         'mlflow': False,
         'repl_numbers': False,
         'repl_strings': False,
-        'sampling_factor':0.001
+        'sampling_factor': 0.001
     }
 
     for k in default_values:
         if k not in config:
             config[k] = default_values[k]
     return config
+
 
 def _convert_to_bool(config, key):
     if config[key] in [True, False]:
@@ -292,6 +291,7 @@ def read_edgelist(edgelist_path):
                         l1.append(w1)
                 edgelist.append(l1)
     return node_types, edgelist
+
 
 def check_config_validity(config):
     #### Set default values
@@ -377,7 +377,7 @@ def check_config_validity(config):
         raise ValueError('Unknown walks strategy {}.'.format(config['walks_strategy']))
     if config['numeric'] not in ['no', 'only', 'all']:
         raise ValueError('Unknown numeric strategy {}.'.format(config['numeric']))
-    if config['training_algorithm'] not in  ['word2vec', 'fasttext']:
+    if config['training_algorithm'] not in ['word2vec', 'fasttext']:
         raise ValueError('Unknown training algorithm {}.'.format(config['training_algorithm']))
     if config['learning_method'] not in ['skipgram', 'CBOW']:
         raise ValueError('Unknown learning method {}'.format(config['learning_method']))
@@ -427,7 +427,6 @@ def check_config_validity(config):
             raise IOError('Walks file {} not found.'.format(config['walks_file']))
         if os.path.getsize(config['walks_file']) == 0:
             raise IOError('Walks file is empty.')
-
 
     ###### WARNINGS
     if int(config['n_dimensions']) != 300:

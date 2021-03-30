@@ -43,24 +43,24 @@ def data_preprocessing(dfs, params):
     :return: the concatenated dataset
     """
     parameters = {
-        'missing_value': 'nan,ukn,none,unknown,', # values to be interpreted as nulls
-        'missing_value_strategy': '', # strategy to be used when handling null values
-        'round_number': -1, # number of rounding digits for float numbers
-        'round_columns': '', # columns to be rounded
-        'split_columns': '', # columns that contain lists to be split
-        'split_delimiter': ',', # delimiter used in the lists
-        'expand_columns': '', # columns that should be expanded in the graph generation phase
-        'tokenize_shared': True, # flag to use heuristic
-        'concatenate': '', # one of {'outer', 'inner', 'horizon'}
-        'auto_merge': False, # flag used to trigger automatic LSH merge of candidates
-        'mh_k_shingles': 3, # size of lsh shingles
-        'mh_threshold': .5, # minhash threshold
-        'mh_perm': 128, # minhash permutations
-        'distance': 'normalized_edit_distance', # string distance to be used
-        'distance_threshold': .20, # distance threshold to decide similar values
-        'merge_columns': '', # columns to study when performing the lsh merge
-        'remove_stop_word': False, # flag to use to remove stop words
-        'case_sensitive': False, # flag to use to specify if the content of the dataset is case sensitive
+        'missing_value': 'nan,ukn,none,unknown,',  # values to be interpreted as nulls
+        'missing_value_strategy': '',  # strategy to be used when handling null values
+        'round_number': -1,  # number of rounding digits for float numbers
+        'round_columns': '',  # columns to be rounded
+        'split_columns': '',  # columns that contain lists to be split
+        'split_delimiter': ',',  # delimiter used in the lists
+        'expand_columns': '',  # columns that should be expanded in the graph generation phase
+        'tokenize_shared': True,  # flag to use heuristic
+        'concatenate': '',  # one of {'outer', 'inner', 'horizon'}
+        'auto_merge': False,  # flag used to trigger automatic LSH merge of candidates
+        'mh_k_shingles': 3,  # size of lsh shingles
+        'mh_threshold': .5,  # minhash threshold
+        'mh_perm': 128,  # minhash permutations
+        'distance': 'normalized_edit_distance',  # string distance to be used
+        'distance_threshold': .20,  # distance threshold to decide similar values
+        'merge_columns': '',  # columns to study when performing the lsh merge
+        'remove_stop_word': False,  # flag to use to remove stop words
+        'case_sensitive': False,  # flag to use to specify if the content of the dataset is case sensitive
     }
     for _ in params.keys():
         if _ in parameters:

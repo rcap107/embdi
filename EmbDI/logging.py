@@ -1,10 +1,15 @@
-import os
 import csv
+import os
 
 
 class params: pass
+
+
 class metrics: pass
+
+
 class mem_results: pass
+
 
 def log_params():
     path = 'pipeline/' + params.par_dict['output_file'] + '.params'
@@ -15,9 +20,11 @@ def log_params():
             writer = csv.writer(fp, delimiter=',')
             header = list(params.par_dict.keys()) + list(metrics_dict.keys()) + list(mem_results.res_dict.keys())
             writer.writerow(header)
-            writer.writerow(list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))
+            writer.writerow(
+                list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))
     else:
         with open('pipeline/logging/' + params.par_dict['output_file'] + '.results', 'a') as fp:
             writer = csv.writer(fp, delimiter=',')
             # writer.writerow(list(configuration.keys()))
-            writer.writerow(list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))
+            writer.writerow(
+                list(params.par_dict.values()) + list(metrics_dict.values()) + list(mem_results.res_dict.values()))

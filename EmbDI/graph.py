@@ -1,17 +1,14 @@
+import datetime
 import math
 import random
 
-import numpy as np
-
 from tqdm import tqdm
-
-import warnings
-import datetime
 
 from EmbDI.utils import *
 
 try:
     import networkx as nx
+
     NX_NOT_FOUND = False
 except ModuleNotFoundError:
     warnings.warn('NetworkX not found. Graph conversion unavailable')
@@ -22,6 +19,7 @@ class Node:
     """
         Cell class used to describe the nodes that build the graph.
     """
+
     def __init__(self, name, type, node_class, numeric):
         self.random_neigh = None
         self.neighbors = dict()
@@ -41,7 +39,6 @@ class Node:
         bb = '{:03b}'.format(node_type)
         for i, _ in enumerate(['isfirst', 'isroot', 'isappear']):
             self.node_class[_] = bool(int(bb[i]))
-
 
     def set_frequency(self, frequency):
         self.frequency = frequency
@@ -110,7 +107,6 @@ class Node:
     def get_random_replacement(self):
         return random.choices(self.similar_tokens, weights=self.similar_distance, k=1)[0]
 
-
     def normalize_neighbors(self, uniform):
         self.neighbor_names = np.array(list(self.neighbors.keys()))
         self.number_neighbors = len(self.neighbor_names)
@@ -120,7 +116,6 @@ class Node:
         self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
-
 
     def rebuild(self):
         raise NotImplementedError
@@ -140,12 +135,12 @@ class Node:
             candidates_replacement = self.similar_distance[1:]
             sum_cand = sum(candidates_replacement)
             if sum_cand >= 1:
-                candidates_replacement = np.array(candidates_replacement) / sum_cand * (1-self.p_stay)
+                candidates_replacement = np.array(candidates_replacement) / sum_cand * (1 - self.p_stay)
             else:
-                candidates_replacement = np.array(candidates_replacement) * sum_cand * (1-self.p_stay)
+                candidates_replacement = np.array(candidates_replacement) * sum_cand * (1 - self.p_stay)
         else:
             candidates_replacement = []
-        self.similar_distance = [1-sum(candidates_replacement)] + list(candidates_replacement)
+        self.similar_distance = [1 - sum(candidates_replacement)] + list(candidates_replacement)
         self.n_similar = len(self.similar_tokens)
 
     def add_similar(self, other, distance):
@@ -160,6 +155,7 @@ class Edge:
         self.weight_forward = weight_forward
         self.weight_back = weight_back
 
+
 class Graph:
     def compute_n_sentences(self, sentence_length, factor=1000):
         """Compute the default number of sentences according to the rule of thumb:
@@ -169,7 +165,7 @@ class Graph:
         :param factor: "desired" number of occurrences of each node
         :return: n_sentences
         """
-        n = len(self.nodes)*factor//sentence_length
+        n = len(self.nodes) * factor // sentence_length
         print('# {} sentences will be generated.'.format(n))
         return n
 
@@ -185,7 +181,6 @@ class Graph:
             node_from.add_neighbor(node_to, weight_forward)
             if weight_back is not None:
                 node_to.add_neighbor(node_from, weight_back)
-
 
     def add_similarities(self, sim_list):
         for row in sim_list:
@@ -241,7 +236,7 @@ class Graph:
                 self.node_classes[pref] = rwclass
                 if rwclass >= 4:
                     self.possible_first.append(pref)
-            if int(rwclass)%2 == 1:
+            if int(rwclass) % 2 == 1:
                 self.isappear.append(prefix)
                 valid = True
             if strnum not in ['#', '$']:
@@ -289,7 +284,7 @@ class Graph:
             n2 = line[1]
 
             if n1 is np.nan or n2 is np.nan:
-                raise ValueError('{} or {} are NaNs.'.format(n1,n2))
+                raise ValueError('{} or {} are NaNs.'.format(n1, n2))
 
             to_link = []
 
@@ -301,7 +296,7 @@ class Graph:
                 w2 = line[3]
 
             elif len(line) == 3:
-            # unidirectional edge
+                # unidirectional edge
                 w1 = line[2]
                 w2 = None
             else:
@@ -310,7 +305,7 @@ class Graph:
             if w1 != w2 or w2 is None:
                 self.uniform = False
 
-            for _n in [n1,n2]:
+            for _n in [n1, n2]:
                 tl = []
                 try:
                     float_c = float(_n)
@@ -339,14 +334,13 @@ class Graph:
                            if (ii > 0 and _ != '')]
                     # to_link.append()
                 # else:
-                    # node_prefix = node_name.split('__', maxsplit=1)[0]
+                # node_prefix = node_name.split('__', maxsplit=1)[0]
 
                 if node_name not in self.nodes:
                     node = Node(node_name, node_prefix, node_class=self.node_classes[node_prefix],
                                 numeric=self.node_is_numeric[node_prefix])
                     self.nodes[node_name] = node
                 tl.append(self.nodes[node_name])
-                # to_link.append([])
                 to_link.append(set(tl))
 
             for _1 in to_link[0]:
@@ -362,15 +356,13 @@ class Graph:
                 self.cell_list.append(node_name)
             if len(self.nodes[node_name].neighbors) == 0:
                 raise ValueError('Node {} has no neighbors'.format(node_name))
-                # to_delete.append(n)
             else:
                 self.nodes[node_name].normalize_neighbors(uniform=self.uniform)
         for node_name in to_delete:
             self.nodes.pop(node_name)
-        # self.edges = None  # remove the edges list since to save memory
+        # self.edges = None  # remove the edges list to save memory
         if sim_list:
             self.add_similarities(sim_list)
-
 
     def convert_to_nx(self):
         if NX_NOT_FOUND:
@@ -380,6 +372,7 @@ class Graph:
             for edge in self.edges:
                 nxg.add_edge(edge.node_from, edge.node_to)
             return nxg
+
 
 def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     """
@@ -397,7 +390,7 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
         list_sim = None
 
     if 'flatten' in configuration and configuration['flatten']:
-        if configuration['flatten'].lower() not in  ['all', 'false']:
+        if configuration['flatten'].lower() not in ['all', 'false']:
             flatten = configuration['flatten'].strip().split(',')
         elif configuration['flatten'].lower() == 'false':
             flatten = []
@@ -420,8 +413,8 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten)
     t_end = datetime.datetime.now()
     dt = t_end - t_start
-    print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
-    print(OUTPUT_FORMAT.format('Time required to build graph:', f'{dt.total_seconds():.2} seconds.'))
     print()
+    print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
+    print(OUTPUT_FORMAT.format('Time required to build graph:', f'{dt.total_seconds():.2f} seconds.'))
     metrics.time_graph = dt.total_seconds()
     return g
