@@ -1,31 +1,31 @@
-import math
-import pandas as pd
-
-import numpy as np
-
-from collections import Counter
-from EmbDI.graph import Graph
-
 import argparse
+import math
+import os.path as osp
+import pickle
+from collections import Counter
 
 import networkx as nx
-
-import pickle
-import os.path as osp
-
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
     parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist_file.')
-    parser.add_argument('--info_file', required=False, type=str, default=None, help='Path to info file with df boundaries.')
-    parser.add_argument('--export', required=False, action='store_true', help='Flag for exportin the edgelist in networkx format.')
+    parser.add_argument('--tokenization', required=True, type=str, choices=['token', 'flatten', 'all'],
+                        help='Tokenization strategy to use.')
+    parser.add_argument('--info_file', required=False, type=str, default=None,
+                        help='Path to info file with df boundaries.')
+
+    parser.add_argument('--export', required=False, action='store_true',
+                        help='Flag for exportin the edgelist in networkx format.')
 
     return parser.parse_args()
 
-class EdgeList:
 
+class EdgeList:
     @staticmethod
     def f_no_smoothing():
         return 1.0
@@ -43,7 +43,7 @@ class EdgeList:
 
     @staticmethod
     def inverse_freq(freq):
-        return 1/freq
+        return 1 / freq
 
     @staticmethod
     def log_freq(freq, base=10):
@@ -61,7 +61,15 @@ class EdgeList:
         elif self.smoothing_method == 'no':
             return self.f_no_smoothing()
 
-    def convert_cell_value(self, original_value):
+    @staticmethod
+    def convert_cell_value(original_value):
+        '''
+        Convert cell values to strings. Round float values.
+        :param original_value: The value to convert to str.
+        :return: The converted value.
+        '''
+
+        # If the cell is the empty string, or np.nan, return None.
         if original_value == '':
             return None
         if original_value != original_value:
@@ -78,6 +86,12 @@ class EdgeList:
         return cell_value
 
     def _parse_smoothing_method(self, smoothing_method):
+        '''
+        Convert the smoothing method supplied by the user into parameters that can be used by the edgelist.
+        This function is also performing error checking on the input parameters.
+
+        :param smoothing_method: One of "smooth", "inverse_smooth", "log", "piecewise", "no".
+        '''
         if smoothing_method.startswith('smooth'):
             smooth_split = smoothing_method.split(',')
             if len(smooth_split) == 3:
@@ -155,7 +169,8 @@ class EdgeList:
 
         return list(intersection)
 
-    def evaluate_frequencies(self, flatten, df, intersection):
+    @staticmethod
+    def evaluate_frequencies(flatten, df, intersection):
         if flatten and intersection:
             split_values = []
             for val in df.values.ravel().tolist():
@@ -178,15 +193,10 @@ class EdgeList:
                 split_values += split
             frequencies = dict(Counter(split_values))
         else:
-            # frequencies = dict(Counter(df.values.ravel().tolist()))
-            # uniques = set([str(_) for _ in df.values.ravel().tolist() if _ == _])
-            # counts = len(uniques)
             frequencies = dict(Counter([str(_) for _ in df.values.ravel().tolist() if _ == _]))
-
-            # frequencies = dict(zip(uniques, counts))
+        # Remove null values if they somehow slipped in.
         frequencies.pop('', None)
         frequencies.pop(np.nan, None)
-
 
         return frequencies
 
@@ -203,7 +213,6 @@ class EdgeList:
             valsplit = [cell_value]
         return valsplit
 
-
     def __init__(self, df, edgefile, prefixes, info_file=None, smoothing_method='no', flatten=False):
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
         in the graph, built according to the parameters passed to the function.
@@ -216,7 +225,7 @@ class EdgeList:
         """
         self._parse_smoothing_method(smoothing_method)
         # df = df.fillna('')
-        self.edgelist  = []
+        self.edgelist = []
 
         numeric_columns = []
 
@@ -237,19 +246,22 @@ class EdgeList:
         count_rows = 1
         with open(edgefile, 'w') as fp:
             fp.write(','.join(prefixes) + '\n')
+            # Iterate over all rows in the df
             for idx, r in tqdm(df.iterrows()):
                 rid = 'idx__' + str(idx)
 
+                # Remove nans from the row
                 row = r.dropna()
                 # Create a node for the current row id.
                 for col in df.columns:
                     try:
                         og_value = row[col]
-
                         cell_value = self.convert_cell_value(og_value)
+                        # If cell value is None, continue
                         if not cell_value:
                             continue
 
+                        # Tokenize cell_value depending on the chosen strategy.
                         valsplit = self.prepare_split(cell_value, flatten, intersection)
 
                         for split in valsplit:
@@ -285,13 +297,13 @@ class EdgeList:
                     except KeyError:
                         continue
 
-                print('\r# {:0.1f} - {:}/{:} tuples'.format(count_rows/len(df) * 100, count_rows, len(df)), end='')
+                print('\r# {:0.1f} - {:}/{:} tuples'.format(count_rows / len(df) * 100, count_rows, len(df)), end='')
                 count_rows += 1
 
         print('')
 
     def get_edgelist(self):
-        return  self.edgelist
+        return self.edgelist
 
     def convert_to_dict(self):
         self.graph_dict = {}
@@ -329,6 +341,7 @@ class EdgeList:
 
         return numeric_dict
 
+
 if __name__ == '__main__':
     args = parse_args()
     dfpath = args.input_file
@@ -336,13 +349,16 @@ if __name__ == '__main__':
 
     if args.info_file:
         info = args.info_file
+        if args.tokenization == '':
+            pass
     else:
         info = None
+
     df = pd.read_csv(dfpath, low_memory=False)
 
-    pref = ['3#__tn', '3$__tt','5$__idx', '1$__cid']
+    pref = ['3#__tn', '3$__tt', '5$__idx', '1$__cid']
 
-    el = EdgeList(df, edgefile, pref, info, flatten=False)
+    el = EdgeList(df, edgefile, pref, info, flatten=True)
 
     if args.export:
         el.convert_to_dict()
