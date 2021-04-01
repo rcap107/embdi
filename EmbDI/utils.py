@@ -245,7 +245,7 @@ def return_default_values(config):
         'walks_strategy': 'basic',
         'learning_method': 'skipgram',
         'sentence_length': 60,
-        'window_size': 3,
+        'window_size': 5,
         'n_dimensions': 300,
         'numeric': 'no',
         'experiment_type': 'ER',
@@ -431,8 +431,8 @@ def check_config_validity(config):
     ###### WARNINGS
     if int(config['n_dimensions']) != 300:
         warnings.warn('Number of dimensions different from default (300): {}'.format(config['n_dimensions']))
-    if int(config['window_size']) != 3:
-        warnings.warn('Window size different from default (3): {}'.format(config['window_size']))
+    if int(config['window_size']) != 5:
+        warnings.warn('Window size different from default (5 ): {}'.format(config['window_size']))
     if config['walks_strategy'] == 'basic' and config['numeric'] != 'no':
         config['numeric'] = 'no'
         warnings.warn('Basic random walks require no replacement strategy.')
