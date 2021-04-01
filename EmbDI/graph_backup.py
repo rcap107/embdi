@@ -33,16 +33,16 @@ class Node:
         :param weights:
         :return: Aliased randomizer
         '''
-        N = len(weights)
-        if N == 0:
+        node_number = len(weights)
+        if node_number == 0:
             raise ValueError('Node {} has no neighbors. Check the input dataset. '.format(self.name))
-        avg = sum(weights) / N
-        aliases = [(1, None)] * N
-        smalls = ((i, w / avg) for i, w in enumerate(weights) if w < avg)
-        bigs = ((i, w / avg) for i, w in enumerate(weights) if w >= avg)
+        avg_weight = sum(weights) / node_number
+        alias_vector = [(1, None)] * node_number
+        smalls = ((i, w / avg_weight) for i, w in enumerate(weights) if w < avg_weight)
+        bigs = ((i, w / avg_weight) for i, w in enumerate(weights) if w >= avg_weight)
         small, big = next(smalls, None), next(bigs, None)
         while big and small:
-            aliases[small[0]] = (small[1], big[0])
+            alias_vector[small[0]] = (small[1], big[0])
             big = (big[0], big[1] - (1 - small[1]))
             if big[1] < 1:
                 small = big
@@ -51,9 +51,9 @@ class Node:
                 small = next(smalls, None)
 
         def weighted_random():
-            r = random.random() * N
+            r = random.random() * node_number
             i = int(r)
-            odds, alias = aliases[i]
+            odds, alias = alias_vector[i]
             if (r - i) > odds:
                 return self.neighbor_names[alias]
             else:

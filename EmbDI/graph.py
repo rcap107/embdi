@@ -4,6 +4,7 @@ import random
 
 from tqdm import tqdm
 
+from EmbDI.aliased_randomizer import prepare_aliased_randomizer
 from EmbDI.utils import *
 
 try:
@@ -43,40 +44,6 @@ class Node:
     def set_frequency(self, frequency):
         self.frequency = frequency
 
-    def _prepare_aliased_randomizer(self, weights):
-        '''Implemented according to the alias method.
-
-        :param weights:
-        :return: Aliased randomizer
-        '''
-        N = len(weights)
-        if N == 0:
-            raise ValueError('Node {} has no neighbors. Check the input dataset. '.format(self.name))
-        avg = sum(weights) / N
-        aliases = [(1, None)] * N
-        smalls = ((i, w / avg) for i, w in enumerate(weights) if w < avg)
-        bigs = ((i, w / avg) for i, w in enumerate(weights) if w >= avg)
-        small, big = next(smalls, None), next(bigs, None)
-        while big and small:
-            aliases[small[0]] = (small[1], big[0])
-            big = (big[0], big[1] - (1 - small[1]))
-            if big[1] < 1:
-                small = big
-                big = next(bigs, None)
-            else:
-                small = next(smalls, None)
-
-        def weighted_random():
-            r = random.random() * N
-            i = int(r)
-            odds, alias = aliases[i]
-            if (r - i) > odds:
-                return self.neighbor_names[alias]
-            else:
-                return self.neighbor_names[i]
-            # return alias if (r - i) > odds else i
-
-        return weighted_random
 
     def get_random_start(self):
         if len(self.startfrom) > 0:
@@ -113,7 +80,7 @@ class Node:
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
 
         # if not uniform:
-        self.random_neigh = self._prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
+        self.random_neigh = prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
