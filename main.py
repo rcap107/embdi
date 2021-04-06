@@ -259,7 +259,7 @@ def main(file_path=None, dir_path=None, args=None):
             dt = t_end - t_start
             print('# Time required: {:.2f} s'.format(dt.total_seconds()))
 
-    clean_dump()
+    # clean_dump()
 
 if __name__ == '__main__':
     args = parse_args()

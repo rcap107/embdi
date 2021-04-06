@@ -14,8 +14,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', required=True, type=str, help='Path to input csv file to translate.')
     parser.add_argument('-o', '--output_file', required=True, type=str, help='Path to output edgelist_file.')
-    parser.add_argument('--tokenization', required=True, type=str, choices=['token', 'flatten', 'all'],
-                        help='Tokenization strategy to use.')
+    # parser.add_argument('--tokenization', required=True, type=str, choices=['token', 'flatten', 'all'],
+    #                     help='Tokenization strategy to use.')
     parser.add_argument('--info_file', required=False, type=str, default=None,
                         help='Path to info file with df boundaries.')
 
