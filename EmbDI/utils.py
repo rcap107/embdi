@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 
+from EmbDI.logging import *
+
+
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 OUTPUT_FORMAT = '# {:.<60} {}'
 

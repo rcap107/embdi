@@ -43,7 +43,7 @@ SOFTWARE.
 
 import random
 
-def prepare_aliased_randomizer(self, weights):
+def prepare_aliased_randomizer(neighbor_names, weights):
     '''Implemented according to the alias method.
 
     :param weights:
@@ -51,7 +51,7 @@ def prepare_aliased_randomizer(self, weights):
     '''
     N = len(weights)
     if N == 0:
-        raise ValueError('Node {} has no neighbors. Check the input dataset. '.format(self.name))
+        raise ValueError('Node {} has no neighbors. Check the input dataset. '.format(name))
     avg = sum(weights) / N
     aliases = [(1, None)] * N
     smalls = ((i, w / avg) for i, w in enumerate(weights) if w < avg)
@@ -71,9 +71,9 @@ def prepare_aliased_randomizer(self, weights):
         i = int(r)
         odds, alias = aliases[i]
         if (r - i) > odds:
-            return self.neighbor_names[alias]
+            return neighbor_names[alias]
         else:
-            return self.neighbor_names[i]
+            return neighbor_names[i]
         # return alias if (r - i) > odds else i
 
     return weighted_random

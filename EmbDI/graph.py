@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from EmbDI.aliased_randomizer import prepare_aliased_randomizer
 from EmbDI.utils import *
+from EmbDI.logging import *
 
 try:
     import networkx as nx
@@ -80,7 +81,7 @@ class Node:
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
 
         # if not uniform:
-        self.random_neigh = prepare_aliased_randomizer(np.array(list(self.neighbors.values())))
+        self.random_neigh = prepare_aliased_randomizer(self.neighbor_names, np.array(list(self.neighbors.values())))
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
