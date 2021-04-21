@@ -29,9 +29,10 @@ perform the tasks specified by the user.
  in batch by reading all files in a directory or by passing a single configuration file on the command line.
  Configuration files are explained in a separate section. The input file must be an edgelist that uses a specific format
  described in its section.
- * `generate_tests.py` produces the files needed to test embedding quality (`MA`, `MR`, `MC`).
+ * `generate_tests.py` produces the files needed to test embedding quality ("match attributes" `MA`, "match rows" `MR` and "match columns" `MC`).
  * `edgelist.py` is used to generate the lists of edges used to build the graph starting from a relational dataset. This
- script is used for backward compatibility.
+ script is used for backward compatibility. It can also export the graph in networkx format, so that it can be used in 
+   other applications. 
 
 #### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory
@@ -43,19 +44,19 @@ root
   ├─EmbDI
   |
   ├─pipeline
-        ├── config_files
-        ├── datasets
-        ├── dump
-        ├── edgelists
-        ├── embeddings
-        ├── experiments
-        ├── generated-matches
-        ├── info
-        ├── matches
-        ├── replacements
-        ├── sim_files
-        ├── test_dir
-        └── walks
+      ├── config_files
+      ├── datasets
+      ├── dump
+      ├── edgelists
+      ├── embeddings
+      ├── experiments
+      ├── generated-matches
+      ├── info
+      ├── matches
+      ├── replacements
+      ├── sim_files
+      ├── test_dir
+      └── walks
 ```
 
 Additional directories are present in the project directory: they contain additional (not required) code or are needed
@@ -64,13 +65,16 @@ for preprocessing or analysis.
 Resources
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
-Base datasets are available for download, together with the ER version of the combined dataset. Datasets to be used in
-the SM task can be built by using the `data_preprocessing.py` script starting from the base datasets according to the 
-instructions specified below. 
-To avoid inflating the size of the repository, these resources can be found at: 
+We uploaded additional resources to reproduce our results in a separated cloud folder at: 
 `https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm`
 
-Additionally, the tests used for the Embeddings Quality (EQ) section are also provided in the same location.
+The additional resources include:
+  * (partially preprocessed) base datasets.
+  * Their Entity Resolution and Schema Matching versions. 
+  * Edgelists for both ER and SM versions.
+  * Ground truth files for ER and SM tasks.
+  * Test directories for the EQ task. 
+  * Copies of the configuration files provided in this repository. 
 
 Configuration files, info files and ER match files were left in this repository in `pipeline/config_files/default`,
 `pipeline/info` and `pipeline/matches/default`.
@@ -84,7 +88,7 @@ subset of the pipeline steps depending on the parameters found in the `task` fie
 The script requires one of two command line parameters:
 * `-d`, `--config-dir` require the path to a directory that should contain configuration files. All valid files will be
 executed in alphabetical. All files present in the provided directory that do not start with the string `default` and 
-that are not directories themselves will be considered as "valid".
+that are not directories themselves will be considered as "valid". 
 
 ```
 python main.py -d path/to/config/dir/
@@ -113,27 +117,27 @@ Configuration files
 Some example configuration files are stored in the folder `pipeline/config_files/demo`. An example of generic
 configuration file is reported below.
 Please note that the order of lines is not important, but the first field (before the `:`) has to be written how it is
-shown here.
+shown here (unknown strings will raise exceptions).
 All lines starting with `#` will be treated as comments and will be ignored. Similarly, all text following a `#` will be
 ignored.
 In the example below, lines starting with `*` are optional and, if missing, will be assigned a default value.
+Values enclosed in `{}` denote parameters that require only one choice out of the proposed values. 
 
 ```
 # Input configuration:
 task: {train, test, match, train-test, train-match}
 input_file: path/to/edgelist/edgelist.txt
-output_file: name_of_output_file
+output_file: name_of_output_file # the final embeddings file will be saved in pipeline/embeddings/name_of_output_file.emb 
 experiment_type: {EQ, ER, SM}
 match_file: path/to/match/file.txt [required for SM, ER]
 dataset_file:path/to/dataset/file.csv [required for SM]
 test_dir: path/to/EQ/tests/ [required for EQ]
-similarity_file: path/to/similarity/file.txt [Needed to apply replacement, ignored otherwise] CURRENTLY NOT IMPLEMENTED
 embeddings_file: path/to/embeddings/file.emb [This field will be ignored if the task requires training]
 walks_file: path/to/walks/file/file.walks [A valid walks file will bypass the graph and walks generation]
 
 # Walks configuration:
 *sentence_length: length_of_sentences
-*n_sentences: {(int) number_of_sentences, default}
+*n_sentences: {(int) number_of_sentences, default} # default will compute a "good" number of sentences based on the number of nodes in the graph
 *follow_sub: {true, false} [If the strategy is Replacement, when a substitute is found, jump on the substitute.]
 *smoothing_method: {no, smooth, inverse_smooth, log, piecewise} [Refer to the section on smoothing for more details]
 *backtrack: {True, False} [Allow backtracking, i.e. given step n in a RW, it is possible to go back to the node in step n-1]
@@ -144,16 +148,16 @@ walks_file: path/to/walks/file/file.walks [A valid walks file will bypass the gr
 
 # Embeddings configuration:
 *learning_method: {CBOW, skipgram}
-*window_size: w_size
-*n_dimensions: n_dim
+*window_size: w_size # Size of the context window in the word2vec training step
+*n_dimensions: n_dim # Number of dimensions to be used for the final embeddings
 
 # Test configuration:
 *ntop: n_closest_neighbors_to_study
-*ncand: n_candidates_from_ntop
+*ncand: n_candidates_from_ntop  to take when looking for the closest. Boosts recall, reduces precision a lot
 *max_rank: cutoff_rank_for_SM
 
 # Miscellaneous:
-*indexing: {basic, ngt, faiss, annoy} [Choose which indexing method to use in the ER task]
+*indexing: {basic, ngt, faiss, annoy} # Choose which indexing method to use in the ER task. Normally unnecessary, unless the embeddings are *very* large.
 *epsilon: [parameter used by the ngt indexer]
 *num_trees: [parameter used by the annoy indexer]
 ```
@@ -222,17 +226,20 @@ line:
 The format of the edgelist is one of the following:
 * `n1,n2,w1,w2` >> node1, node2, weight1to2, weight2to1
 * `n1,n2` >> node1, node2, 1, 1
-* `n1,n2,w1` >> node1, node2, weight1to2 [no link back]
+* `n1,n2,w1` >> node1, node2, weight1to2 [no link back, directed graph]
 
+### Edgelist prefixes
 The first line of the edgelist must contain all the prefixes that define node types (such as RID, CID,
-tokens). 
+tokens). These prefixes will be used to tell the algorithm how to handle the different node types. During our experimental
+campaign, we noticed that variations in how nodes are represented in the random walks were reflected in the performance 
+of the algorithm in the different tasks. For this reason we implemented the following prefix/class system, as it would 
+allow us to have a more systematic method for customizing these representations. 
 
-Prefixes must be written using a specific format:
-`[1-7][#-$]__node_type_name`
-
+The default set of prefixes used in the edgelists generated for EmbDI is , where each 
+comma-separated value has the specific format `[1-7][#-$]__node_type_name`:
 - The first character should be a numeric value in the range `1-7`, which will denote the `class` of the node type.
 - The second character is used to distinguish nodes that contain numeric values (with symbol `#`) from those that
-contain categorical information (`$`).
+contain categorical information (`$`). 
 
 The `class` will influence the behavior of the random walks generation algorithm.
 
@@ -240,6 +247,29 @@ There are 7 possible classes based on the truth table reported below. `first` me
 as first value in a sentence. `root` means that the node will be added to the pool of nodes to start from when
 generating sentences. `appears` means that, when the random walks hits the node, the node will appear in the
 sentence, otherwise it will not be saved.
+
+##### Example of prefix with explanation
+Considering the example `3#__tn,3$__tt,5$__idx,1$__cid`:
+* Nodes with prefix `tn__` will be treated as numbers (because of the `#` character) and undergo some additional 
+  processing in the graph generation phase.
+* Nodes with prefix `tt__`, `idx__` and `cid__` will be treated as strings (due to character `$`).
+* `tt__` and `tn__` nodes are in class 3. Nodes in class 3 will be used as root for the random walks (that is, paths 
+  will begin from nodes in this class). This means that the random walks generation algorithm will build the training 
+  corpus by going through all nodes marked as "root" and generate a certain number of random walks starting from each 
+  of them.
+* `idx__` nodes are in class 5. In our experiments, we noticed that Entity Resolution results improved when random walks
+featured an additional `idx__` node before the root. Given a random walk `tt__G2, idx_0, tt_A3, cid__col1`, its "improved"
+  version according to this method (denoted as `first`) would be `idx_3, tt_G2, idx_0, tt_A3, cid__col1`
+* `cid__` nodes are in class 1. In some training scenarios, the presence of a node clas in the training corpus would make
+training more difficult and produce worse representations of the nodes, which in turn caused issues down the line. Tasks
+  that revolved entirely around cell value embeddings would be less successful because of the presence of additional 
+  nodes that "diluted" the amount of information available in the training corpus. To mitigate this issue, it is possible 
+  to mark some nodes using the `appear` flag to signal to the algorithm that a certain class of nodes should be 
+  considered as a viable neighbor when generating each random walk, but at the same time nodes belonging to that class 
+  should not appear in the training corpus. For example, in a case in which both `idx__` and `cid__` nodes have 
+  "appear" set to false, the random walk `tt__G2, idx_0, tt_A3, cid__col1, tt_G5, idx_0 ...` would be saved on disk as:
+`tt__G2, tt_A3, tt_G5, ...`
+
 
 | Class | First | Root | Appears |
 |:-----:|:-----:|:----:|:-------:|
@@ -258,16 +288,8 @@ For example, if the prefixes are `tt, tn, idx, cid` like in the standard csv-tra
 nodes with prefix `tt` will be flattened.
 
 
-Experiment logging
----
-The system has been implemented to use either the `mlflow` library, or simple csv logging to log results and parameters.
-All results are accessible by using the mlflow library in the root directory:
 
-```$ mlflow ui```
 
-By default, the UI will be available on ```localhost:5000``` on the local machine.
-
-In the current implementation, mlflow is off by default. 
 
 Additional files
 ----
@@ -362,10 +384,10 @@ EQ tests can be generated by using the `generate_test.py` script. In its current
 and must be changed in the script itself.
 
 Three different tests are currently provided:
-* nmr (no-match-rows) tests observe whether the provided embeddings are able to recognize what value within a tuple was
+* nmr (no-match-rows, MR in the paper) tests observe whether the provided embeddings are able to recognize what value within a tuple was
 exchanged with a value that does not belong to that tuple.
-* nmc (no-match-column) tests observe whether the embeddings can find what value does not belong to  a given attribute
-* nmcon (no-match-concept) tests observe if a semantic link between values is stronger than the link between values
+* nmc (no-match-column, MA in the paper) tests observe whether the embeddings can find what value does not belong to  a given attribute
+* nmcon (no-match-concept, MC in the paper) tests observe if a semantic link between values is stronger than the link between values
 belonging to the same attribute (e.g. given director Steven Spielberg and target values Jurassic Park, Saving Private
 Ryan, Jaws and Star Wars: A new Hope, nmcon tests expect Star Wars as the answer, since it was not directed
 by Steven Spielberg).
@@ -516,4 +538,5 @@ If you use EmbDI in your work, please cite it as follows:
    author={Cappuzzo, Riccardo and Papotti, Paolo and Thirumuruganathan, Saravanan},
    year={2020},
    month={May}
-}```
+}
+```
