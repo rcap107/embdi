@@ -20,6 +20,14 @@ digs = string.digits + string.ascii_uppercase
 
 
 def remove_prefixes(edgelist_file, model_file):
+    '''
+    Utility function for preparing a new embeddings file in which all embeddings have their prefixes removed.
+    The contents of embeddings file will be copied inside a new file.
+
+    :param edgelist_file: File that contains the prefixes to remove in the header.
+    :param model_file: Embeddings file to clean.
+    :return: Path to the new, cleaned embeddings file.
+    '''
     newf, _ = os.path.splitext(model_file)
     newf += '_cleaned.emb'
 
@@ -51,6 +59,15 @@ def remove_prefixes(edgelist_file, model_file):
 
 
 def apply_PCA(embeddings_file, reduced_file, n_components):
+    '''
+    Utility function for reducing the dimensionality of the embeddings. Given the embeddings file and a path to the
+    output file, reduce the size of the input embeddings to n_components dimensions using PCA.
+
+    :param embeddings_file: Path of the input embeddings file.
+    :param reduced_file: Path of file  in which to save the reduced embeddings.
+    :param n_components: Number of dimensions to reduce the embeddings to.
+    :return:
+    '''
     keys = []
 
     with open(embeddings_file, 'r') as fp:
@@ -64,6 +81,10 @@ def apply_PCA(embeddings_file, reduced_file, n_components):
             ll = line.strip().split()
             mat[n, :] = np.array(ll[1:])
             keys.append(ll[0])
+
+    if sizes[1] < n_components:
+        raise ValueError(f'The number of input dimensions ({sizes[1]}) is smaller than '
+                         f'the number of output dimensions ({n_components}).')
 
     pca = PCA(n_components=n_components)
 
@@ -234,16 +255,16 @@ def return_default_values(config):
         'ntop': 10,
         'ncand': 1,
         'max_rank': 3,
-        'follow_sub': 'false',
+        'follow_sub': False,
         'smoothing_method': 'no',
-        'backtrack': 'True',
+        'backtrack': True,
         'training_algorithm': 'word2vec',
-        'write_walks': 'true',
+        'write_walks': True,
         'flatten': 'all',
         'indexing': 'basic',
         'epsilon': 0.1,
         'num_trees': 250,
-        'compression': 'False',
+        'compression': False,
         'n_sentences': 'default',
         'walks_strategy': 'basic',
         'learning_method': 'skipgram',
@@ -252,7 +273,7 @@ def return_default_values(config):
         'n_dimensions': 300,
         'numeric': 'no',
         'experiment_type': 'ER',
-        'intersection': 'false',
+        'intersection': False,
         'walks_file': None,
         'mlflow': False,
         'repl_numbers': False,
@@ -270,7 +291,7 @@ def _convert_to_bool(config, key):
     if config[key] in [True, False]:
         return config
     if config[key].lower() not in ['true', 'false']:
-        raise ValueError('Unknown {key} parameter {value}'.format(key=key, value=config['backtrack']))
+        raise ValueError('Unknown {key} parameter {value}'.format(key=key, value=config[key]))
     else:
         if config[key].lower() == 'false':
             config[key] = False
@@ -435,7 +456,7 @@ def check_config_validity(config):
     if int(config['n_dimensions']) != 300:
         warnings.warn('Number of dimensions different from default (300): {}'.format(config['n_dimensions']))
     if int(config['window_size']) != 5:
-        warnings.warn('Window size different from default (5 ): {}'.format(config['window_size']))
+        warnings.warn('Window size different from default (5): {}'.format(config['window_size']))
     if config['walks_strategy'] == 'basic' and config['numeric'] != 'no':
         config['numeric'] = 'no'
         warnings.warn('Basic random walks require no replacement strategy.')

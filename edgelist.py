@@ -20,7 +20,7 @@ def parse_args():
                         help='Path to info file with df boundaries.')
 
     parser.add_argument('--export', required=False, action='store_true',
-                        help='Flag for exportin the edgelist in networkx format.')
+                        help='Flag for exporting the edgelist in networkx format.')
 
     return parser.parse_args()
 

@@ -51,7 +51,7 @@ def prepare_aliased_randomizer(neighbor_names, weights):
     '''
     N = len(weights)
     if N == 0:
-        raise ValueError('Node {} has no neighbors. Check the input dataset. '.format(name))
+        raise ValueError('Node has no neighbors. Check the input dataset.')
     avg = sum(weights) / N
     aliases = [(1, None)] * N
     smalls = ((i, w / avg) for i, w in enumerate(weights) if w < avg)
