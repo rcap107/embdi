@@ -1,28 +1,50 @@
+'''
+Author: Riccardo Cappuzzo
+
+Main EmbDI script.
+
+Invoke by passing either a single config file, or by passing a directory that 
+contains a batch of config files to run.
+```
+python main.py -f path/to/config/file
+python main.py -d path/to/config/directory
+```
+
+
+'''
 import argparse
 import datetime
-
+import os
 import warnings
+
+import pandas as pd
 
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
+    import EmbDI.utils as eutils
     from EmbDI.embeddings import learn_embeddings
-    from EmbDI.sentence_generation_strategies import random_walks_generation
-    from EmbDI.utils import *
-
-    from EmbDI.testing_functions import test_driver, match_driver
     from EmbDI.graph import graph_generation
-    from EmbDI.logging import *
+    from EmbDI.logging import log_params, metrics, params
+    from EmbDI.sentence_generation_strategies import random_walks_generation
+    from EmbDI.testing_functions import match_driver, test_driver
+    from EmbDI.utils import (OUTPUT_FORMAT, TIME_FORMAT, check_config_validity,
+                             dict_compression_edgelist, read_edgelist)
 
 
 def parse_args():
+    """Simple argument parser invoked on startup. 
+
+    Returns:
+        Namespace: Argument parser
+    """ 
     parser = argparse.ArgumentParser()
     parser.add_argument('--unblocking', action='store_true', default=False)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-f', '--config_file', action='store', default=None)
     group.add_argument('-d', '--config_dir', action='store', default=None)
     parser.add_argument('--no_info', action='store_true', default=False)
-    args = parser.parse_args()
-    return args
+    built_args = parser.parse_args()
+    return built_args
 
 
 def embeddings_generation(walks, configuration, dictionary):
@@ -33,39 +55,43 @@ def embeddings_generation(walks, configuration, dictionary):
     :param dictionary:
     :return:
     """
-    t1 = datetime.datetime.now()
+    start_time = datetime.datetime.now()
     output_file = configuration['run-tag']
 
-    print(OUTPUT_FORMAT.format('Training embeddings', t1.strftime(TIME_FORMAT)))
-    t = 'pipeline/embeddings/' + output_file + '.emb'
-    print('# Writing embeddings in file: {}'.format(t))
-    learn_embeddings(t, walks, write_walks=configuration['write_walks'],
+    print(OUTPUT_FORMAT.format('Training embeddings', start_time.strftime(TIME_FORMAT)))
+    output_file_name = 'pipeline/embeddings/' + output_file + '.emb'
+    print('# Writing embeddings in file: {}'.format(output_file_name))
+    learn_embeddings(output_file_name, walks, write_walks=configuration['write_walks'],
                      dimensions=int(configuration['n_dimensions']),
                      window_size=int(configuration['window_size']),
                      training_algorithm=configuration['training_algorithm'],
                      learning_method=configuration['learning_method'],
                      sampling_factor=configuration['sampling_factor'])
     if configuration['compression']:
-        newf = clean_embeddings_file(t, dictionary)
+        newf = eutils.clean_embeddings_file(output_file_name, dictionary)
     else:
-        newf = t
-    t2 = datetime.datetime.now()
-    dt = t2 - t1
-    str_ttime = t2.strftime(TIME_FORMAT)
+        newf = output_file_name
+    end_time = datetime.datetime.now()
+    duration = end_time - start_time
+    str_ttime = end_time.strftime(TIME_FORMAT)
     print(OUTPUT_FORMAT.format('Embeddings generation complete', str_ttime))
 
     configuration['embeddings_file'] = newf
 
-    metrics.time_embeddings = dt.total_seconds()
+    metrics.time_embeddings = duration.total_seconds()
     return configuration
 
 
 def training_driver(configuration):
-    '''This function trains local embeddings according to the parameters specified in the configuration. The input dataset is transformed into a graph,
-    then random walks are generated and the result is passed to the embeddings training algorithm. 
+    '''This function trains local embeddings according to the parameters 
+    specified in the configuration. 
+    The input dataset is transformed into a graph, then random walks are 
+    generated and the result is passed to the embeddings training algorithm. 
 
     '''
-    edgelist_df = pd.read_csv(configuration['input_file'], dtype=str, index_col=False)
+    edgelist_df = pd.read_csv(configuration['input_file'], 
+                                dtype=str, 
+                                index_col=False)
     edgelist_df = edgelist_df[edgelist_df.columns[:2]]
     edgelist_df.dropna(inplace=True)
 
@@ -80,13 +106,13 @@ def training_driver(configuration):
             if configuration['compression']:
                 # Execute compression if required.
                 edgelist_df, dictionary = dict_compression_edgelist(edgelist_df, prefixes=prefixes)
-                el = edgelist_df.values.tolist()
+                final_edgelist = edgelist_df.values.tolist()
             else:
                 dictionary = None
-                el = edgelist
+                final_edgelist = edgelist
             # dictionary=None
 
-            graph = graph_generation(configuration, el, prefixes, dictionary)
+            graph = graph_generation(configuration, final_edgelist, prefixes, dictionary)
             if configuration['n_sentences'] == 'default':
                 #  Compute the number of sentences according to the rule of thumb.
                 configuration['n_sentences'] = graph.compute_n_sentences(int(configuration['sentence_length']))
@@ -113,10 +139,20 @@ def testing_driver(configuration):
 
 
 def matching_driver(configuration):
-    embeddings_file = configuration['embeddings_file']
-    df = pd.read_csv(configuration['input_file'])
+    """Function for generating and printing out the matches. 
 
-    matches_tuples, matches_columns = match_driver(embeddings_file, df, configuration)
+    Args:
+        configuration (dict): Configuration of the run
+
+    Returns:
+        str: Path to the row match file.
+    """
+    embeddings_file = configuration['embeddings_file']
+    input_dataframe = pd.read_csv(configuration['input_file'])
+
+    matches_tuples, matches_columns = match_driver(embeddings_file, 
+                                                    input_dataframe, 
+                                                    configuration)
 
     root_matches = 'pipeline/generated-matches/'
     if 'run-tag' in configuration:
@@ -126,33 +162,41 @@ def matching_driver(configuration):
     file_col = matches_file + '_col' + '.matches'
     file_row = matches_file + '_tup' + '.matches'
 
-    with open(file_col, 'w') as fp:
-        for m in matches_columns:
-            s = '{} {}\n'.format(*m)
-            fp.write(s)
+    with open(file_col, 'w') as fp_matches_columns:
+        for match in matches_columns:
+            output_str = '{} {}\n'.format(*match)
+            fp_matches_columns.write(output_str)
 
-    with open(file_row, 'w') as fp:
-        for m in matches_tuples:
-            s = '{} {}\n'.format(*m)
-            fp.write(s)
+    with open(file_row, 'w') as fp_matches_rows:
+        for match in matches_tuples:
+            output_str = '{} {}\n'.format(*match)
+            fp_matches_rows.write(output_str)
 
     return file_row
 
 
 def read_configuration(config_file):
+    """Read the configuration file and save it in the config dictionary.
+
+    Args:
+        config_file (str): Path to the configuration file.
+
+    Returns:
+        dict: Dictionary that contains the configuration for this run.
+    """
     config = {}
 
-    with open(config_file, 'r') as fp:
-        for idx, line in enumerate(fp):
+    with open(config_file, 'r') as fp_config_file:
+        for idx, line in enumerate(fp_config_file):
             line = line.strip()
-            if len(line) == 0 or line[0] == '#': continue
+            if len(line) == 0 or line[0] == '#': 
+                continue
             split_line = line.split(':')
             if len(split_line) < 2:
                 continue
-            else:
-                key, value = split_line
-                value = value.strip()
-                config[key] = value
+            key, value = split_line
+            value = value.strip()
+            config[key] = value
     return config
 
 
@@ -168,13 +212,13 @@ def full_run(config_dir, config_file):
     if configuration['task'] == 'train':
         configuration = training_driver(configuration)
     elif configuration['task'] == 'test':
-        results = testing_driver(configuration)
+        testing_driver(configuration)
         log_params()
     elif configuration['task'] == 'match':
         matching_driver(configuration)
     elif configuration['task'] == 'train-test':
         configuration = training_driver(configuration)
-        results = testing_driver(configuration)
+        testing_driver(configuration)
         log_params()
     elif configuration['task'] == 'train-match':
         configuration = training_driver(configuration)
@@ -182,9 +226,6 @@ def full_run(config_dir, config_file):
 
 
 def main(file_path=None, dir_path=None, args=None):
-    results = None
-    configuration = None
-
     # Building dir tree required to run the code.
     os.makedirs('pipeline/dump', exist_ok=True)
     os.makedirs('pipeline/walks', exist_ok=True)
@@ -240,9 +281,15 @@ def main(file_path=None, dir_path=None, args=None):
                 print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
                 dt = t_end - t_start
                 print('# Time required: {:.2} s'.format(dt.total_seconds()))
-            except Exception as e:
+            except RuntimeError as e:
                 print(f'Run {file} has failed. ')
                 print(e)
+            except ValueError as e:
+                print(f'Run {file} has failed. ')
+                print(e)
+            finally:
+                print(f'Run {file} is over. ')
+
     else:
         for idx, file in enumerate(sorted(valid_files)):
             print('#' * 80)
