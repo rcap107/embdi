@@ -128,3 +128,6 @@ dmypy.json
 mlruns/
 mlruns_bk/
 /.idea/
+
+# VSCode settings
+.vscode/
