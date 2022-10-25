@@ -62,7 +62,7 @@ root
 Additional directories are present in the project directory: they contain additional (not required) code or are needed
 for preprocessing or analysis.
 
-Resources
+Resources and dataset used in the paper
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
 We uploaded additional resources to reproduce our results in a separated cloud folder at: 
