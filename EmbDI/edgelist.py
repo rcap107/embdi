@@ -359,8 +359,8 @@ class EdgeList:
                 except KeyError:
                     continue
 
-            print("\r# {:0.1f} - {:}/{:} tuples".format(count_rows / len(df) * 100, count_rows, len(df)), end="")
-            count_rows += 1
+            # print("\r# {:0.1f} - {:}/{:} tuples".format(count_rows / len(df) * 100, count_rows, len(df)), end="")
+            # count_rows += 1
 
         print("")
 
