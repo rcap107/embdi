@@ -279,7 +279,7 @@ class EdgeList:
         """
         self._parse_smoothing_method(smoothing_method)
         self.edgelist = []
-
+        self.prefixes = prefixes
         numeric_columns = []
 
         for col in df.columns:
@@ -300,10 +300,10 @@ class EdgeList:
 
         if edgefile_path is not None:
             fp = open(edgefile_path, "w")
+            fp.write(",".join(prefixes) + "\n")
         else:
             fp = None
 
-        fp.write(",".join(prefixes) + "\n")
         # Iterate over all rows in the df
         for idx, df_row in tqdm(df.iterrows()):
             rid = "idx__" + str(idx)
@@ -327,31 +327,35 @@ class EdgeList:
                             smoothed_f = self.smooth_freq(frequencies[split])
                         except KeyError:
                             smoothed_f = 1
-                        node_1 = rid
+                        rid_node = rid
                         if col in numeric_columns:
-                            node_2 = "tn__" + split
+                            cell_node = "tn__" + split
                         else:
-                            node_2 = "tt__" + split
+                            cell_node = "tt__" + split
 
-                        weight_1 = 1
-                        weight_2 = smoothed_f
-                        self.edgelist.append((node_1, node_2, weight_1, weight_2))
-                        edgerow = "{},{},{},{}\n".format(node_1, node_2, weight_1, weight_2)
+                        weight_rid_to_cell = 1
+                        weight_cell_to_rid = smoothed_f
+                        self.edgelist.append((rid_node, cell_node, weight_rid_to_cell, weight_cell_to_rid))
 
-                        fp.write(edgerow)
                         if col in numeric_columns:
-                            node_1 = "tn__" + split
+                            cell_node = "tn__" + split
                         else:
-                            node_1 = "tt__" + split
+                            cell_node = "tt__" + split
 
-                        node_2 = "cid__" + col
-                        weight_1 = smoothed_f
-                        weight_2 = 1
-                        self.edgelist.append((node_1, node_2, weight_1, weight_2))
+                        cid_node = "cid__" + col
+                        weight_cell_to_cid = smoothed_f
+                        weight_cid_to_cell = 1
+                        self.edgelist.append((cell_node, cid_node, weight_cell_to_cid, weight_cid_to_cell))
 
                         if fp is not None:
-                            edgerow = "{},{},{},{}\n".format(node_1, node_2, weight_1, weight_2)
-                            fp.write(edgerow)
+                            edgerow_rid_cell = "{},{},{},{}\n".format(
+                                rid_node, cell_node, weight_rid_to_cell, weight_cell_to_rid
+                            )
+                            fp.write(edgerow_rid_cell)
+                            edgerow_cid_cell = "{},{},{},{}\n".format(
+                                cell_node, cid_node, weight_cell_to_cid, weight_cid_to_cell
+                            )
+                            fp.write(edgerow_cid_cell)
                 except KeyError:
                     continue
 
@@ -368,6 +372,9 @@ class EdgeList:
                     (node_1, node_2, weight_12, weight_21)
         """
         return self.edgelist
+
+    def get_prefixes(self):
+        return self.prefixes
 
     def convert_to_dict(self):
         self.graph_dict = {}
