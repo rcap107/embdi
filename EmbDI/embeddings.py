@@ -5,8 +5,17 @@ import numpy as np
 from gensim.models import Word2Vec, FastText, Doc2Vec
 
 
-def learn_embeddings(output_embeddings_file, walks, write_walks, dimensions, window_size, training_algorithm='word2vec',
-                     learning_method='skipgram', workers=mp.cpu_count(), sampling_factor=0.001):
+def learn_embeddings(
+    output_embeddings_file,
+    walks,
+    write_walks,
+    dimensions,
+    window_size,
+    training_algorithm="word2vec",
+    learning_method="skipgram",
+    workers=mp.cpu_count(),
+    sampling_factor=0.001,
+):
     """Function used to train the embeddings based on the given walks corpus. Multiple parameters are available to
     tweak the training procedure. The resulting embedding file will be saved in the given path to be used later in the
     experimental phase.
@@ -20,40 +29,66 @@ def learn_embeddings(output_embeddings_file, walks, write_walks, dimensions, win
     :param learning_method: skipgram or CBOW
     :param workers: number of CPU workers to be used in during the training. Default = mp.cpu_count().
     """
-    if training_algorithm == 'word2vec':
-        if learning_method == 'skipgram':
+    if training_algorithm == "word2vec":
+        if learning_method == "skipgram":
             sg = 1
-        elif learning_method == 'CBOW':
+        elif learning_method == "CBOW":
             sg = 0
         else:
-            raise ValueError('Unknown learning method {}'.format(learning_method))
+            raise ValueError("Unknown learning method {}".format(learning_method))
         if write_walks:
-            model = Word2Vec(corpus_file=walks, size=dimensions, window=window_size, min_count=2, sg=sg,
-                             workers=workers,
-                             sample=sampling_factor)
+            model = Word2Vec(
+                corpus_file=walks,
+                vector_size=dimensions,
+                window=window_size,
+                min_count=2,
+                sg=sg,
+                workers=workers,
+                sample=sampling_factor,
+            )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
         else:
-            model = Word2Vec(sentences=walks, size=dimensions, window=window_size, min_count=2, sg=sg, workers=workers,
-                             sample=sampling_factor)
+            model = Word2Vec(
+                sentences=walks,
+                vector_size=dimensions,
+                window=window_size,
+                min_count=2,
+                sg=sg,
+                workers=workers,
+                sample=sampling_factor,
+            )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
-    elif training_algorithm == 'doc2vec':
-        if learning_method == 'skipgram':
+    elif training_algorithm == "doc2vec":
+        if learning_method == "skipgram":
             sg = 1
-        elif learning_method == 'CBOW':
+        elif learning_method == "CBOW":
             sg = 0
         else:
-            raise ValueError('Unknown learning method {}'.format(learning_method))
+            raise ValueError("Unknown learning method {}".format(learning_method))
         if write_walks:
-            model = Doc2Vec(corpus_file=walks, size=dimensions, window=window_size, min_count=2, sg=sg,
-                            workers=workers,
-                            sample=sampling_factor)
+            model = Doc2Vec(
+                corpus_file=walks,
+                size=dimensions,
+                window=window_size,
+                min_count=2,
+                sg=sg,
+                workers=workers,
+                sample=sampling_factor,
+            )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
         else:
-            model = Doc2Vec(sentences=walks, size=dimensions, window=window_size, min_count=2, sg=sg, workers=workers,
-                            sample=sampling_factor)
+            model = Doc2Vec(
+                sentences=walks,
+                size=dimensions,
+                window=window_size,
+                min_count=2,
+                sg=sg,
+                workers=workers,
+                sample=sampling_factor,
+            )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
-    elif training_algorithm == 'fasttext':
-        print('Using Fasttext')
+    elif training_algorithm == "fasttext":
+        print("Using Fasttext")
         if write_walks:
             model = FastText(corpus_file=walks, window=window_size, min_count=2, workers=workers, size=dimensions)
             model.wv.save(output_embeddings_file)
@@ -74,25 +109,25 @@ def return_combined(row, wv, n_dimensions):
 
 
 def generate_concatenated_file(df, old_emb_file, prefix, n_dimensions=100):
-    wv = models.KeyedVectors.load_word2vec_format(old_emb_file, unicode_errors='ignore')
-    print('Model built from file {}'.format(old_emb_file))
+    wv = models.KeyedVectors.load_word2vec_format(old_emb_file, unicode_errors="ignore")
+    print("Model built from file {}".format(old_emb_file))
 
     concatenated_wv = {}
 
     for idx, row in df.iterrows():
         concatenated_wv[idx] = return_combined(row, wv, n_dimensions)
 
-    new_emb_file = old_emb_file.split('.')[0] + '_tuples.emb'
+    new_emb_file = old_emb_file.split(".")[0] + "_tuples.emb"
 
-    with open(new_emb_file, 'w') as fp:
-        fp.write('{} {}\n'.format(str(len(concatenated_wv)), len(concatenated_wv[0])))
+    with open(new_emb_file, "w") as fp:
+        fp.write("{} {}\n".format(str(len(concatenated_wv)), len(concatenated_wv[0])))
         for key in concatenated_wv:
-            s = '{}{} '.format(prefix, key)
+            s = "{}{} ".format(prefix, key)
             for value in concatenated_wv[key]:
-                s += '{} '.format(value)
-            s = s.strip(' ') + '\n'
+                s += "{} ".format(value)
+            s = s.strip(" ") + "\n"
             fp.write(s)
 
-    print('Model saved on file {}'.format(new_emb_file))
+    print("Model saved on file {}".format(new_emb_file))
 
     return new_emb_file
