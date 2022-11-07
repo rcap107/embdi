@@ -7,7 +7,8 @@ from EmbDI.graph import Node
 from EmbDI.utils import *
 
 
-class RandomWalk:    def __init__(
+class RandomWalk:
+    def __init__(
         self,
         graph_nodes,
         starting_node_name,
