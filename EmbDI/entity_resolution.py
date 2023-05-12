@@ -297,10 +297,10 @@ def perform_matching(most_similar):
     matches = []
     for idx in most_similar:
         for m in most_similar[idx]:
-            i1 = idx.split('_')[1]
-            i2 = m.split('_')[1]
+            i1 = idx.split('__')[1]
+            i2 = m.split('__')[1]
             t = sorted([i1, i2])
-            matches.append(tuple(['idx_{}'.format(_) for _ in t]))
+            matches.append(tuple(['idx__{}'.format(_) for _ in t]))
     return matches
 
 
