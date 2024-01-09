@@ -38,7 +38,7 @@ perform the tasks specified by the user.
 Contact `riccardo [dot] cappuzzo [at] inria [dot] fr` for any inquiries. 
 
 
-#### Directory tree
+### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory
 labeled `pipeline`. All data input/output will assume the presence of a directory with this name.
 
