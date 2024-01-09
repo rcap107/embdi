@@ -66,7 +66,7 @@ Resources and dataset used in the paper
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
 We uploaded additional resources to reproduce our results in a separated cloud folder at: 
-`https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm`
+`https://zenodo.org/records/7930461`
 
 The additional resources include:
   * (partially preprocessed) base datasets.
