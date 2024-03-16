@@ -1,7 +1,7 @@
 """This script takes as input a (prepared) csv file, then produces as output
-    a new text file that contains the list of all the edges in the graph. The 
+    a new text file that contains the list of all the edges in the graph. The
     script can also export the edgelist in networkx format, so that the graph
-    can be imported by other programs that use networkx. 
+    can be imported by other programs that use networkx.
 
     Author: Riccardo Cappuzzo
 """
@@ -212,18 +212,15 @@ class EdgeList:
 
         intersection = s1.intersection(s2)
 
-        return list(intersection)
+        return intersection
 
     @staticmethod
     def evaluate_frequencies(flatten, df, intersection):
         if flatten and intersection:
             split_values = []
             for val in df.values.ravel().tolist():
-                if val not in intersection:
-                    try:
-                        split = val.split("_")
-                    except AttributeError:
-                        split = [str(val)]
+                if val not in intersection and isinstance(val, str):
+                    split = val.split("_")
                 else:
                     split = [str(val)]
                 split_values += split
@@ -231,9 +228,9 @@ class EdgeList:
         elif flatten:
             split_values = []
             for val in df.values.ravel().tolist():
-                try:
+                if isinstance(val, str):
                     split = val.split("_")
-                except AttributeError:
+                else:
                     split = [str(val)]
                 split_values += split
             frequencies = dict(Counter(split_values))
@@ -289,10 +286,9 @@ class EdgeList:
             except ValueError:
                 pass
 
+        intersection = set()
         if info_file:
             intersection = self.find_intersection_flatten(df, info_file)
-        else:
-            intersection = []
 
         frequencies = self.evaluate_frequencies(flatten, df, intersection)
 
