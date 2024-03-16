@@ -217,9 +217,10 @@ class EdgeList:
     @staticmethod
     def evaluate_frequencies(flatten, df, intersection):
         if flatten and intersection:
+            intersection_lookup = set(intersection)
             split_values = []
             for val in df.values.ravel().tolist():
-                if val not in intersection and isinstance(val, str):
+                if val not in intersection_lookup and isinstance(val, str):
                     split = val.split("_")
                 else:
                     split = [str(val)]
