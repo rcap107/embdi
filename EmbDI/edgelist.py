@@ -212,7 +212,7 @@ class EdgeList:
 
         intersection = s1.intersection(s2)
 
-        return set(intersection)
+        return intersection
 
     @staticmethod
     def evaluate_frequencies(flatten, df, intersection):
