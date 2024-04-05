@@ -39,7 +39,7 @@ def learn_embeddings(
         if write_walks:
             model = Word2Vec(
                 corpus_file=walks,
-                vector_vector_size=dimensions,
+                vector_size=dimensions,
                 window=window_size,
                 min_count=2,
                 sg=sg,
