@@ -7,3 +7,4 @@ pandas==2.2.1
 tqdm==4.66.2
 networkx==3.2.1
 nltk==3.8.1
+pre-commit
