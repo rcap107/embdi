@@ -132,3 +132,13 @@ dmypy.json
 mlruns/
 mlruns_bk/
 /.idea/
+pipeline/datasets
+pipeline/debug
+pipeline/edgelists
+pipeline/embeddings
+pipeline/walks
+
+# VSCode settings
+.vscode/
+EmbDI/.DS_Store
+.DS_Store

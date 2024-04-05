@@ -7,16 +7,15 @@ import nltk
 import numpy as np
 import pandas as pd
 from datasketch import MinHash, MinHashLSH
-from similarity.levenshtein import Levenshtein
-from similarity.normalized_levenshtein import NormalizedLevenshtein
+from similarity.levenshtein import get_levenshtein_distance
 
-nltk.download('stopwords')
+nltk.download("stopwords")
 from nltk.corpus import stopwords
 
-REPLACE_BY_SPACE_RE = re.compile('[-._/(){}\[\]\|@,;\\\/]')
-BAD_SYMBOLS_NUMBERS = re.compile('[^\d*(\.\d+)?]')
-BAD_SYMBOLS_RE = re.compile('[^0-9a-z A-Z]')
-STOPWORDS = set(stopwords.words('english'))
+REPLACE_BY_SPACE_RE = re.compile("[-._/(){}\[\]\|@,;\\\/]")
+BAD_SYMBOLS_NUMBERS = re.compile("[^\d*(\.\d+)?]")
+BAD_SYMBOLS_RE = re.compile("[^0-9a-z A-Z]")
+STOPWORDS = set(stopwords.words("english"))
 
 
 def check_info(df, columns=[]):
@@ -29,9 +28,11 @@ def check_info(df, columns=[]):
         print("total null values: ", null[c])
         print("total unique values: ", len(df[c].unique()))
         gr_title_count = df.groupby(c).count()
-        print("Duplicated values: ", gr_title_count[gr_title_count['id'] > 1].shape[0])
-        print("Duplicated instances: ",
-              gr_title_count[gr_title_count['id'] > 1]['id'].sum() - gr_title_count[gr_title_count['id'] > 1].shape[0])
+        print("Duplicated values: ", gr_title_count[gr_title_count["id"] > 1].shape[0])
+        print(
+            "Duplicated instances: ",
+            gr_title_count[gr_title_count["id"] > 1]["id"].sum() - gr_title_count[gr_title_count["id"] > 1].shape[0],
+        )
         print("===================")
 
 
@@ -43,24 +44,24 @@ def data_preprocessing(dfs, params):
     :return: the concatenated dataset
     """
     parameters = {
-        'missing_value': 'nan,ukn,none,unknown,',  # values to be interpreted as nulls
-        'missing_value_strategy': '',  # strategy to be used when handling null values
-        'round_number': -1,  # number of rounding digits for float numbers
-        'round_columns': '',  # columns to be rounded
-        'split_columns': '',  # columns that contain lists to be split
-        'split_delimiter': ',',  # delimiter used in the lists
-        'expand_columns': '',  # columns that should be expanded in the graph generation phase
-        'tokenize_shared': True,  # flag to use heuristic
-        'concatenate': '',  # one of {'outer', 'inner', 'horizon'}
-        'auto_merge': False,  # flag used to trigger automatic LSH merge of candidates
-        'mh_k_shingles': 3,  # size of lsh shingles
-        'mh_threshold': .5,  # minhash threshold
-        'mh_perm': 128,  # minhash permutations
-        'distance': 'normalized_edit_distance',  # string distance to be used
-        'distance_threshold': .20,  # distance threshold to decide similar values
-        'merge_columns': '',  # columns to study when performing the lsh merge
-        'remove_stop_word': False,  # flag to use to remove stop words
-        'case_sensitive': False,  # flag to use to specify if the content of the dataset is case sensitive
+        "missing_value": "nan,ukn,none,unknown,",  # values to be interpreted as nulls
+        "missing_value_strategy": "",  # strategy to be used when handling null values
+        "round_number": -1,  # number of rounding digits for float numbers
+        "round_columns": "",  # columns to be rounded
+        "split_columns": "",  # columns that contain lists to be split
+        "split_delimiter": ",",  # delimiter used in the lists
+        "expand_columns": "",  # columns that should be expanded in the graph generation phase
+        "tokenize_shared": True,  # flag to use heuristic
+        "concatenate": "",  # one of {'outer', 'inner', 'horizon'}
+        "auto_merge": False,  # flag used to trigger automatic LSH merge of candidates
+        "mh_k_shingles": 3,  # size of lsh shingles
+        "mh_threshold": 0.5,  # minhash threshold
+        "mh_perm": 128,  # minhash permutations
+        "distance": "normalized_edit_distance",  # string distance to be used
+        "distance_threshold": 0.20,  # distance threshold to decide similar values
+        "merge_columns": "",  # columns to study when performing the lsh merge
+        "remove_stop_word": False,  # flag to use to remove stop words
+        "case_sensitive": False,  # flag to use to specify if the content of the dataset is case sensitive
     }
     for _ in params.keys():
         if _ in parameters:
@@ -68,19 +69,19 @@ def data_preprocessing(dfs, params):
 
     # Check if parameters are valid
     try:
-        parameters['round_number'] = int(parameters['round_number'])
+        parameters["round_number"] = int(parameters["round_number"])
     except ValueError:
-        parameters['round_number'] = -1
-        warnings.warn('Round number must be an integer. Run without rounding number.')
-    if parameters['round_number'] > -1 and parameters['round_columns'] == '':
-        warnings.warn('No attributes chosen to round.')
-    if parameters['auto_merge'] and parameters['merge_columns'] == '':
-        parameters['auto_merge'] = False
-        warnings.warn('No attributes chosen to merge.')
+        parameters["round_number"] = -1
+        warnings.warn("Round number must be an integer. Run without rounding number.")
+    if parameters["round_number"] > -1 and parameters["round_columns"] == "":
+        warnings.warn("No attributes chosen to round.")
+    if parameters["auto_merge"] and parameters["merge_columns"] == "":
+        parameters["auto_merge"] = False
+        warnings.warn("No attributes chosen to merge.")
 
     if isinstance(dfs, pd.DataFrame):
         dfs = [dfs]
-        parameters['concatenate'] = ''
+        parameters["concatenate"] = ""
 
     all_merge_columns = []
 
@@ -89,77 +90,78 @@ def data_preprocessing(dfs, params):
     # Iterate through all data frames.
     for i, df in enumerate(dfs):
         # Set all values to lowercase if words are not case sensitive.
-        if not parameters['case_sensitive']:
+        if not parameters["case_sensitive"]:
             df.columns = [_.lower() for _ in df.columns]
-        df.columns = [re.sub(r'\s+', '_', str(x)) for x in df.columns]
+        df.columns = [re.sub(r"\s+", "_", str(x)) for x in df.columns]
         # df[c] = df[c].apply(lambda x: )
         #
         # normalize missing values
-        if parameters['missing_value'] != '':
-            missing_value = parameters['missing_value'].split(',')
+        if parameters["missing_value"] != "":
+            missing_value = parameters["missing_value"].split(",")
             missing_value = [_.strip() for _ in missing_value]
             missing_value = "|".join(missing_value)
-            pattern = re.compile('^\s*(' + missing_value + ')\s*$', re.IGNORECASE)
+            pattern = re.compile("^\s*(" + missing_value + ")\s*$", re.IGNORECASE)
             df = df.replace(pattern, np.nan)
 
         # Extract the columns needed to perform different operations on
-        num_columns = [_ for _ in parameters['round_columns'].split(',') if _ in df.columns]
-        split_columns = [_ for _ in parameters['split_columns'].split(',') if _ in df.columns]
-        if parameters['tokenize_shared']:
+        num_columns = [_ for _ in parameters["round_columns"].split(",") if _ in df.columns]
+        split_columns = [_ for _ in parameters["split_columns"].split(",") if _ in df.columns]
+        if parameters["tokenize_shared"]:
             expand_columns = df.columns
         else:
-            expand_columns = [_ for _ in parameters['expand_columns'].split(',') if _ in df.columns]
+            expand_columns = [_ for _ in parameters["expand_columns"].split(",") if _ in df.columns]
 
         # normalize text: lower/trim/replace by space/remove bad chars/concatenate string
         for c in df.columns:
 
             # Apply string normalization only on string fields.
-            if df[c].dtype == 'object':
+            if df[c].dtype == "object":
 
                 if c in num_columns:
                     warnings.warn(
-                        'Column {} is marked to be rounded, but it contains non-numeric characters.'.format(c))
-                    df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_NUMBERS, '', str(x)))
+                        "Column {} is marked to be rounded, but it contains non-numeric characters.".format(c)
+                    )
+                    df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_NUMBERS, "", str(x)))
                     try:
-                        df[c] = df[c].replace('', np.nan).astype(float)
+                        df[c] = df[c].replace("", np.nan).astype(float)
                     except ValueError():
-                        print('Something went wrong. Wrong type found. Skipping column {}'.format(c))
+                        print("Something went wrong. Wrong type found. Skipping column {}".format(c))
                 else:
-                    if not parameters['case_sensitive']:
+                    if not parameters["case_sensitive"]:
                         df[c] = df[c].str.lower()
                     # If the column under observation is a list, it will be expanded
                     if c in split_columns:
-                        df[c] = df[c].apply(_split_lists, delimiter=parameters['split_delimiter'])
+                        df[c] = df[c].apply(_split_lists, delimiter=parameters["split_delimiter"])
                     else:
-                        df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_RE, '', str(x)))
-                        df[c] = df[c].apply(lambda x: re.sub(REPLACE_BY_SPACE_RE, ' ', str(x).strip().lower()))
+                        df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_RE, "", str(x)))
+                        df[c] = df[c].apply(lambda x: re.sub(REPLACE_BY_SPACE_RE, " ", str(x).strip().lower()))
                         # If the column should be expanded,
                         if c in expand_columns:
-                            df[c] = df[c].apply(lambda x: re.sub(r'\s+', '_', str(x)))
+                            df[c] = df[c].apply(lambda x: re.sub(r"\s+", "_", str(x)))
                         else:
-                            df[c] = df[c].apply(lambda x: re.sub(r'\s+', '|', str(x)))
-                if parameters['remove_stop_word']:
-                    df[c] = df[c].apply(_remove_stop_words, '_')
+                            df[c] = df[c].apply(lambda x: re.sub(r"\s+", "|", str(x)))
+                if parameters["remove_stop_word"]:
+                    df[c] = df[c].apply(_remove_stop_words, "_")
 
         for c in num_columns:
-            df[c] = df[c].apply(lambda x: re.sub(r'[^\d.]', '', str(x)))
-            df[c] = df[c].apply(_round_number, ndigits=parameters['round_number'])
+            df[c] = df[c].apply(lambda x: re.sub(r"[^\d.]", "", str(x)))
+            df[c] = df[c].apply(_round_number, ndigits=parameters["round_number"])
 
         # change the columns name in case of horizon concatenation
-        if parameters['concatenate'] == 'horizon' and len(dfs) > 1:
-            for idx, c in enumerate(parameters['merge_columns'].split(',')):
+        if parameters["concatenate"] == "horizon" and len(dfs) > 1:
+            for idx, c in enumerate(parameters["merge_columns"].split(",")):
                 if c in df.columns:
-                    all_merge_columns.append(str(i) + '_' + c)
-            df.columns = str(i) + '_' + df.columns
+                    all_merge_columns.append(str(i) + "_" + c)
+            df.columns = str(i) + "_" + df.columns
 
         dfs[i] = df
         df_words[i] = get_unique_string_values(df, df.columns)
 
     # concatenate datasets
     if len(dfs) > 1:
-        if parameters['concatenate'] == 'inner':
+        if parameters["concatenate"] == "inner":
             concat_df = pd.concat(dfs, join="inner")
-        elif parameters['concatenate'] == 'horizon':
+        elif parameters["concatenate"] == "horizon":
             concat_df = pd.concat(dfs, axis=0, ignore_index=True, sort=True)
         else:
             concat_df = pd.concat(dfs, sort=True)
@@ -168,12 +170,12 @@ def data_preprocessing(dfs, params):
 
     def retokenize(line, words):
         if line in words:
-            return line.replace('_', '|')
+            return line.replace("_", "|")
         else:
             return line
 
     if len(dfs) > 1:
-        if parameters['tokenize_shared']:
+        if parameters["tokenize_shared"]:
             intersection = df_words[0].intersection(df_words[1])
             if len(dfs) > 2:
                 for i, df in enumerate(dfs[2:]):
@@ -184,14 +186,14 @@ def data_preprocessing(dfs, params):
     concat_df.reset_index(inplace=True, drop=True)
 
     # merge
-    if parameters['auto_merge']:
+    if parameters["auto_merge"]:
         if len(all_merge_columns) == 0:
-            all_merge_columns = [_ for _ in parameters['merge_columns'].split(',') if _ in concat_df.columns]
+            all_merge_columns = [_ for _ in parameters["merge_columns"].split(",") if _ in concat_df.columns]
         if len(all_merge_columns) > 0:
             # get unique values
             uniq_values = set(concat_df[all_merge_columns].astype(str).values.ravel())
-            lsh = LSHMerge(uniq_values, parameters['mh_k_shingles'], parameters['mh_threshold'], parameters['mh_perm'])
-            replacement = lsh.get_replacement(parameters['distance'], parameters['distance_threshold'])
+            lsh = LSHMerge(uniq_values, parameters["mh_k_shingles"], parameters["mh_threshold"], parameters["mh_perm"])
+            replacement = lsh.get_replacement(parameters["distance"], parameters["distance_threshold"])
 
             # rep_path = '../pipeline/replacements/'
             # with open(rep_path + parameters['output_file'] + '.txt', 'wb') as fp:
@@ -203,13 +205,14 @@ def data_preprocessing(dfs, params):
 
     # empty value
     # concat_df = concat_df.fillna('')
-    if parameters['missing_value_strategy'] == 'separated_null':
+    if parameters["missing_value_strategy"] == "separated_null":
         for c in concat_df.columns:
             c_idx = concat_df.columns.get_loc(c)
-            concat_df.loc[concat_df[c] == '', c] = c_idx + '_null_' + concat_df.loc[concat_df[c] == '', c].index.astype(
-                str)
-    elif parameters['missing_value_strategy'] == 'one_null':
-        concat_df = concat_df.replace('', 'null')
+            concat_df.loc[concat_df[c] == "", c] = (
+                c_idx + "_null_" + concat_df.loc[concat_df[c] == "", c].index.astype(str)
+            )
+    elif parameters["missing_value_strategy"] == "one_null":
+        concat_df = concat_df.replace("", "null")
 
     return concat_df
 
@@ -219,16 +222,16 @@ def _remove_stop_words(text, delimiter=" "):
     return text
 
 
-def _split_lists(line, delimiter=','):
+def _split_lists(line, delimiter=","):
     split = []
     if line is np.nan:
-        return ''
+        return ""
     for word in [_.strip() for _ in line.split(delimiter)]:
-        x = re.sub(BAD_SYMBOLS_RE, '', str(word))
-        x = re.sub(REPLACE_BY_SPACE_RE, ' ', str(x).strip().lower())
-        x = re.sub(' ', '|', str(x).strip().lower())
+        x = re.sub(BAD_SYMBOLS_RE, "", str(word))
+        x = re.sub(REPLACE_BY_SPACE_RE, " ", str(x).strip().lower())
+        x = re.sub(" ", "|", str(x).strip().lower())
         split.append(x)
-    s = '_'.join(split)
+    s = "_".join(split)
     return s
 
 
@@ -289,7 +292,7 @@ def _round_number(value, ndigits):
         return value
 
 
-def get_unique_string_values(df, columns, level='token'):
+def get_unique_string_values(df, columns, level="token"):
     """
     Get unique values in token level or word level
     :param df:
@@ -298,8 +301,8 @@ def get_unique_string_values(df, columns, level='token'):
     :return:
     """
     values = df[columns].astype(str).values.ravel()
-    if level == 'word':
-        words = [v.split('_') for v in values]
+    if level == "word":
+        words = [v.split("_") for v in values]
         words = set(chain.from_iterable(words))
     else:
         words = set(values)
@@ -315,7 +318,7 @@ def get_unique_string_values(df, columns, level='token'):
     return words
 
 
-def merge(df, replacement_dict, columns, level='token'):
+def merge(df, replacement_dict, columns, level="token"):
     """
     Merge values based on a dictionary of replacement in level token / word
     :param df:
@@ -326,11 +329,11 @@ def merge(df, replacement_dict, columns, level='token'):
     """
     if isinstance(columns, str):
         columns = [columns]
-    if level == 'token':
+    if level == "token":
         df = df.replace(replacement_dict)
-    elif level == 'word':
+    elif level == "word":
         for f, r in replacement_dict.items():
-            f_pattern = re.compile('(^|_)' + f + '($|_)', re.IGNORECASE)
+            f_pattern = re.compile("(^|_)" + f + "($|_)", re.IGNORECASE)
             r_repl = lambda m: m.group(1) + r + m.group(2)
             for c in columns:
                 df[c] = df[c].str.replace(f_pattern, r_repl)
@@ -346,15 +349,15 @@ def write_info_file(dfs, output, f=[]):
     :return:
     """
     # info_path = '../pipeline/info/'
-    with open(output, 'w') as fp:
+    with open(output, "w") as fp:
         if len(f) != len(dfs):
             f = list(range(len(dfs)))
         for idx, df in enumerate(dfs):
-            fp.write('{},{}\n'.format(f[idx], df.shape[0]))
+            fp.write("{},{}\n".format(f[idx], df.shape[0]))
 
 
 class LSHMerge:
-    def __init__(self, uniq_values, k_shingles=3, mh_threshold=.5, mh_num_perm=128, delimiter='_'):
+    def __init__(self, uniq_values, k_shingles=3, mh_threshold=0.5, mh_num_perm=128, delimiter="_"):
         self.k_shingles = k_shingles
         self.mh_threshold = mh_threshold
         self.mh_num_perm = mh_num_perm
@@ -371,13 +374,13 @@ class LSHMerge:
 
     def _generate_hash(self, value):
         if isinstance(self.k_shingles, int):
-            shingles = set([value[max(0, i - self.k_shingles):i] for i in range(self.k_shingles, len(value) + 1)])
-        elif self.k_shingles == 'word':
+            shingles = set([value[max(0, i - self.k_shingles) : i] for i in range(self.k_shingles, len(value) + 1)])
+        elif self.k_shingles == "word":
             shingles = set(value.split(self.delimiter))
 
         m = MinHash(num_perm=self.mh_num_perm)
         for shingle in shingles:
-            m.update(shingle.encode('utf8'))
+            m.update(shingle.encode("utf8"))
         return m
 
     def get_similarities(self, value):
@@ -403,12 +406,7 @@ class LSHMerge:
             count += 1
         return results
 
-    def get_replacement(self, distance='lsh', threshold=.8):
-        if distance == 'edit_distance':
-            distance = Levenshtein()
-        elif distance == 'normalized_edit_distance':
-            distance = NormalizedLevenshtein()
-
+    def get_replacement(self, distance="lsh", threshold=0.8):
         # for each token, get its bin
         # for each bin, iterate each element and get the groups of satisfied tokens such as
         # [white] = [whit, whie, whit]
@@ -426,13 +424,13 @@ class LSHMerge:
             if len(similarities) > 1:
                 scores = {}
                 bin_replacement = {}
-                if distance != 'lsh':
+                if distance != "lsh":
                     for idx, item in enumerate(similarities):
                         count = 0
                         candidates = []
                         for idx_compared in range(idx + 1, len(similarities)):
                             candidate = similarities[idx_compared]
-                            if item != candidate and distance.distance(item, candidate) < threshold:
+                            if item != candidate and get_levenshtein_distance(item, candidate) < threshold:
                                 if idx not in bin_replacement:
                                     bin_replacement[idx] = [idx_compared]
                                 else:
@@ -461,30 +459,30 @@ class LSHMerge:
         return replacement
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parameters = {
-        'output_file': '',
-        'concatenate': 'outer',
-        'missing_value': 'nan,ukn,none,unknown,-',
-        'missing_value_strategy': '',
-        'round_number': 1,
-        'round_columns': '',
-        'auto_merge': False,
-        'expand_columns': '',
-        'tokenize_shared': False
+        "output_file": "",
+        "concatenate": "outer",
+        "missing_value": "nan,ukn,none,unknown,-",
+        "missing_value_strategy": "",
+        "round_number": 1,
+        "round_columns": "",
+        "auto_merge": False,
+        "expand_columns": "",
+        "tokenize_shared": False,
     }
-    f1 = '../pipeline/experiments/programming_challenge/www.shopbot.com.au.csv'
-    df1 = pd.read_csv(f1, encoding='ISO-8859-1')
+    f1 = "../pipeline/experiments/programming_challenge/www.shopbot.com.au.csv"
+    df1 = pd.read_csv(f1, encoding="ISO-8859-1")
     for c in df1.columns:
-        if df1[c].dtype == 'object':
-            df1[c] = df1[c].str.replace('_', ' ')
+        if df1[c].dtype == "object":
+            df1[c] = df1[c].str.replace("_", " ")
 
-    f2 = '../pipeline/datasets/programming_challenge/www.pricedekho.com.csv'
-    df2 = pd.read_csv(f2, encoding='ISO-8859-1')
+    f2 = "../pipeline/datasets/programming_challenge/www.pricedekho.com.csv"
+    df2 = pd.read_csv(f2, encoding="ISO-8859-1")
 
     for c in df2.columns:
-        if df2[c].dtype == 'object':
-            df2[c] = df2[c].str.replace('_', ' ')
+        if df2[c].dtype == "object":
+            df2[c] = df2[c].str.replace("_", " ")
 
     # print("Datasets exploration:", f1)
     # check_info(df1, ['title', 'manufacturer', 'description'])
@@ -492,7 +490,7 @@ if __name__ == '__main__':
     # check_info(df2, ['title', 'manufacturer', 'description'])
 
     df_c = data_preprocessing([df1, df2], parameters)
-    write_info_file([df1, df2], 'cameras_testing', [f1, f2])
+    write_info_file([df1, df2], "cameras_testing", [f1, f2])
 
     # Merge title in word level
     # words = get_unique_string_values(df_c, 'title', 'word')
@@ -531,4 +529,4 @@ if __name__ == '__main__':
     # check_info(df_c, ['title', 'manufacturer', 'description'])
 
     # Export the file
-    df_c.to_csv('../pipeline/datasets/' + parameters['output_file'] + '.csv', index=False)
+    df_c.to_csv("../pipeline/datasets/" + parameters["output_file"] + ".csv", index=False)

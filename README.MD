@@ -34,7 +34,11 @@ perform the tasks specified by the user.
  script is used for backward compatibility. It can also export the graph in networkx format, so that it can be used in 
    other applications. 
 
-#### Directory tree
+### Contacts
+Contact `riccardo [dot] cappuzzo [at] inria [dot] fr` for any inquiries. 
+
+
+### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory
 labeled `pipeline`. All data input/output will assume the presence of a directory with this name.
 
@@ -62,11 +66,11 @@ root
 Additional directories are present in the project directory: they contain additional (not required) code or are needed
 for preprocessing or analysis.
 
-Resources
+Resources and dataset used in the paper
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
 We uploaded additional resources to reproduce our results in a separated cloud folder at: 
-`https://nextcloud.eurecom.fr/s/MwiRs8REfGRX5dm`
+`https://zenodo.org/records/7930461`
 
 The additional resources include:
   * (partially preprocessed) base datasets.
