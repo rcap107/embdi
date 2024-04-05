@@ -21,21 +21,21 @@ EmbDI
 =======
 EmbDI is a Python library developed to perform Entity Resolution (ER) and Schema Matching (SM) tasks by employing
 word embeddings. To test how well does the model encode information, we also implemented a set of Embeddings Quality (EQ)
-tests. 
+tests.
 
 The repository includes a `main` script and a collection of additional scripts used to generate the files needed to
-perform the tasks specified by the user.  
+perform the tasks specified by the user.
  * `main.py` is used to train the embeddings and/or perform postprocessing (ER, SM, EQ) on them. Execution may be done
  in batch by reading all files in a directory or by passing a single configuration file on the command line.
  Configuration files are explained in a separate section. The input file must be an edgelist that uses a specific format
  described in its section.
  * `generate_tests.py` produces the files needed to test embedding quality ("match attributes" `MA`, "match rows" `MR` and "match columns" `MC`).
  * `edgelist.py` is used to generate the lists of edges used to build the graph starting from a relational dataset. This
- script is used for backward compatibility. It can also export the graph in networkx format, so that it can be used in 
-   other applications. 
+ script is used for backward compatibility. It can also export the graph in networkx format, so that it can be used in
+   other applications.
 
 ### Contacts
-Contact `riccardo [dot] cappuzzo [at] inria [dot] fr` for any inquiries. 
+Contact `riccardo [dot] cappuzzo [at] inria [dot] fr` for any inquiries.
 
 
 ### Directory tree
@@ -69,16 +69,16 @@ for preprocessing or analysis.
 Resources and dataset used in the paper
 ---
 The datasets used for our experiments were converted into edgelists after performing some preprocessing steps.
-We uploaded additional resources to reproduce our results in a separated cloud folder at: 
+We uploaded additional resources to reproduce our results in a separated cloud folder at:
 `https://zenodo.org/records/7930461`
 
 The additional resources include:
   * (partially preprocessed) base datasets.
-  * Their Entity Resolution and Schema Matching versions. 
+  * Their Entity Resolution and Schema Matching versions.
   * Edgelists for both ER and SM versions.
   * Ground truth files for ER and SM tasks.
-  * Test directories for the EQ task. 
-  * Copies of the configuration files provided in this repository. 
+  * Test directories for the EQ task.
+  * Copies of the configuration files provided in this repository.
 
 Configuration files, info files and ER match files were left in this repository in `pipeline/config_files/default`,
 `pipeline/info` and `pipeline/matches/default`.
@@ -91,8 +91,8 @@ subset of the pipeline steps depending on the parameters found in the `task` fie
 
 The script requires one of two command line parameters:
 * `-d`, `--config-dir` require the path to a directory that should contain configuration files. All valid files will be
-executed in alphabetical. All files present in the provided directory that do not start with the string `default` and 
-that are not directories themselves will be considered as "valid". 
+executed in alphabetical. All files present in the provided directory that do not start with the string `default` and
+that are not directories themselves will be considered as "valid".
 
 ```
 python main.py -d path/to/config/dir/
@@ -125,13 +125,13 @@ shown here (unknown strings will raise exceptions).
 All lines starting with `#` will be treated as comments and will be ignored. Similarly, all text following a `#` will be
 ignored.
 In the example below, lines starting with `*` are optional and, if missing, will be assigned a default value.
-Values enclosed in `{}` denote parameters that require only one choice out of the proposed values. 
+Values enclosed in `{}` denote parameters that require only one choice out of the proposed values.
 
 ```
 # Input configuration:
 task: {train, test, match, train-test, train-match}
 input_file: path/to/edgelist/edgelist.txt
-output_file: name_of_output_file # the final embeddings file will be saved in pipeline/embeddings/name_of_output_file.emb 
+output_file: name_of_output_file # the final embeddings file will be saved in pipeline/embeddings/name_of_output_file.emb
 experiment_type: {EQ, ER, SM}
 match_file: path/to/match/file.txt [required for SM, ER]
 dataset_file:path/to/dataset/file.csv [required for SM]
@@ -235,15 +235,15 @@ The format of the edgelist is one of the following:
 ### Edgelist prefixes
 The first line of the edgelist must contain all the prefixes that define node types (such as RID, CID,
 tokens). These prefixes will be used to tell the algorithm how to handle the different node types. During our experimental
-campaign, we noticed that variations in how nodes are represented in the random walks were reflected in the performance 
-of the algorithm in the different tasks. For this reason we implemented the following prefix/class system, as it would 
-allow us to have a more systematic method for customizing these representations. 
+campaign, we noticed that variations in how nodes are represented in the random walks were reflected in the performance
+of the algorithm in the different tasks. For this reason we implemented the following prefix/class system, as it would
+allow us to have a more systematic method for customizing these representations.
 
-The default set of prefixes used in the edgelists generated for EmbDI is , where each 
+The default set of prefixes used in the edgelists generated for EmbDI is , where each
 comma-separated value has the specific format `[1-7][#-$]__node_type_name`:
 - The first character should be a numeric value in the range `1-7`, which will denote the `class` of the node type.
 - The second character is used to distinguish nodes that contain numeric values (with symbol `#`) from those that
-contain categorical information (`$`). 
+contain categorical information (`$`).
 
 The `class` will influence the behavior of the random walks generation algorithm.
 
@@ -254,23 +254,23 @@ sentence, otherwise it will not be saved.
 
 ##### Example of prefix with explanation
 Considering the example `3#__tn,3$__tt,5$__idx,1$__cid`:
-* Nodes with prefix `tn__` will be treated as numbers (because of the `#` character) and undergo some additional 
+* Nodes with prefix `tn__` will be treated as numbers (because of the `#` character) and undergo some additional
   processing in the graph generation phase.
 * Nodes with prefix `tt__`, `idx__` and `cid__` will be treated as strings (due to character `$`).
-* `tt__` and `tn__` nodes are in class 3. Nodes in class 3 will be used as root for the random walks (that is, paths 
-  will begin from nodes in this class). This means that the random walks generation algorithm will build the training 
-  corpus by going through all nodes marked as "root" and generate a certain number of random walks starting from each 
+* `tt__` and `tn__` nodes are in class 3. Nodes in class 3 will be used as root for the random walks (that is, paths
+  will begin from nodes in this class). This means that the random walks generation algorithm will build the training
+  corpus by going through all nodes marked as "root" and generate a certain number of random walks starting from each
   of them.
 * `idx__` nodes are in class 5. In our experiments, we noticed that Entity Resolution results improved when random walks
 featured an additional `idx__` node before the root. Given a random walk `tt__G2, idx_0, tt_A3, cid__col1`, its "improved"
   version according to this method (denoted as `first`) would be `idx_3, tt_G2, idx_0, tt_A3, cid__col1`
 * `cid__` nodes are in class 1. In some training scenarios, the presence of a node clas in the training corpus would make
 training more difficult and produce worse representations of the nodes, which in turn caused issues down the line. Tasks
-  that revolved entirely around cell value embeddings would be less successful because of the presence of additional 
-  nodes that "diluted" the amount of information available in the training corpus. To mitigate this issue, it is possible 
-  to mark some nodes using the `appear` flag to signal to the algorithm that a certain class of nodes should be 
-  considered as a viable neighbor when generating each random walk, but at the same time nodes belonging to that class 
-  should not appear in the training corpus. For example, in a case in which both `idx__` and `cid__` nodes have 
+  that revolved entirely around cell value embeddings would be less successful because of the presence of additional
+  nodes that "diluted" the amount of information available in the training corpus. To mitigate this issue, it is possible
+  to mark some nodes using the `appear` flag to signal to the algorithm that a certain class of nodes should be
+  considered as a viable neighbor when generating each random walk, but at the same time nodes belonging to that class
+  should not appear in the training corpus. For example, in a case in which both `idx__` and `cid__` nodes have
   "appear" set to false, the random walk `tt__G2, idx_0, tt_A3, cid__col1, tt_G5, idx_0 ...` would be saved on disk as:
 `tt__G2, tt_A3, tt_G5, ...`
 
@@ -335,10 +335,10 @@ The matches file for the SM case (here, for the DBLP_Scholar dataset) looks like
 ```
 
 SM tasks take as inputs datasets whose columns were renamed to "label_dataset_n_[column_name]". For example,
-the header of the DBLP-ACM dataset will become 
+the header of the DBLP-ACM dataset will become
 `0_author_1,0_author_2,0_author_3,0_author_4,0_title,0_venue,0_year,1_author_1,1_author_2,1_author_3,1_author_4,1_title,1_venue,1_year`.
-To properly concatenate the dataset, it is possible to use the `data_preprocessing` model provided here using the `horizon` 
-parameter. 
+To properly concatenate the dataset, it is possible to use the `data_preprocessing` model provided here using the `horizon`
+parameter.
 
 
 All following lines should contain the ground truth matches. If a column can be matched arbitrarily to multiple
@@ -346,14 +346,14 @@ columns, multiple matches are allowed. As in the ER case, however, only the clos
 This behavior will change in a future version of the code.
 
 ##### Note on results
-It may happen that results differ slightly between different runs. In our experience, there may be some variance in the 
+It may happen that results differ slightly between different runs. In our experience, there may be some variance in the
  ER results because of the random walks generation, as well as the embeddings training procedure.
 
-In SM, the difference might become larger due to the fact that there are only a few "matches", so even a single miss 
+In SM, the difference might become larger due to the fact that there are only a few "matches", so even a single miss
 will drop the precision by a large amount.
 
-We observed that different random walks lead to slightly different embeddings. In our matching algorithms we use k-nn 
-to find the best candidates, and the ranking may be influenced by how the embeddings are positioned in different runs. 
+We observed that different random walks lead to slightly different embeddings. In our matching algorithms we use k-nn
+to find the best candidates, and the ranking may be influenced by how the embeddings are positioned in different runs.
 
 
 
@@ -441,10 +441,10 @@ are removed, words are concatenated into one single string.
 * rounding of numerical fields: numerical fields (user-supplied, if needed) are rounded to the given number of digits
 after the decimal point
 * concatenation of datasets: the input datasets are concatenated using one of the given methods: `{horizon,inner,outer}`
-  *  `horizon` will concatenate the datasets in such a way that no column in the first dataset will contain values coming 
+  *  `horizon` will concatenate the datasets in such a way that no column in the first dataset will contain values coming
   from the second dataset (they will be replaced by NULLs). **This is the format required to perform Schema Matching**.
-  *  `inner` will concatenate common columns and drop columns that are not present in both datasets. 
-  *  `outer` will concatenate common columns and keep the remaining columns, filling missing values with NULLs. 
+  *  `inner` will concatenate common columns and drop columns that are not present in both datasets.
+  *  `outer` will concatenate common columns and keep the remaining columns, filling missing values with NULLs.
 * token merging: similar tokens (according to multiple similarity measures) are merged into one to increase the amount
 of overlap between the two tables. MinHash LSH merging is supported. Tokens that satisfy the LSH threshold and the
 distance threshold are merged into a new one.
@@ -482,7 +482,7 @@ df_c = data_preprocessing([df1, df2], parameters)
 ##### LSHMerge
 
 A class used to handle token merging. It is used as a first blocking step to find merge candidates.
-Multiple user-defined parameters are supported.  
+Multiple user-defined parameters are supported.
 The merge process is done in two steps:
 * `LSH MinHash`: Neighbors are found and placed in buckets. Params:
     * `k-shingles`: group characters by k-shingles or by word. Shingles separate words in substrings and index them independently.
@@ -516,13 +516,13 @@ replacement = lsh.get_replacement('normalized_edit_distance', .4)
 ```
 
 #### Preparing datasets for the SM task
-To perform Schema Matching, EmbDI will expect datasets formatted according to a specific structure. 
-Columns should be renamed to unique values (e.g. `[0_author_1, 0_author_2]` and `[1_author_1, 1_author_2]`) in such a 
-way that  the concatenation does not put together values from different datasets. This can be achieved by setting the 
+To perform Schema Matching, EmbDI will expect datasets formatted according to a specific structure.
+Columns should be renamed to unique values (e.g. `[0_author_1, 0_author_2]` and `[1_author_1, 1_author_2]`) in such a
+way that  the concatenation does not put together values from different datasets. This can be achieved by setting the
 parameter `concatenate: horizon` in the data preprocessing pipeline explained above.
 
-The result will be a dataset in which all tuples belonging to Dataset 1 will contain values in Dataset 1's columns, and 
-nulls in Dataset 2's columns; similarly, tuples in D2 will contain nulls in D1's columns, and the proper values in D2's 
+The result will be a dataset in which all tuples belonging to Dataset 1 will contain values in Dataset 1's columns, and
+nulls in Dataset 2's columns; similarly, tuples in D2 will contain nulls in D1's columns, and the proper values in D2's
 columns.
 
 ![](Schema%20Matching%20in%20EmbDI%20explanation.png)
