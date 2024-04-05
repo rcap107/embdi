@@ -1,2 +1,0 @@
-pipeline/experiments/itunes-amazon/exp_data/tableA.csv,6907
-pipeline/experiments/itunes-amazon/exp_data/tableB.csv,55923

@@ -1,2 +1,0 @@
-pipeline/experiments/amazon_google/exp_data/tableA.csv,1363
-pipeline/experiments/amazon_google/exp_data/tableB.csv,3226

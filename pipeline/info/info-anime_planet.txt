@@ -1,1 +1,0 @@
-anime_planet.csv,4000

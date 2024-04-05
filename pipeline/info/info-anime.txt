@@ -1,2 +1,0 @@
-anime_planet-master.csv,4000
-my_anime_list-master.csv,4000

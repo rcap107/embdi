@@ -1,2 +1,0 @@
-datasets/amazon_hashed.csv,1363
-datasets/google_hashed.csv,3226

@@ -1,5 +1,5 @@
 task:train-test
-input_file:pipeline/edgelists/walmart_amazon-edgelist.txt
+input_file:pipeline/edgelists/walmart_amazon-er-edgelist.txt
 dataset_info:pipeline/info/info-walmart_amazon.txt
 output_file:walmart_amazon-ER
 flatten:tt

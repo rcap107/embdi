@@ -1,2 +1,0 @@
-pipeline/experiments/products/Amazon.csv,1363
-pipeline/experiments/products/GoogleProducts.csv,3226

@@ -1,5 +1,5 @@
 task:train-test
-input_file:pipeline/edgelists/imdb_movielens-edgelist.txt
+input_file:pipeline/edgelists/imdb_movielens-er-edgelist.txt
 dataset_info:pipeline/info/info-imdb_movielens.txt
 output_file:imdb_movielens-ER
 flatten:tt

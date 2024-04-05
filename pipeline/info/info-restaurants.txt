@@ -1,2 +1,0 @@
-pipeline/datasets/fodors.csv,533
-pipeline/datasets/zagats.csv,331

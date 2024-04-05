@@ -1,5 +1,5 @@
 task:train-test
-input_file:pipeline/edgelists/fodors_zagats-edgelist.txt
+input_file:pipeline/edgelists/fodors_zagats-er-edgelist.txt
 dataset_info:pipeline/info/info-fodors_zagats.txt
 output_file:fodors_zagats-ER
 flatten:tt

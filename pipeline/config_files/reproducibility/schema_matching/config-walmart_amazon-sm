@@ -4,6 +4,7 @@ dataset_info:pipeline/info/info-walmart_amazon.txt
 output_file:walmart_amazon-SM
 flatten:tt
 experiment_type:SM
+test_dir:pipeline/test_dir/walmart_amazon
 dataset_file:pipeline/datasets/walmart_amazon/walmart_amazon-master-sm.csv
 match_file:pipeline/matches/sm-matches/sm-matches-walmart_amazon.txt
 ntop:10

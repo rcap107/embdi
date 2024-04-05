@@ -1,2 +1,0 @@
-pipeline/experiments/amazon-google/exp_data/audit_activity_screens_table.csv,52403
-pipeline/experiments/amazon-google/exp_data/audit_taxonomy_screens_table.csv,2443
