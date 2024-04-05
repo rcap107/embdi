@@ -11,6 +11,7 @@ with warnings.catch_warnings():
 
     from EmbDI.testing_functions import test_driver, match_driver
     from EmbDI.graph import graph_generation
+    # TODO: implement proper logging
     from EmbDI.logging import *
 
 
@@ -140,6 +141,7 @@ def matching_driver(configuration):
 
 
 def read_configuration(config_file):
+    # TODO: convert this to reading toml
     config = {}
 
     with open(config_file, 'r') as fp:
@@ -208,6 +210,7 @@ def main(file_path=None, dir_path=None, args=None):
 
     # Extracting valid files
     if config_dir:
+        # TODO: clean this up, use Path
         valid_files = [_ for _ in os.listdir(config_dir) if not _.startswith('default')
                        and not os.path.isdir(config_dir + '/' + _)]
         n_files = len(valid_files)
