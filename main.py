@@ -58,7 +58,7 @@ def main(file_path=None, dir_path=None, args=None):
             if not _.startswith("default") and not os.path.isdir(config_dir + "/" + _)
         ]
         n_files = len(valid_files)
-        print("Found {} files".format(n_files))
+        print(f"Found {n_files} files")
     elif config_file:
         if args:
             valid_files = [os.path.basename(args.config_file)]
@@ -75,8 +75,8 @@ def main(file_path=None, dir_path=None, args=None):
         for idx, file in enumerate(sorted(valid_files)):
             try:
                 print("#" * 80)
-                print("# File {} out of {}".format(idx + 1, len(valid_files)))
-                print("# Configuration file: {}".format(file))
+                print(f"# File {idx + 1} out of {len(valid_files)}")
+                print(f"# Configuration file: {file}")
                 t_start = datetime.datetime.now()
                 print(
                     OUTPUT_FORMAT.format("Starting run.", t_start.strftime(TIME_FORMAT))
@@ -88,15 +88,15 @@ def main(file_path=None, dir_path=None, args=None):
                 t_end = datetime.datetime.now()
                 print(OUTPUT_FORMAT.format("Ending run.", t_end.strftime(TIME_FORMAT)))
                 dt = t_end - t_start
-                print("# Time required: {:.2} s".format(dt.total_seconds()))
+                print(f"# Time required: {dt.total_seconds():.2f} s")
             except Exception as e:
                 print(f"Run {file} has failed. ")
                 print(e)
     else:
         for idx, file in enumerate(sorted(valid_files)):
             print("#" * 80)
-            print("# File {} out of {}".format(idx + 1, len(valid_files)))
-            print("# Configuration file: {}".format(file))
+            print(f"# File {idx + 1} out of {len(valid_files)}")
+            print(f"# Configuration file: {file}")
             t_start = datetime.datetime.now()
             print(OUTPUT_FORMAT.format("Starting run.", t_start.strftime(TIME_FORMAT)))
             print()
@@ -106,7 +106,7 @@ def main(file_path=None, dir_path=None, args=None):
             t_end = datetime.datetime.now()
             print(OUTPUT_FORMAT.format("Ending run.", t_end.strftime(TIME_FORMAT)))
             dt = t_end - t_start
-            print("# Time required: {:.2f} s".format(dt.total_seconds()))
+            print(f"# Time required: {dt.total_seconds():.2f} s")
 
     # clean_dump()
 
