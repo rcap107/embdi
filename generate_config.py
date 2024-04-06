@@ -1,6 +1,6 @@
 import os
 
-from EmbDI.edgelist import EdgeList
+from embdi.edgelist import EdgeList
 
 import pandas as pd
 

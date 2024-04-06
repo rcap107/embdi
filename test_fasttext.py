@@ -1,6 +1,6 @@
 import pandas as pd
 import fasttext
-from EmbDI.entity_resolution import entity_resolution
+from embdi.entity_resolution import entity_resolution
 import csv
 import os.path as osp
 import datetime as dt

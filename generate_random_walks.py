@@ -7,9 +7,9 @@ readme for more details.
 
 '''
 
-from EmbDI.utils import *
-from EmbDI.graph import graph_generation
-from EmbDI.sentence_generation_strategies import random_walks_generation
+from embdi.utils import *
+from embdi.graph import graph_generation
+from embdi.sentence_generation_strategies import random_walks_generation
 import pandas as pd
 
 import argparse

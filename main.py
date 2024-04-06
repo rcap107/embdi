@@ -5,14 +5,14 @@ import warnings
 
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
-    from EmbDI.embeddings import learn_embeddings
-    from EmbDI.sentence_generation_strategies import random_walks_generation
-    from EmbDI.utils import *
+    from embdi.embeddings import learn_embeddings
+    from embdi.sentence_generation_strategies import random_walks_generation
+    from embdi.utils import *
 
-    from EmbDI.testing_functions import test_driver, match_driver
-    from EmbDI.graph import graph_generation
+    from embdi.testing_functions import test_driver, match_driver
+    from embdi.graph import graph_generation
     # TODO: implement proper logging
-    from EmbDI.logging import *
+    from embdi.logging import *
 
 
 def parse_args():

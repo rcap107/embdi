@@ -3,8 +3,8 @@ import random
 
 from tqdm import tqdm
 
-from EmbDI.graph import Node
-from EmbDI.utils import *
+from embdi.graph import Node
+from embdi.utils import *
 
 
 class RandomWalk:

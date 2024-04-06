@@ -1,10 +1,10 @@
 import os
 
-from EmbDI.embeddings_quality import embeddings_quality
-from EmbDI.entity_resolution import entity_resolution
-from EmbDI.logging import *
-from EmbDI.schema_matching import schema_matching
-from EmbDI.utils import remove_prefixes
+from embdi.embeddings_quality import embeddings_quality
+from embdi.entity_resolution import entity_resolution
+from embdi.logging import *
+from embdi.schema_matching import schema_matching
+from embdi.utils import remove_prefixes
 
 
 def test_driver(embeddings_file, configuration=None):

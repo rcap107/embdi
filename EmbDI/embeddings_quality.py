@@ -4,7 +4,7 @@ import os
 import gensim.models as models
 import warnings
 from itertools import chain
-from EmbDI.utils import *
+from embdi.utils import *
 
 def _test_no_match_columns(model, list_files):
     correct = 0

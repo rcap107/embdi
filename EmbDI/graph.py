@@ -4,9 +4,9 @@ import random
 
 from tqdm import tqdm
 
-from EmbDI.aliased_randomizer import prepare_aliased_randomizer
-from EmbDI.utils import *
-from EmbDI.logging import *
+from embdi.aliased_randomizer import prepare_aliased_randomizer
+from embdi.utils import *
+from embdi.logging import *
 
 try:
     import networkx as nx
