@@ -1,11 +1,11 @@
-task:train-test
-input_file:pipeline/edgelists/amazon_google-er-edgelist.txt
-dataset_info:pipeline/info/info-amazon_google.txt
+task:train
+input_file:data/edgelists/amazon_google-er-edgelist.txt
+dataset_info:data/info/info-amazon_google.txt
 output_file:amazon_google-ER
 flatten:tt
 experiment_type:ER
-match_file:pipeline/matches/er-matches/matches-amazon_google.txt
-dataset_file:pipeline/datasets/amazon_google/amazon_google-master.csv
+match_file:data/matches/er-matches/matches-amazon_google.txt
+dataset_file:data/datasets/amazon_google/amazon_google-master.csv
 ntop:10
 ncand:1
 max_rank:3
@@ -24,4 +24,4 @@ intersection:false
 mlflow:false
 repl_numbers:False
 repl_strings:False
-# walks_file:/Users/rcap/Projects/embdi/pipeline/walks/amazon_google-ER.walks
+# walks_file:/Users/rcap/Projects/embdi/data/walks/amazon_google-ER.walks
