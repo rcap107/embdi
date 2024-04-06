@@ -13,13 +13,13 @@ try:
 
     NX_NOT_FOUND = False
 except ModuleNotFoundError:
-    warnings.warn('NetworkX not found. Graph conversion unavailable')
+    warnings.warn("NetworkX not found. Graph conversion unavailable")
     NX_NOT_FOUND = True
 
 
 class Node:
     """
-        Cell class used to describe the nodes that build the graph.
+    Cell class used to describe the nodes that build the graph.
     """
 
     def __init__(self, name, type, node_class, numeric):
@@ -38,13 +38,12 @@ class Node:
         self.numeric = numeric
 
     def _extract_class(self, node_type):
-        bb = '{:03b}'.format(node_type)
-        for i, _ in enumerate(['isfirst', 'isroot', 'isappear']):
+        bb = "{:03b}".format(node_type)
+        for i, _ in enumerate(["isfirst", "isroot", "isappear"]):
             self.node_class[_] = bool(int(bb[i]))
 
     def set_frequency(self, frequency):
         self.frequency = frequency
-
 
     def get_random_start(self):
         if len(self.startfrom) > 0:
@@ -66,14 +65,20 @@ class Node:
     def add_neighbor(self, neighbor, weight):
         if neighbor not in self.neighbors:
             self.neighbors[neighbor.name] = weight
-            if neighbor.node_class['isfirst']:
+            if neighbor.node_class["isfirst"]:
                 self.startfrom.append(neighbor.name)
         else:
             if neighbor in self.neighbors and self.neighbors[neighbor.name] != weight:
-                raise ValueError('Duplicate edge {} {} found, weights are different.'.format(self.name, neighbor))
+                raise ValueError(
+                    "Duplicate edge {} {} found, weights are different.".format(
+                        self.name, neighbor
+                    )
+                )
 
     def get_random_replacement(self):
-        return random.choices(self.similar_tokens, weights=self.similar_distance, k=1)[0]
+        return random.choices(self.similar_tokens, weights=self.similar_distance, k=1)[
+            0
+        ]
 
     def normalize_neighbors(self, uniform):
         self.neighbor_names = np.array(list(self.neighbors.keys()))
@@ -81,7 +86,9 @@ class Node:
         # self.neighbor_frequencies = np.array(list(self.neighbors.values()))
 
         # if not uniform:
-        self.random_neigh = prepare_aliased_randomizer(self.neighbor_names, np.array(list(self.neighbors.values())))
+        self.random_neigh = prepare_aliased_randomizer(
+            self.neighbor_names, np.array(list(self.neighbors.values()))
+        )
         self.startfrom = np.array(self.startfrom)
         self.neighbors = None
 
@@ -89,26 +96,32 @@ class Node:
         raise NotImplementedError
         if np.nan in self.left:
             self.left.remove(np.nan)
-        if '' in self.left:
-            self.left.remove('')
+        if "" in self.left:
+            self.left.remove("")
         self.left = list(self.left)
 
         if np.nan in self.right:
             self.right.remove(np.nan)
-        if '' in self.right:
-            self.right.remove('')
+        if "" in self.right:
+            self.right.remove("")
         self.right = list(self.right)
 
         if len(self.similar_distance) > 1:
             candidates_replacement = self.similar_distance[1:]
             sum_cand = sum(candidates_replacement)
             if sum_cand >= 1:
-                candidates_replacement = np.array(candidates_replacement) / sum_cand * (1 - self.p_stay)
+                candidates_replacement = (
+                    np.array(candidates_replacement) / sum_cand * (1 - self.p_stay)
+                )
             else:
-                candidates_replacement = np.array(candidates_replacement) * sum_cand * (1 - self.p_stay)
+                candidates_replacement = (
+                    np.array(candidates_replacement) * sum_cand * (1 - self.p_stay)
+                )
         else:
             candidates_replacement = []
-        self.similar_distance = [1 - sum(candidates_replacement)] + list(candidates_replacement)
+        self.similar_distance = [1 - sum(candidates_replacement)] + list(
+            candidates_replacement
+        )
         self.n_similar = len(self.similar_tokens)
 
     def add_similar(self, other, distance):
@@ -134,7 +147,7 @@ class Graph:
         :return: n_sentences
         """
         n = len(self.nodes) * factor // sentence_length
-        print('# {} sentences will be generated.'.format(n))
+        print("# {} sentences will be generated.".format(n))
         return n
 
     def add_edge(self, node_from, node_to, weight_forward, weight_back=None):
@@ -174,32 +187,36 @@ class Graph:
     def produce_intersection(self, intersecting_nodes):
         intersection = set()
         for node in self.nodes:
-            prefix, name = node.split('__')
+            prefix, name = node.split("__")
             if name in intersecting_nodes:
                 intersection.add(node)
         return intersection
 
     def _get_node_type(self, node):
         for pre in self.node_classes:
-            if node.startswith(pre + '__'):
+            if node.startswith(pre + "__"):
                 return pre
-        raise ValueError('Node {} does not have a recognized prefix. '
-                         'Currently recognized node_classes:\n'.format(node, ' '.join(self.node_classes)))
+        raise ValueError(
+            "Node {} does not have a recognized prefix. "
+            "Currently recognized node_classes:\n".format(
+                node, " ".join(self.node_classes)
+            )
+        )
 
     def _check_flatten(self):
-        if self.to_flatten != 'all':
+        if self.to_flatten != "all":
             for _ in self.to_flatten:
                 if _[:] not in self.node_classes:
-                    raise ValueError('Unknown to-flatten type {}.'.format(_))
+                    raise ValueError("Unknown to-flatten type {}.".format(_))
 
     def _extract_prefix(self, prefixes):
         valid = False
         for prefix in prefixes:
-            prefix_properties, pref = prefix.split('__')
+            prefix_properties, pref = prefix.split("__")
             strnum = prefix_properties[1]
             rwclass = int(prefix_properties[0])
             if rwclass not in range(8):
-                raise ValueError('Unknown class {}'.format(rwclass))
+                raise ValueError("Unknown class {}".format(rwclass))
             else:
                 self.node_classes[pref] = rwclass
                 if rwclass >= 4:
@@ -207,13 +224,15 @@ class Graph:
             if int(rwclass) % 2 == 1:
                 self.isappear.append(prefix)
                 valid = True
-            if strnum not in ['#', '$']:
-                raise ValueError('Unknown type prefix {}'.format(strnum))
+            if strnum not in ["#", "$"]:
+                raise ValueError("Unknown type prefix {}".format(strnum))
             else:
-                self.node_is_numeric[pref] = True if strnum == '#' else False
+                self.node_is_numeric[pref] = True if strnum == "#" else False
         if not valid:
-            raise ValueError('No node class with "isappear"==True is present. '
-                             'All random walks will be empty. Terminating. ')
+            raise ValueError(
+                'No node class with "isappear"==True is present. '
+                "All random walks will be empty. Terminating. "
+            )
 
     def __init__(self, edgelist, prefixes, sim_list=None, flatten=[]):
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
@@ -236,23 +255,23 @@ class Graph:
         self._check_flatten()
         self.uniform = True
 
-        if flatten == 'all':
-            print('# Flatten = all, all strings will be expanded.')
+        if flatten == "all":
+            print("# Flatten = all, all strings will be expanded.")
             self.to_flatten = self.node_classes
         elif len(self.to_flatten) > 0:
-            print('# Expanding columns: [{}].'.format(', '.join(self.to_flatten)))
+            print("# Expanding columns: [{}].".format(", ".join(self.to_flatten)))
         elif not flatten:
-            print('# All values will be tokenized. ')
+            print("# All values will be tokenized. ")
         else:
-            print('# All values will be tokenized. ')
+            print("# All values will be tokenized. ")
 
         # pbar = tqdm()
-        for line in tqdm(edgelist, desc='# Loading edgelist_file.'):
+        for line in tqdm(edgelist, desc="# Loading edgelist_file."):
             n1 = line[0]
             n2 = line[1]
 
             if n1 is np.nan or n2 is np.nan:
-                raise ValueError('{} or {} are NaNs.'.format(n1, n2))
+                raise ValueError("{} or {} are NaNs.".format(n1, n2))
 
             to_link = []
 
@@ -268,7 +287,9 @@ class Graph:
                 w1 = line[2]
                 w2 = None
             else:
-                raise ValueError('Line {} does not contain the correct number of values'.format(line))
+                raise ValueError(
+                    "Line {} does not contain the correct number of values".format(line)
+                )
 
             if w1 != w2 or w2 is None:
                 self.uniform = False
@@ -289,24 +310,35 @@ class Graph:
                 # npr, nn = node_name.split('__', maxsplit=1)
                 if node_prefix in self.to_flatten:
                     # node_prefix = node_name.split('__', maxsplit=1)[0]
-                    valsplit = node_name.split('_')
+                    valsplit = node_name.split("_")
                     for idx, val in enumerate(valsplit):
-                        if idx == 0 and val in self.node_classes or val == '':
+                        if idx == 0 and val in self.node_classes or val == "":
                             continue
-                        nn = node_prefix + '__' + val
+                        nn = node_prefix + "__" + val
                         if nn not in self.nodes:
-                            node = Node(nn, node_prefix, node_class=self.node_classes[node_prefix],
-                                        numeric=False)
+                            node = Node(
+                                nn,
+                                node_prefix,
+                                node_class=self.node_classes[node_prefix],
+                                numeric=False,
+                            )
                             self.nodes[nn] = node
-                    tl += [self.nodes[node_prefix + '__' + _] for ii, _ in enumerate(valsplit)
-                           if (ii > 0 and _ != '')]
+                    tl += [
+                        self.nodes[node_prefix + "__" + _]
+                        for ii, _ in enumerate(valsplit)
+                        if (ii > 0 and _ != "")
+                    ]
                     # to_link.append()
                 # else:
                 # node_prefix = node_name.split('__', maxsplit=1)[0]
 
                 if node_name not in self.nodes:
-                    node = Node(node_name, node_prefix, node_class=self.node_classes[node_prefix],
-                                numeric=self.node_is_numeric[node_prefix])
+                    node = Node(
+                        node_name,
+                        node_prefix,
+                        node_class=self.node_classes[node_prefix],
+                        numeric=self.node_is_numeric[node_prefix],
+                    )
                     self.nodes[node_name] = node
                 tl.append(self.nodes[node_name])
                 to_link.append(set(tl))
@@ -318,12 +350,12 @@ class Graph:
 
         to_delete = []
         if len(self.nodes) == 0:
-            raise ValueError(f'No nodes found in edgelist!')
-        for node_name in tqdm(self.nodes, desc='# Preparing aliased randomizer.'):
-            if self.nodes[node_name].node_class['isroot']:
+            raise ValueError(f"No nodes found in edgelist!")
+        for node_name in tqdm(self.nodes, desc="# Preparing aliased randomizer."):
+            if self.nodes[node_name].node_class["isroot"]:
                 self.cell_list.append(node_name)
             if len(self.nodes[node_name].neighbors) == 0:
-                raise ValueError('Node {} has no neighbors'.format(node_name))
+                raise ValueError("Node {} has no neighbors".format(node_name))
             else:
                 self.nodes[node_name].normalize_neighbors(uniform=self.uniform)
         for node_name in to_delete:
@@ -334,7 +366,7 @@ class Graph:
 
     def convert_to_nx(self):
         if NX_NOT_FOUND:
-            raise ImportError('NetworkX not found.')
+            raise ImportError("NetworkX not found.")
         else:
             nxg = nx.Graph()
             for edge in self.edges:
@@ -350,25 +382,29 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     :return: the generated graph
     """
     # Read external info file to perform replacement.
-    if configuration['walks_strategy'] == 'replacement':
+    if configuration["walks_strategy"] == "replacement":
         raise NotImplementedError
-        print('# Reading similarity file {}'.format(configuration['similarity_file']))
-        list_sim = read_similarities(configuration['similarity_file'])
+        print("# Reading similarity file {}".format(configuration["similarity_file"]))
+        list_sim = read_similarities(configuration["similarity_file"])
     else:
         list_sim = None
 
-    if 'flatten' in configuration and configuration['flatten']:
-        if configuration['flatten'].lower() not in ['all', 'false']:
-            flatten = configuration['flatten'].strip().split(',')
-        elif configuration['flatten'].lower() == 'false':
+    if "flatten" in configuration and configuration["flatten"]:
+        if configuration["flatten"].lower() not in ["all", "false"]:
+            flatten = configuration["flatten"].strip().split(",")
+        elif configuration["flatten"].lower() == "false":
             flatten = []
         else:
-            flatten = 'all'
+            flatten = "all"
     else:
         flatten = []
 
     t_start = datetime.datetime.now()
-    print(OUTPUT_FORMAT.format('Starting graph construction', t_start.strftime(TIME_FORMAT)))
+    print(
+        OUTPUT_FORMAT.format(
+            "Starting graph construction", t_start.strftime(TIME_FORMAT)
+        )
+    )
     if dictionary:
         for __ in edgelist:
             l = []
@@ -382,7 +418,13 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
     t_end = datetime.datetime.now()
     dt = t_end - t_start
     print()
-    print(OUTPUT_FORMAT.format('Graph construction complete', t_end.strftime(TIME_FORMAT)))
-    print(OUTPUT_FORMAT.format('Time required to build graph:', f'{dt.total_seconds():.2f} seconds.'))
+    print(
+        OUTPUT_FORMAT.format("Graph construction complete", t_end.strftime(TIME_FORMAT))
+    )
+    print(
+        OUTPUT_FORMAT.format(
+            "Time required to build graph:", f"{dt.total_seconds():.2f} seconds."
+        )
+    )
     metrics.time_graph = dt.total_seconds()
     return g

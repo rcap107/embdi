@@ -35,9 +35,13 @@ class RandomWalk:
                 current_node_name = current_node.get_weighted_random_neighbor()
 
             if repl_numbers:
-                current_node_name = self.replace_numeric_value(current_node_name, graph_nodes)
+                current_node_name = self.replace_numeric_value(
+                    current_node_name, graph_nodes
+                )
             if repl_strings:
-                current_node_name, replaced_node = self.replace_string_value(graph_nodes[current_node_name])
+                current_node_name, replaced_node = self.replace_string_value(
+                    graph_nodes[current_node_name]
+                )
             else:
                 replaced_node = current_node_name
             if not backtrack and current_node_name == self.walk[-1]:
@@ -77,7 +81,9 @@ class RandomWalk:
             except OverflowError:
                 return str(value)
             while (
-                new_val not in nodes.keys() and str(new_val) not in nodes.keys() and float(new_val) not in nodes.keys()
+                new_val not in nodes.keys()
+                and str(new_val) not in nodes.keys()
+                and float(new_val) not in nodes.keys()
             ):
                 if cc > 1:
                     return str(value)
@@ -129,7 +135,9 @@ def generate_walks(parameters, graph, intersection=None):
         n_cells = len(intersection)
     random_walks_per_node = n_sentences // n_cells
 
-    sentence_distribution = dict(zip([strat for strat in strategies], [0 for _ in range(len(strategies))]))
+    sentence_distribution = dict(
+        zip([strat for strat in strategies], [0 for _ in range(len(strategies))])
+    )
 
     # ########### Random walks ############
     # print('Generating random walks.')
@@ -146,7 +154,10 @@ def generate_walks(parameters, graph, intersection=None):
     count_cells = 0
 
     if random_walks_per_node > 0:
-        pbar = tqdm(desc="# Sentence generation progress: ", total=len(intersection) * random_walks_per_node)
+        pbar = tqdm(
+            desc="# Sentence generation progress: ",
+            total=len(intersection) * random_walks_per_node,
+        )
         for cell in intersection:
             # if cell in intersection:
             r = []
@@ -181,7 +192,9 @@ def generate_walks(parameters, graph, intersection=None):
     if needed > 0:
         t_comp = datetime.datetime.now()
         str_comp_time = t_comp.strftime(TIME_FORMAT)
-        print(OUTPUT_FORMAT.format("Completing fraction of random walks.", str_comp_time))
+        print(
+            OUTPUT_FORMAT.format("Completing fraction of random walks.", str_comp_time)
+        )
 
         with tqdm(total=needed, desc="# Sentence generation progress: ") as pbar:
             l_int = list(intersection)
@@ -217,6 +230,7 @@ def generate_walks(parameters, graph, intersection=None):
 
     if parameters["write_walks"]:
         fp_walks.close()
+        # TODO: compress walks file
         return walks_file
     else:
         return sentences
@@ -253,10 +267,14 @@ def random_walks_generation(configuration, graph):
             warnings.warn("Executing intersection while flatten = True.")
         # Find the intersection
         df = pd.read_csv(configuration["dataset_file"])
-        intersecting_nodes = find_intersection_flatten(df, configuration["dataset_info"])
+        intersecting_nodes = find_intersection_flatten(
+            df, configuration["dataset_info"]
+        )
         intersection = graph.produce_intersection(intersecting_nodes)
         if len(intersection) == 0:
-            warnings.warn("Datasets have no tokens in common. Falling back to no-intersection.")
+            warnings.warn(
+                "Datasets have no tokens in common. Falling back to no-intersection."
+            )
             intersection = None
         else:
             print("# Number of common values: {}".format(len(intersection)))

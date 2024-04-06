@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 
-from EmbDI.entity_resolution import entity_resolution
+from embdi.entity_resolution import entity_resolution
 
 
 def concatenate_word_embs(row, model):

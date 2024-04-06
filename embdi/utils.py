@@ -49,7 +49,6 @@ def remove_prefixes(edgelist_file, model_file):
             else:
                 fo.write(line)
 
-
     return newf
 
 
@@ -382,12 +381,17 @@ def check_config_validity(config):
             raise ValueError("Sentence length must be > 0.")
 
         try:
-            config["n_sentences"] = int(config["n_sentences"])
-            if not config["n_sentences"] > 0:
-                raise ValueError("Number of sentences must be > 0.")
+            n_sentences = int(config["n_sentences"])
+            if n_sentences < 0 and n_sentences != -1:
+                raise ValueError
+            if n_sentences == -1:
+                config["n_sentences"] = "default"
+            else:
+                config["n_sentences"] = n_sentences
         except ValueError:
-            if config["n_sentences"] != "default":
-                raise ValueError('Expected integer n_sentences value, or "default".')
+            raise ValueError(
+                f"n_sentences must be a positive integer, or -1. Found {n_sentences}"
+            )
 
         try:
             config["n_dimensions"] = int(config["n_dimensions"])
