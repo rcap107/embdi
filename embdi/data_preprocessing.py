@@ -31,7 +31,8 @@ def check_info(df, columns=[]):
         print("Duplicated values: ", gr_title_count[gr_title_count["id"] > 1].shape[0])
         print(
             "Duplicated instances: ",
-            gr_title_count[gr_title_count["id"] > 1]["id"].sum() - gr_title_count[gr_title_count["id"] > 1].shape[0],
+            gr_title_count[gr_title_count["id"] > 1]["id"].sum()
+            - gr_title_count[gr_title_count["id"] > 1].shape[0],
         )
         print("===================")
 
@@ -104,12 +105,18 @@ def data_preprocessing(dfs, params):
             df = df.replace(pattern, np.nan)
 
         # Extract the columns needed to perform different operations on
-        num_columns = [_ for _ in parameters["round_columns"].split(",") if _ in df.columns]
-        split_columns = [_ for _ in parameters["split_columns"].split(",") if _ in df.columns]
+        num_columns = [
+            _ for _ in parameters["round_columns"].split(",") if _ in df.columns
+        ]
+        split_columns = [
+            _ for _ in parameters["split_columns"].split(",") if _ in df.columns
+        ]
         if parameters["tokenize_shared"]:
             expand_columns = df.columns
         else:
-            expand_columns = [_ for _ in parameters["expand_columns"].split(",") if _ in df.columns]
+            expand_columns = [
+                _ for _ in parameters["expand_columns"].split(",") if _ in df.columns
+            ]
 
         # normalize text: lower/trim/replace by space/remove bad chars/concatenate string
         for c in df.columns:
@@ -119,22 +126,38 @@ def data_preprocessing(dfs, params):
 
                 if c in num_columns:
                     warnings.warn(
-                        "Column {} is marked to be rounded, but it contains non-numeric characters.".format(c)
+                        "Column {} is marked to be rounded, but it contains non-numeric characters.".format(
+                            c
+                        )
                     )
-                    df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_NUMBERS, "", str(x)))
+                    df[c] = df[c].apply(
+                        lambda x: re.sub(BAD_SYMBOLS_NUMBERS, "", str(x))
+                    )
                     try:
                         df[c] = df[c].replace("", np.nan).astype(float)
                     except ValueError():
-                        print("Something went wrong. Wrong type found. Skipping column {}".format(c))
+                        print(
+                            "Something went wrong. Wrong type found. Skipping column {}".format(
+                                c
+                            )
+                        )
                 else:
                     if not parameters["case_sensitive"]:
                         df[c] = df[c].str.lower()
                     # If the column under observation is a list, it will be expanded
                     if c in split_columns:
-                        df[c] = df[c].apply(_split_lists, delimiter=parameters["split_delimiter"])
+                        df[c] = df[c].apply(
+                            _split_lists, delimiter=parameters["split_delimiter"]
+                        )
                     else:
-                        df[c] = df[c].apply(lambda x: re.sub(BAD_SYMBOLS_RE, "", str(x)))
-                        df[c] = df[c].apply(lambda x: re.sub(REPLACE_BY_SPACE_RE, " ", str(x).strip().lower()))
+                        df[c] = df[c].apply(
+                            lambda x: re.sub(BAD_SYMBOLS_RE, "", str(x))
+                        )
+                        df[c] = df[c].apply(
+                            lambda x: re.sub(
+                                REPLACE_BY_SPACE_RE, " ", str(x).strip().lower()
+                            )
+                        )
                         # If the column should be expanded,
                         if c in expand_columns:
                             df[c] = df[c].apply(lambda x: re.sub(r"\s+", "_", str(x)))
@@ -188,12 +211,23 @@ def data_preprocessing(dfs, params):
     # merge
     if parameters["auto_merge"]:
         if len(all_merge_columns) == 0:
-            all_merge_columns = [_ for _ in parameters["merge_columns"].split(",") if _ in concat_df.columns]
+            all_merge_columns = [
+                _
+                for _ in parameters["merge_columns"].split(",")
+                if _ in concat_df.columns
+            ]
         if len(all_merge_columns) > 0:
             # get unique values
             uniq_values = set(concat_df[all_merge_columns].astype(str).values.ravel())
-            lsh = LSHMerge(uniq_values, parameters["mh_k_shingles"], parameters["mh_threshold"], parameters["mh_perm"])
-            replacement = lsh.get_replacement(parameters["distance"], parameters["distance_threshold"])
+            lsh = LSHMerge(
+                uniq_values,
+                parameters["mh_k_shingles"],
+                parameters["mh_threshold"],
+                parameters["mh_perm"],
+            )
+            replacement = lsh.get_replacement(
+                parameters["distance"], parameters["distance_threshold"]
+            )
 
             # rep_path = '../pipeline/replacements/'
             # with open(rep_path + parameters['output_file'] + '.txt', 'wb') as fp:
@@ -209,7 +243,9 @@ def data_preprocessing(dfs, params):
         for c in concat_df.columns:
             c_idx = concat_df.columns.get_loc(c)
             concat_df.loc[concat_df[c] == "", c] = (
-                c_idx + "_null_" + concat_df.loc[concat_df[c] == "", c].index.astype(str)
+                c_idx
+                + "_null_"
+                + concat_df.loc[concat_df[c] == "", c].index.astype(str)
             )
     elif parameters["missing_value_strategy"] == "one_null":
         concat_df = concat_df.replace("", "null")
@@ -218,7 +254,9 @@ def data_preprocessing(dfs, params):
 
 
 def _remove_stop_words(text, delimiter=" "):
-    text = delimiter.join([word for word in text.split(delimiter) if word not in STOPWORDS])
+    text = delimiter.join(
+        [word for word in text.split(delimiter) if word not in STOPWORDS]
+    )
     return text
 
 
@@ -357,7 +395,14 @@ def write_info_file(dfs, output, f=[]):
 
 
 class LSHMerge:
-    def __init__(self, uniq_values, k_shingles=3, mh_threshold=0.5, mh_num_perm=128, delimiter="_"):
+    def __init__(
+        self,
+        uniq_values,
+        k_shingles=3,
+        mh_threshold=0.5,
+        mh_num_perm=128,
+        delimiter="_",
+    ):
         self.k_shingles = k_shingles
         self.mh_threshold = mh_threshold
         self.mh_num_perm = mh_num_perm
@@ -374,7 +419,12 @@ class LSHMerge:
 
     def _generate_hash(self, value):
         if isinstance(self.k_shingles, int):
-            shingles = set([value[max(0, i - self.k_shingles) : i] for i in range(self.k_shingles, len(value) + 1)])
+            shingles = set(
+                [
+                    value[max(0, i - self.k_shingles) : i]
+                    for i in range(self.k_shingles, len(value) + 1)
+                ]
+            )
         elif self.k_shingles == "word":
             shingles = set(value.split(self.delimiter))
 
@@ -420,7 +470,11 @@ class LSHMerge:
             s.remove(token)
             m = self._generate_hash(token)
             similarities = self.lsh.query(m)
-            similarities = [_ for _ in similarities if _ not in replacement.values() and _ not in replacement.keys()]
+            similarities = [
+                _
+                for _ in similarities
+                if _ not in replacement.values() and _ not in replacement.keys()
+            ]
             if len(similarities) > 1:
                 scores = {}
                 bin_replacement = {}
@@ -430,7 +484,11 @@ class LSHMerge:
                         candidates = []
                         for idx_compared in range(idx + 1, len(similarities)):
                             candidate = similarities[idx_compared]
-                            if item != candidate and get_levenshtein_distance(item, candidate) < threshold:
+                            if (
+                                item != candidate
+                                and get_levenshtein_distance(item, candidate)
+                                < threshold
+                            ):
                                 if idx not in bin_replacement:
                                     bin_replacement[idx] = [idx_compared]
                                 else:
@@ -440,13 +498,18 @@ class LSHMerge:
                                 else:
                                     bin_replacement[idx_compared].append(idx)
 
-                    for idx_item, candidates in sorted(bin_replacement.items(), key=lambda x: -len(x[1])):
+                    for idx_item, candidates in sorted(
+                        bin_replacement.items(), key=lambda x: -len(x[1])
+                    ):
                         item = similarities[idx_item]
                         if item in replacement.keys():
                             item = replacement[item]
                         for idx_candidate in candidates:
                             candidate = similarities[idx_candidate]
-                            if candidate != item and candidate not in replacement.keys():
+                            if (
+                                candidate != item
+                                and candidate not in replacement.keys()
+                            ):
                                 if item not in replacement.keys():
                                     replacement[candidate] = item
                                 elif replacement[item] != candidate:
@@ -529,4 +592,6 @@ if __name__ == "__main__":
     # check_info(df_c, ['title', 'manufacturer', 'description'])
 
     # Export the file
-    df_c.to_csv("../pipeline/datasets/" + parameters["output_file"] + ".csv", index=False)
+    df_c.to_csv(
+        "../pipeline/datasets/" + parameters["output_file"] + ".csv", index=False
+    )
