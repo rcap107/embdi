@@ -5,9 +5,6 @@ import string
 import tarfile
 from pathlib import Path
 
-import polars as pl
-import src.utils.plotting as plotting
-
 RUN_ID_PATH = Path("results/run_id")
 SCENARIO_ID_PATH = Path("results/scenario_id")
 
