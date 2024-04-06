@@ -6,18 +6,19 @@ Author: Riccardo Cappuzzo
 """
 
 import datetime
+import tomllib
 from pathlib import Path
 
 import pandas as pd
 
-from EmbDI.embeddings import learn_embeddings
-from EmbDI.graph import graph_generation
+from embdi.embeddings import learn_embeddings
+from embdi.graph import graph_generation
 
 # TODO: implement proper logging
-from EmbDI.logging import *
-from EmbDI.sentence_generation_strategies import random_walks_generation
-from EmbDI.testing_functions import match_driver, test_driver
-from EmbDI.utils import (
+from embdi.logging import *
+from embdi.sentence_generation_strategies import random_walks_generation
+from embdi.testing_functions import match_driver, test_driver
+from embdi.utils import (
     OUTPUT_FORMAT,
     TIME_FORMAT,
     check_config_validity,
@@ -152,21 +153,7 @@ def matching_driver(configuration):
 
 
 def read_configuration(config_file):
-    # TODO: convert this to reading toml
-    config = {}
-
-    with open(config_file, "r") as fp:
-        for idx, line in enumerate(fp):
-            line = line.strip()
-            if len(line) == 0 or line[0] == "#":
-                continue
-            split_line = line.split(":")
-            if len(split_line) < 2:
-                continue
-            else:
-                key, value = split_line
-                value = value.strip()
-                config[key] = value
+    config = tomllib.load(open(config_file, "rb"))
     return config
 
 

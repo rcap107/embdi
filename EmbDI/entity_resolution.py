@@ -5,7 +5,7 @@ import pickle
 import gensim.models as models
 from tqdm import tqdm
 
-from EmbDI.utils import *
+from embdi.utils import *
 
 NGT_NOT_FOUND = ANNOY_NOT_FOUND = FAISS_NOT_FOUND = False
 

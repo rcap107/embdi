@@ -11,9 +11,9 @@ import argparse
 
 import pandas as pd
 
-from EmbDI.graph import graph_generation
-from EmbDI.sentence_generation_strategies import random_walks_generation
-from EmbDI.utils import *
+from embdi.graph import graph_generation
+from embdi.sentence_generation_strategies import random_walks_generation
+from embdi.utils import *
 
 
 def parse_args(args):

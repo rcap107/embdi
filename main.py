@@ -3,9 +3,9 @@ import datetime
 from pathlib import Path
 
 # TODO: implement proper logging
-from EmbDI.logging import *
-from EmbDI.pipeline import full_run
-from EmbDI.utils import OUTPUT_FORMAT, TIME_FORMAT
+from embdi.logging import *
+from embdi.pipeline import full_run
+from embdi.utils import OUTPUT_FORMAT, TIME_FORMAT
 
 
 def parse_args():
