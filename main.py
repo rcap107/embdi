@@ -1,19 +1,14 @@
 import argparse
 import datetime
-from pathlib import Path
-
 import warnings
+import os
 
 with warnings.catch_warnings():
     warnings.simplefilter('ignore')
-    from embdi.embeddings import learn_embeddings
-    from embdi.sentence_generation_strategies import random_walks_generation
-    from embdi.utils import *
-
-    from embdi.testing_functions import test_driver, match_driver
-    from embdi.graph import graph_generation
     # TODO: implement proper logging
-    from embdi.logging import *
+    # from embdi.logging import *
+    from embdi.pipeline import full_run
+    from embdi.utils import TIME_FORMAT, OUTPUT_FORMAT
 
 
 def parse_args():
