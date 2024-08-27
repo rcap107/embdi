@@ -57,13 +57,21 @@ some dependencies may conflict with existing installations.
 
 First, create and activate the env with conda:
 ```
-conda create -n embdi "python>=3.12" pip
+conda create -n embdi "python>=3.10" pip
 conda activate embdi
 ```
 Then, install the packages:
 ```
 pip install -r requirements.txt
 ```
+
+Finally, run the code: 
+```
+python main.py -f pipeline/config_files/reproducibility/entity_resolution/config-amazon_google-er
+```
+Note that this assumes that the folder `pipeline` has already been prepared with 
+the required files. If that is not the case, additional steps must be performed 
+to build the edgelist. 
 
 
 ### Directory tree
