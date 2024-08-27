@@ -1,11 +1,11 @@
+scipy==1.13.1
 gensim==4.3.2
-datasketch==1.6.4
-strsim==0.0.3
-scikit-learn==1.4.1
+datasketch
+strsim
+scikit-learn
 numpy==1.26.4
 pandas==2.2.1
 tqdm==4.66.2
 networkx==3.2.1
 nltk==3.8.1
 pre-commit
-toml
