@@ -1,9 +1,6 @@
-gensim==4.2.0
-datasketch
-strsim
-scikit-learn
-numpy
-pandas
-tqdm
-networkx
-nltk
+gensim==4.3.3
+scikit-learn==1.5.1
+numpy==1.26.4
+pandas==2.2.2
+tqdm==4.66.5
+networkx==3.3
