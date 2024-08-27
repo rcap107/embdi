@@ -37,6 +37,20 @@ perform the tasks specified by the user.
 ### Contacts
 Contact `riccardo [dot] cappuzzo [at] inria [dot] fr` for any inquiries.
 
+### Quick start & installation
+We recommend creating a new environment to install the required packages, as 
+some dependencies may conflict with existing installations. 
+
+First, create and activate the env with conda:
+```
+conda create -n embdi "python>=3.12" pip
+conda activate embdi
+```
+Then, install the packages:
+```
+pip install -r requirements.txt
+```
+
 
 ### Directory tree
 Due to the different files required to run the code, both input and output files are saved in a directory

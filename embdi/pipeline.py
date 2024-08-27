@@ -68,8 +68,10 @@ def embeddings_generation(walks, configuration, dictionary):
 
 
 def training_driver(configuration):
-    """This function trains local embeddings according to the parameters specified in the configuration. The input dataset is transformed into a graph,
-    then random walks are generated and the result is passed to the embeddings training algorithm.
+    """This function trains local embeddings according to the parameters 
+    specified in the configuration. The input dataset is transformed into a graph,
+    then random walks are generated and the result is passed to the embeddings 
+    training algorithm.
 
     """
     edgelist_df = pd.read_csv(configuration["input_file"], dtype=str, index_col=False)
