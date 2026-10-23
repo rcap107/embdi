@@ -1,0 +1,554 @@
+{
+  "archive": {
+    "key": "EmbDI datasets.zip",
+    "md5": "70036bc7482a6614d55d6054058ca17b",
+    "size": 1421696261
+  },
+  "concept_doi": "10.5281/zenodo.7930460",
+  "doi": "10.5281/zenodo.7930461",
+  "extract_prefixes": [
+    "EmbDI datasets/pipeline/datasets/",
+    "EmbDI datasets/pipeline/edgelists/",
+    "EmbDI datasets/pipeline/test_dir/"
+  ],
+  "files": {
+    "pipeline/datasets/amazon_google/amazon_google-master-sm.csv": {
+      "sha256": "e52df2e73295453ed05599c3a2a49a1edcc4cf8d9f66ebacf0dcba3b4503aa2a",
+      "size": 299176
+    },
+    "pipeline/datasets/amazon_google/amazon_google-master.csv": {
+      "sha256": "3e298d0e667b68a858f776abf281f349276a09890b9b1eb82e4866c7014f3472",
+      "size": 285372
+    },
+    "pipeline/datasets/beer/beer-master-sm.csv": {
+      "sha256": "2e4861864451fc442c4abbbc178572eff6eb769a3fb6178d4fc27d30c70f22c9",
+      "size": 530062
+    },
+    "pipeline/datasets/beer/beer-master.csv": {
+      "sha256": "7b2bf9a51370ceee33e2d377829d760d20a448915deca77e9f519952c9d851b3",
+      "size": 501293
+    },
+    "pipeline/datasets/dblp_acm/dblp_acm-master-sm.csv": {
+      "sha256": "cbfe108e5692ae06895392a48bac5b2f300fd4e2aed28e53a382557528a0bb3e",
+      "size": 678852
+    },
+    "pipeline/datasets/dblp_acm/dblp_acm-master.csv": {
+      "sha256": "cd5899211947ece11c561eb9582c4b28c81cbab07482f29fe480017dd3c21b78",
+      "size": 634581
+    },
+    "pipeline/datasets/dblp_scholar/dblp_scholar-master-sm.csv": {
+      "sha256": "153e7511fd6b7e8e0692ef3d495a8cb8f65ffa827f45985995cd70d841c37914",
+      "size": 7582546
+    },
+    "pipeline/datasets/dblp_scholar/dblp_scholar-master.csv": {
+      "sha256": "42b9117a8a9d90ea2597ee24b8c38972263f0d6356e84f0c592bb054ee81fb97",
+      "size": 7314846
+    },
+    "pipeline/datasets/fodors_zagats/fodors_zagats-master-sm.csv": {
+      "sha256": "9a5c8123302ea6be68bd3581966b05979e3eb933d32cfeef53084e9ead559a24",
+      "size": 67514
+    },
+    "pipeline/datasets/fodors_zagats/fodors_zagats-master.csv": {
+      "sha256": "dda47ae0d7f543ac48ec11c3bac5c10f3f1dd1ec1800cea7f2b50efe6a4f38fc",
+      "size": 60546
+    },
+    "pipeline/datasets/imdb_movielens/imdb_movielens-master-sm.csv": {
+      "sha256": "d63fb631f3e7f61c9507cab728968dbfe7d21261f533f1f564aedf66a82ef8fa",
+      "size": 6607919
+    },
+    "pipeline/datasets/imdb_movielens/imdb_movielens-master.csv": {
+      "sha256": "ca7355d5d8e33b9976ecd675a59f4e2719847deab5087a59b013e84d1d4ba8a3",
+      "size": 6358402
+    },
+    "pipeline/datasets/itunes_amazon/itunes_amazon-master-sm.csv": {
+      "sha256": "508bdb25136329489ee45bf104fbddfff0f6d7d1a7d4cdffaeca1a69622674f1",
+      "size": 9468608
+    },
+    "pipeline/datasets/itunes_amazon/itunes_amazon-master.csv": {
+      "sha256": "4cae73981627e9da72c55270bd4191ab5bb38b2f072621e3a311fbe088a343e5",
+      "size": 8965867
+    },
+    "pipeline/datasets/walmart_amazon/walmart_amazon-master-sm.csv": {
+      "sha256": "9b1212060fe91dff61fcb44e19677bede1bd483cbfa1cc942882e0e153f90899",
+      "size": 2690199
+    },
+    "pipeline/datasets/walmart_amazon/walmart_amazon-master.csv": {
+      "sha256": "9aef1fa00432760e0fb9802a7f0ac38ab8a20d4d0f07c24bc195e9cc5735f7b1",
+      "size": 2643212
+    },
+    "pipeline/edgelists/amazon_google-eq-edgelist.txt": {
+      "sha256": "c7102e823fda934c5686ef4ae8740d43c834b70d33d6440f236aff456fe703ee",
+      "size": 959759
+    },
+    "pipeline/edgelists/amazon_google-er-edgelist.txt": {
+      "sha256": "be490a92852d63c63d2fb49cb1dc5754974eadab8ec29e6d4e5469ecfd51d5f8",
+      "size": 959759
+    },
+    "pipeline/edgelists/amazon_google-sm-edgelist.txt": {
+      "sha256": "0b8dbf70b50dd382320ec92810bbeb3f14abc129369f9b72eb4aa3747b021a9a",
+      "size": 981155
+    },
+    "pipeline/edgelists/beer-eq-edgelist.txt": {
+      "sha256": "9dbc0d1535dd7d81afa5a623a006c1a4616d2f9f470bb3fd94968fb54ac3838a",
+      "size": 2216963
+    },
+    "pipeline/edgelists/beer-er-edgelist.txt": {
+      "sha256": "c95aa68300cbf1e9278e72643ac07f18cb95e6412e1de1f8c211e55e5c7dfd57",
+      "size": 2216963
+    },
+    "pipeline/edgelists/beer-sm-edgelist.txt": {
+      "sha256": "7e650902b86036da93bb27cddd70849656380c2670dceddda3ff819e9c4b117d",
+      "size": 2283128
+    },
+    "pipeline/edgelists/dblp_acm-eq-edgelist.txt": {
+      "sha256": "f4f4f5c78bd7148ba3996b2745d0272f7f95e05a989b3045e4f4845e8e135432",
+      "size": 2343358
+    },
+    "pipeline/edgelists/dblp_acm-er-edgelist.txt": {
+      "sha256": "94ee733f3b9db5a53bc4249e9886d2183f81dab089530115bc119981faba4e1a",
+      "size": 2343358
+    },
+    "pipeline/edgelists/dblp_acm-sm-edgelist.txt": {
+      "sha256": "3c21e600528e21b5329f5d55a1c8dc01ba5e2cd041bfb623a4150a22040c19dc",
+      "size": 2398130
+    },
+    "pipeline/edgelists/dblp_scholar-eq-edgelist.txt": {
+      "sha256": "fcd7974fb85e9e12b5e12327b80030b889ccdafbd8560ab32f5240003f6727a3",
+      "size": 23412606
+    },
+    "pipeline/edgelists/dblp_scholar-er-edgelist.txt": {
+      "sha256": "2b574d330a7da42c597fa916651b18809eed48f331649f251600394dc7f9542f",
+      "size": 23412606
+    },
+    "pipeline/edgelists/dblp_scholar-sm-edgelist.txt": {
+      "sha256": "2139db3c5ca3bfa374807363172af664853b17211435f572155cbe5dbcd5f7ab",
+      "size": 23848948
+    },
+    "pipeline/edgelists/fodors_zagats-eq-edgelist.txt": {
+      "sha256": "3c363d64b0fd0d73c948e46f63efae7ae9968dbb7ef32d4628a42cd4f0d0f250",
+      "size": 318069
+    },
+    "pipeline/edgelists/fodors_zagats-er-edgelist.txt": {
+      "sha256": "7c11938c0f8d18f369a1aab934f06f946d83c78f6626f6c602160b9f49f73b0c",
+      "size": 318069
+    },
+    "pipeline/edgelists/fodors_zagats-sm-edgelist.txt": {
+      "sha256": "475fc8e54d67246052e33dc83cf7d8e8824ee99ba7ebe9d33db23cc6609b0cf1",
+      "size": 326663
+    },
+    "pipeline/edgelists/imdb_movielens-eq-edgelist.txt": {
+      "sha256": "42f52fb580914b99dd57cc15a15e0ddabc008ddc243f082fde65303d896b00d1",
+      "size": 39992589
+    },
+    "pipeline/edgelists/imdb_movielens-er-edgelist.txt": {
+      "sha256": "67e51a68fc067e2e49680dd9d6113d50a816237b7016240b58b90533b0dff0b1",
+      "size": 39992589
+    },
+    "pipeline/edgelists/imdb_movielens-sm-edgelist.txt": {
+      "sha256": "fa5a1d48c074be67b083a8814115f34bf4f1fe368d4d09e82b4b5b9a316eb064",
+      "size": 41207017
+    },
+    "pipeline/edgelists/itunes_amazon-eq-edgelist.txt": {
+      "sha256": "703b0851f221d14270df4fbdeb13a63acea5dbf893e555a9c7045ad0d2cf71e7",
+      "size": 39464732
+    },
+    "pipeline/edgelists/itunes_amazon-er-edgelist.txt": {
+      "sha256": "1bf43dbdb1eeaca82ca4db0249e1d10999dbb9a021672436b0db08fa9d2c0ccf",
+      "size": 39464732
+    },
+    "pipeline/edgelists/itunes_amazon-sm-edgelist.txt": {
+      "sha256": "bd1ebd38a1e0fdf7c1710bd72f7f9affc448981a7584a6cd4ead4a14a03c84fa",
+      "size": 40454868
+    },
+    "pipeline/edgelists/walmart_amazon-eq-edgelist.txt": {
+      "sha256": "70c09ef20e80ae2a4e95002e3d5f2048c2c5a368e5d64d3a47cc5f7f00f4682b",
+      "size": 9822561
+    },
+    "pipeline/edgelists/walmart_amazon-er-edgelist.txt": {
+      "sha256": "f985016318bb6403face8f3639081d826f1635db8555cbcb99dbac4d47ddf742",
+      "size": 9822561
+    },
+    "pipeline/edgelists/walmart_amazon-sm-edgelist.txt": {
+      "sha256": "26b5ce9df0b489d4090186216b562bb32011f44a803d0472caccf52c2353ecbc",
+      "size": 9900237
+    },
+    "pipeline/test_dir/amazon_google/nmc_manufacturer-title.test": {
+      "sha256": "991998577306b527d83f8c42648278402a74097e2f95dca2a96a4463cc12a5cc",
+      "size": 125771
+    },
+    "pipeline/test_dir/amazon_google/nmcon_manufacturer-title.test": {
+      "sha256": "0a42464d45869cfbca8773290e5eac99c6931bf7ca551d218de51e152d006053",
+      "size": 227289
+    },
+    "pipeline/test_dir/amazon_google/nmr_manufacturer.test": {
+      "sha256": "b07e7ae062a73cdda24dcabd2c7e9bb0e1638c0044805b9bd8e274a68ed6cc61",
+      "size": 21897
+    },
+    "pipeline/test_dir/amazon_google/nmr_price.test": {
+      "sha256": "d83ba50b5b47488d5ce7d985ae79bfa63d005ba70956e6492813d99d9d307526",
+      "size": 17777
+    },
+    "pipeline/test_dir/amazon_google/nmr_title.test": {
+      "sha256": "ba23186f2fefd66621d84d59bdc379572c99d396e334f9d93de8f1f20203a373",
+      "size": 24907
+    },
+    "pipeline/test_dir/beer/nmc_abv-beer_name.test": {
+      "sha256": "2b73169943057f25134dfa26f5c4a6a392c89d4551ae135d37442997f3403507",
+      "size": 47102
+    },
+    "pipeline/test_dir/beer/nmc_brew_factory_name-beer_name.test": {
+      "sha256": "876979ee6da15b55d2711ceeed88b53722715c2990c781029cea896fa82adf88",
+      "size": 132555
+    },
+    "pipeline/test_dir/beer/nmc_style-beer_name.test": {
+      "sha256": "d18c393b6b3dfa48b702eb5ec8664ca3369b9ebb6f28b0b02a493eb55cfb6139",
+      "size": 92274
+    },
+    "pipeline/test_dir/beer/nmcon_abv-beer_name.test": {
+      "sha256": "c8513a8ccac3fa911fd96b7817eab3d4d93e7eafb49bfb06fcc77fccc5f4651d",
+      "size": 141662
+    },
+    "pipeline/test_dir/beer/nmcon_brew_factory_name-beer_name.test": {
+      "sha256": "70388afca0ae3495253b5ed32a2eecac0e03bfa76947f6e6e0ab6064a411aa14",
+      "size": 177140
+    },
+    "pipeline/test_dir/beer/nmcon_style-beer_name.test": {
+      "sha256": "1e164d64d006c9b1bd3b64f30f49b18dd998d72959934e6c57644f61565c2874",
+      "size": 184502
+    },
+    "pipeline/test_dir/beer/nmr_abv.test": {
+      "sha256": "92b947da3eda964910ea2b8f4eb2ae3c1a42544804a606464e9c6838d9ba34aa",
+      "size": 13408
+    },
+    "pipeline/test_dir/beer/nmr_beer_name.test": {
+      "sha256": "8eccbc21e553a666e56436b1a83fa631fdf0c66c26051e5ed9d5f896f8bfe5b1",
+      "size": 70002
+    },
+    "pipeline/test_dir/beer/nmr_brew_factory_name.test": {
+      "sha256": "a27608e286e6efddb3ecf6d4ca0a25559bd88d5e9066a31a56e228e6e2675bb4",
+      "size": 69583
+    },
+    "pipeline/test_dir/beer/nmr_style.test": {
+      "sha256": "c94239fabec0e2355055612e42ba22c36e41bee0d34c3a2922bc226f73982e96",
+      "size": 65928
+    },
+    "pipeline/test_dir/dblp_acm/nmc_venue-author_1.test": {
+      "sha256": "904102c6508134f78be86d498b33335687074a540162369139829f8ea5f335fe",
+      "size": 14498
+    },
+    "pipeline/test_dir/dblp_acm/nmc_venue-title.test": {
+      "sha256": "bedc8cacf83a663a2669e68f5bfebe67b133da835c9e5f0657e0f8f8e3b5873a",
+      "size": 18778
+    },
+    "pipeline/test_dir/dblp_acm/nmc_year-title.test": {
+      "sha256": "2648df3e9c88456ce2a09b28277de9e773da6957bd1c03524455df6e865a1836",
+      "size": 8608
+    },
+    "pipeline/test_dir/dblp_acm/nmcon_venue-author_1.test": {
+      "sha256": "312acda741b0dca512277672ab8d8c44422be107d49620ddf6bc82614fd15b70",
+      "size": 11757
+    },
+    "pipeline/test_dir/dblp_acm/nmcon_venue-title.test": {
+      "sha256": "8298b912e2abc0d75fa822f6ba0232af211aee020d1cb59080ba32ccb4f43ea1",
+      "size": 33907
+    },
+    "pipeline/test_dir/dblp_acm/nmcon_year-title.test": {
+      "sha256": "8b4cf6f51fbbaf1ceba4c257912774d33b675fd516410c29213aeb59cb4aee21",
+      "size": 31427
+    },
+    "pipeline/test_dir/dblp_acm/nmr_author_1.test": {
+      "sha256": "ce16fdc1345d048249f9784544355fb118d21749b0e5dd4e9074d8c82d6bc855",
+      "size": 17243
+    },
+    "pipeline/test_dir/dblp_acm/nmr_author_2.test": {
+      "sha256": "ffeefbf2b37d30917ef01f0dbc2951e148a40ce721313618aace47d1943b6d4b",
+      "size": 16438
+    },
+    "pipeline/test_dir/dblp_acm/nmr_author_3.test": {
+      "sha256": "35f9fdc75336d16159ffb7df0471ffc3d25c933222f0365e92c2173e892c1f63",
+      "size": 16261
+    },
+    "pipeline/test_dir/dblp_acm/nmr_author_4.test": {
+      "sha256": "9382765817309aa0310a8ecf9163d5afa524b993f38494de2b4ff6d58269ae86",
+      "size": 16541
+    },
+    "pipeline/test_dir/dblp_acm/nmr_title.test": {
+      "sha256": "a8508cbee0e84bf9fe6f10ae27be4b758c0cbc8acb8e16570332948f0456654e",
+      "size": 16364
+    },
+    "pipeline/test_dir/dblp_acm/nmr_venue.test": {
+      "sha256": "c1af7217744392d7b44b5a435ebabdac30979f9896cbb16c9d70040edddc1a61",
+      "size": 17231
+    },
+    "pipeline/test_dir/dblp_acm/nmr_year.test": {
+      "sha256": "3f13f6865596ae81d631550fbe1909e7cc285aaaac2f33b245e90b3006ec3c5f",
+      "size": 16683
+    },
+    "pipeline/test_dir/dblp_scholar/nmc_venue-authors.test": {
+      "sha256": "c5ddd4689d022c82658639cdb4efcfdb181ea71c0a8fc9f41eac4bab5df6651d",
+      "size": 203139
+    },
+    "pipeline/test_dir/dblp_scholar/nmc_venue-title.test": {
+      "sha256": "e2c180719f034b61f1ad42dd69ca9701fd7be0697bdf53e6dd9455e3e27474c1",
+      "size": 240968
+    },
+    "pipeline/test_dir/dblp_scholar/nmcon_venue-authors.test": {
+      "sha256": "9ec75e6b1604989ced28acb32aa40b2fa03f298cd2aa841643773dc99a6b0d16",
+      "size": 160650
+    },
+    "pipeline/test_dir/dblp_scholar/nmcon_venue-title.test": {
+      "sha256": "893558856679fcc807c7e44efdb7e9f82f2878abac26ca56caf8c2ff1e1685b0",
+      "size": 360075
+    },
+    "pipeline/test_dir/dblp_scholar/nmcon_year-title.test": {
+      "sha256": "8fa46baa3598be3d604c9fd63b0c7db5c3ab16d2b1a645670356970232a6e827",
+      "size": 312592
+    },
+    "pipeline/test_dir/dblp_scholar/nmr_authors.test": {
+      "sha256": "c8faa0cf76832d1f23bbd9cae2648b9c65e5703c3745dc0133f11e5d7e45ffe3",
+      "size": 55015
+    },
+    "pipeline/test_dir/dblp_scholar/nmr_title.test": {
+      "sha256": "da669f87d542e5a813dbb004e096b79c1fc5cb932abce56b5dec89547ae22175",
+      "size": 52494
+    },
+    "pipeline/test_dir/dblp_scholar/nmr_venue.test": {
+      "sha256": "89f133774a2c21cfa36af4dc95a8ad1a2a0970035896eb573b56ae70acfd440c",
+      "size": 61093
+    },
+    "pipeline/test_dir/fodors_zagats/nmc_city-addr.test": {
+      "sha256": "237cc6d4dccada37bbfef11f58a2d169a823c5af169e352222f09fd69a98e870",
+      "size": 78743
+    },
+    "pipeline/test_dir/fodors_zagats/nmc_type-addr.test": {
+      "sha256": "016ba0f89d2434e30fd88e14749eccfc38c9539d974014761d1e383da09cffc2",
+      "size": 84369
+    },
+    "pipeline/test_dir/fodors_zagats/nmcon_city-addr.test": {
+      "sha256": "94df8f5aecb951d01a1631c8b8ebaa74534446f03dfd14f92fd5a87a48f82a95",
+      "size": 126266
+    },
+    "pipeline/test_dir/fodors_zagats/nmcon_type-addr.test": {
+      "sha256": "1e37c4479b05719953af94a537416ee8afc86a54d3dccab2a99b1e14de188ffe",
+      "size": 130260
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_addr.test": {
+      "sha256": "621a5d80dd6585293cd528af9dd3a91e0f251bf29219054550d4230ddc988efb",
+      "size": 87437
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_city.test": {
+      "sha256": "70dc6714be587fdaa35a70b053c0b02904b05b878719e877c71ef89d785600a1",
+      "size": 86700
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_class.test": {
+      "sha256": "babee9007f5a800b2cea8385c71d205c5e7b90abea3594714f8e0e1547be9ead",
+      "size": 87525
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_name.test": {
+      "sha256": "a2b0aa7a4c0e7388d9c5581944c5a561a6ec3bb31e9df4201a69421ed3fc5586",
+      "size": 87273
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_phone.test": {
+      "sha256": "a9f857676108b5686cb3ed92eaa00e6a55f42ee06d1e50631c454a6e38bc1704",
+      "size": 87052
+    },
+    "pipeline/test_dir/fodors_zagats/nmr_type.test": {
+      "sha256": "2ce6a6cd616763940836c67f8919eacb6ab81bfa41ae93feaf6f289dae6271d9",
+      "size": 88696
+    },
+    "pipeline/test_dir/imdb_movielens/nmc_actor_1-title_R2L.test": {
+      "sha256": "641aa9bd8ca89d1388e6007495733ffc8af53c0f7c33f6052a7c3762b729a277",
+      "size": 9144
+    },
+    "pipeline/test_dir/imdb_movielens/nmc_director-actor_1_NONE.test": {
+      "sha256": "c6c1c9681fb86dbd0f1b9729ac6c320959dea1e1455c7ded189285cf63b47c2c",
+      "size": 8860
+    },
+    "pipeline/test_dir/imdb_movielens/nmc_director-title_BOTH.test": {
+      "sha256": "f3eb42def7c1e183c179e2fd1d7519b1fc80067e4ec7ba994875fff08fc2ed4b",
+      "size": 9305
+    },
+    "pipeline/test_dir/imdb_movielens/nmc_original_language-director_NONE.test": {
+      "sha256": "02913ca98bc0a58ce6c2031b7db8e30e93da9f367894627ff323e9b117f4e13d",
+      "size": 4794
+    },
+    "pipeline/test_dir/imdb_movielens/nmc_original_language-title_R2L.test": {
+      "sha256": "64afa33e22009b0da51272cee8462377435d75fd19c24ead546c1f84fe040c67",
+      "size": 5178
+    },
+    "pipeline/test_dir/imdb_movielens/nmcon_actor_1-title_R2L.test": {
+      "sha256": "70d3dd32944ccac900f3985ea234007b75b7035afa91cc20e7d1b4c99f79f7a2",
+      "size": 11353
+    },
+    "pipeline/test_dir/imdb_movielens/nmcon_director-actor_1_NONE.test": {
+      "sha256": "755c845e836e2b9f3fe80d7f6162c711c336abcd5803dbb7c1a06ef7cd0f083b",
+      "size": 10212
+    },
+    "pipeline/test_dir/imdb_movielens/nmcon_director-title_BOTH.test": {
+      "sha256": "a992508cc2e994e0c81bbc183359315d1dba8c3e40f16a93a1df11d3a464d91e",
+      "size": 11965
+    },
+    "pipeline/test_dir/imdb_movielens/nmcon_original_language-director_NONE_RARE.test": {
+      "sha256": "9c90daf702e6fbad636819b46720a7aec5b513567a1e43277c4abedc78614c26",
+      "size": 9589
+    },
+    "pipeline/test_dir/imdb_movielens/nmcon_original_language-title_R2L_RARE.test": {
+      "sha256": "09a0d89ad3d4f60b5ae729ccf273bd5cb8cb2d35499606c5c2552103bc779e9f",
+      "size": 9823
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_actor_1.test": {
+      "sha256": "1f0a389d4e7c3957b2ab945614868073591737df18dc1f0392cabdedf4706abd",
+      "size": 15482
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_actor_2.test": {
+      "sha256": "70c849f7616a4aabf54009c0984d0809d47acdd555a633c0a8321aee32c9018a",
+      "size": 15894
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_actor_3.test": {
+      "sha256": "0e611ce6eb6c723d1ee78d6c6a6ff2a1628533a354bba896180c199588cb369e",
+      "size": 13240
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_director.test": {
+      "sha256": "fcec026a23bac9b1547af309b514039b6c603c40bd059cdef26e7c959d11e2f1",
+      "size": 15286
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_original_language.test": {
+      "sha256": "de61e69fd0d46d50555e9919e1fb10226d4f93155ef2348ccd3a25f09303c4b3",
+      "size": 15940
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_production_countries.test": {
+      "sha256": "3af6a12b8d5b08ef11bb972129c2eb8226e4209e8a2878635cb38a19461affa1",
+      "size": 15558
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_title.test": {
+      "sha256": "0f956885674dd7fe6f23f6e7f5286775741645ad87418e7b0b0d5f3e32799d88",
+      "size": 13804
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_vote_average.test": {
+      "sha256": "2c7472b5a58336a682a603651531be12f9479877f025e676046631f3930c93a4",
+      "size": 14297
+    },
+    "pipeline/test_dir/imdb_movielens/nmr_year.test": {
+      "sha256": "1352d7d74ffe1743e2a3ebe3209a5445f8d200ba1a5369e73090477dfa58a4e5",
+      "size": 13984
+    },
+    "pipeline/test_dir/itunes_amazon/nmc_album_name-song_name.test": {
+      "sha256": "f51ab3736abbac2156c266362657e9c92ead68ea84adc88bda7ac8d075567753",
+      "size": 148431
+    },
+    "pipeline/test_dir/itunes_amazon/nmc_artist_name-album_name.test": {
+      "sha256": "49b11b76347d4d7e17ea504b51c00f7e84225aa9bf1fbe759d2681eb271f701a",
+      "size": 125604
+    },
+    "pipeline/test_dir/itunes_amazon/nmc_artist_name-song_name.test": {
+      "sha256": "c2f2b3a6617fa7a72819a39711ec15f33402d07c21633a91a30f408d53e8ef47",
+      "size": 125226
+    },
+    "pipeline/test_dir/itunes_amazon/nmc_genre-album_name.test": {
+      "sha256": "5fc922937cd56c8c3155e1fb8b1c4e2a42162fb0c35efa7f57168190efdde4fb",
+      "size": 207724
+    },
+    "pipeline/test_dir/itunes_amazon/nmc_genre-artist_name.test": {
+      "sha256": "81c0c9e7f801cb883dde0a5e88636fafaf5b38de7ce8333671b902d6e8f6b6b4",
+      "size": 200321
+    },
+    "pipeline/test_dir/itunes_amazon/nmcon_album_name-song_name.test": {
+      "sha256": "6b5ef735d8ff988b68862e046939bde09ed6a6a6fa0bf013cf196e928fef1160",
+      "size": 157318
+    },
+    "pipeline/test_dir/itunes_amazon/nmcon_artist_name-album_name.test": {
+      "sha256": "2c8c70749185c2c2e4a5e5c30a880ee4de2e0030d6658c725ef7ed314d48a72c",
+      "size": 154534
+    },
+    "pipeline/test_dir/itunes_amazon/nmcon_artist_name-song_name.test": {
+      "sha256": "f1f7d25d8d9bc6f1db2498651e5d4396fad2e21409199fd40e930c016543bdde",
+      "size": 146527
+    },
+    "pipeline/test_dir/itunes_amazon/nmcon_genre-album_name.test": {
+      "sha256": "0f8c161870eb0aa1d6c6e2436706cebca41f0e3e091415cd353d18ff08083b91",
+      "size": 176349
+    },
+    "pipeline/test_dir/itunes_amazon/nmcon_genre-artist_name.test": {
+      "sha256": "41ffe018fe16a5884038702e500bee91980a68cf88e56623d11282569377c70d",
+      "size": 134346
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_album_name.test": {
+      "sha256": "949211dd30bb528259fd68a8da1cef20de9f9da41f82416f843b678cde830b3d",
+      "size": 148638
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_artist_name.test": {
+      "sha256": "5de4b10112493b969a9e3213f8d3bc0f6c81f51144b28e37fe6da8e7807d948a",
+      "size": 157870
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_copyright.test": {
+      "sha256": "b5010757ae2073b7097b5637128a6628e7d57059ca2e7d6f6ebe640cbc759765",
+      "size": 149856
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_genre.test": {
+      "sha256": "4c201f25f3b7cb36f8a05dda173bef259caf83ff3a570b418c7f1853cd83f323",
+      "size": 167556
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_price.test": {
+      "sha256": "78cfb7676bcf41e4a7958caa85158c6a710b0c7f133cf2119c377e4df592f1aa",
+      "size": 154195
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_released.test": {
+      "sha256": "e14bc8984b69ccfe1073c00f943350e133850e4332213ea14ea8c650af90ba78",
+      "size": 146779
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_song_name.test": {
+      "sha256": "0fb42f7aba73269a8bb0f71ce2187f3637a2f98fa87838945430eef866883c93",
+      "size": 149489
+    },
+    "pipeline/test_dir/itunes_amazon/nmr_time.test": {
+      "sha256": "7bec5138c31044ca9de9e4f9cc0733776efd46b1d32920fa81838d7879dff5a4",
+      "size": 132419
+    },
+    "pipeline/test_dir/walmart_amazon/nmc_brand-modelno.test": {
+      "sha256": "5fb9edb7342145d420a40322d94642ad65c0e89d4960c41e5a2412f39d6099e9",
+      "size": 66587
+    },
+    "pipeline/test_dir/walmart_amazon/nmc_brand-title.test": {
+      "sha256": "cb308d9ca94bfd194be3531ca559806e292ff49c731782a5a880510ea769e67e",
+      "size": 127985
+    },
+    "pipeline/test_dir/walmart_amazon/nmc_category-title.test": {
+      "sha256": "7ed30bc837b90bdcc349a31214d809d6cf8cd05be45def680c3c00fe1c892a43",
+      "size": 154240
+    },
+    "pipeline/test_dir/walmart_amazon/nmcon_brand-modelno.test": {
+      "sha256": "fb01f8e79a7c1882d175106aa45a02afc2af6fd7562abdffbcf0fe3d7c2ac4e1",
+      "size": 79902
+    },
+    "pipeline/test_dir/walmart_amazon/nmcon_brand-title.test": {
+      "sha256": "af165637f14a07ad6496734d915466b0169a52a57ffb427f162b7e933a378aad",
+      "size": 375354
+    },
+    "pipeline/test_dir/walmart_amazon/nmcon_category-title.test": {
+      "sha256": "537dd897a9bb0bc8551c9297c177a34ed2d017c2bbdd6d57f7ca1ba1385c6c67",
+      "size": 384168
+    },
+    "pipeline/test_dir/walmart_amazon/nmr_brand.test": {
+      "sha256": "e85a41c8f9bbcdc374a35f933bcbeb70fd341f4a52937e492e11a5447cbb26c7",
+      "size": 82930
+    },
+    "pipeline/test_dir/walmart_amazon/nmr_category.test": {
+      "sha256": "aa96f5e8fc34ffe8c57c895a93c09404ef25b0008d52bcb16bce095b6855b047",
+      "size": 80361
+    },
+    "pipeline/test_dir/walmart_amazon/nmr_modelno.test": {
+      "sha256": "e253acf2099c507594277d5dd8940abfb0907935f2695e4f98a2611ec1aa94d4",
+      "size": 79339
+    },
+    "pipeline/test_dir/walmart_amazon/nmr_price.test": {
+      "sha256": "55bc29b9fb269e31e53b016fa865565c58f48344591543d2b63bdefc2af9f8f8",
+      "size": 26949
+    },
+    "pipeline/test_dir/walmart_amazon/nmr_title.test": {
+      "sha256": "89aa166e0dd8e8778baedbbd35143f38329b775bbc6af3ff7b6f9ff4a0c35a53",
+      "size": 81080
+    }
+  },
+  "record_id": "7930461",
+  "title": "Datasets and configuration files for EmbDI: Embeddings for Data Integration"
+}
