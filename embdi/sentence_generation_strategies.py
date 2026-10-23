@@ -124,9 +124,9 @@ def generate_walks(parameters, graph, intersection=None):
 
     if intersection is None:
         intersection = set(graph.cell_list)
-        n_cells = len(intersection)
-    else:
-        n_cells = len(intersection)
+    if parameters.get('seed') is not None:
+        intersection = sorted(intersection)
+    n_cells = len(intersection)
     random_walks_per_node = n_sentences // n_cells
 
     sentence_distribution = dict(zip([strat for strat in strategies], [0 for _ in range(len(strategies))]))

@@ -15,6 +15,7 @@ def learn_embeddings(
     learning_method="skipgram",
     workers=mp.cpu_count(),
     sampling_factor=0.001,
+    seed=None,
 ):
     """Function used to train the embeddings based on the given walks corpus. Multiple parameters are available to
     tweak the training procedure. The resulting embedding file will be saved in the given path to be used later in the
@@ -28,7 +29,9 @@ def learn_embeddings(
     :param training_algorithm: either fasttext or word2vec.
     :param learning_method: skipgram or CBOW
     :param workers: number of CPU workers to be used in during the training. Default = mp.cpu_count().
+    :param seed: optional random seed passed to the Gensim model.
     """
+    model_options = {} if seed is None else {"seed": seed}
     if training_algorithm == "word2vec":
         if learning_method == "skipgram":
             sg = 1
@@ -45,6 +48,7 @@ def learn_embeddings(
                 sg=sg,
                 workers=workers,
                 sample=sampling_factor,
+                **model_options,
             )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
         else:
@@ -56,6 +60,7 @@ def learn_embeddings(
                 sg=sg,
                 workers=workers,
                 sample=sampling_factor,
+                **model_options,
             )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
     elif training_algorithm == "doc2vec":
@@ -74,6 +79,7 @@ def learn_embeddings(
                 sg=sg,
                 workers=workers,
                 sample=sampling_factor,
+                **model_options,
             )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
         else:
@@ -85,6 +91,7 @@ def learn_embeddings(
                 sg=sg,
                 workers=workers,
                 sample=sampling_factor,
+                **model_options,
             )
             model.wv.save_word2vec_format(output_embeddings_file, binary=False)
     elif training_algorithm == "fasttext":
@@ -96,6 +103,7 @@ def learn_embeddings(
                 min_count=2,
                 workers=workers,
                 vector_size=dimensions,
+                **model_options,
             )
             model.wv.save(output_embeddings_file)
         else:
@@ -105,6 +113,7 @@ def learn_embeddings(
                 workers=workers,
                 min_count=2,
                 window=window_size,
+                **model_options,
             )
             model.wv.save(output_embeddings_file)
 

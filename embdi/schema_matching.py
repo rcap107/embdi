@@ -1,4 +1,5 @@
 import argparse
+import os
 import warnings
 from operator import itemgetter
 
@@ -28,12 +29,14 @@ def read_matches(match_file):
     return md
 
 
-def _clean_embeddings(emb_file, matches):
-    gt = set()
-    for k, v in matches.items():
-        gt.add(k)
-        for _ in v:
-            gt.add(_)
+def _clean_embeddings(emb_file, matches=None):
+    gt = None
+    if matches is not None:
+        gt = set()
+        for k, v in matches.items():
+            gt.add(k)
+            for _ in v:
+                gt.add(_)
 
     with open(emb_file, 'r') as fp:
         s = fp.readline()
@@ -41,13 +44,17 @@ def _clean_embeddings(emb_file, matches):
         viable_idx = []
         for idx, row in enumerate(fp):
             r = row.split(' ', maxsplit=1)[0]
+            is_cid = r.startswith('cid__')
             # r = 'cid__' + r
-            if r.startswith('cid__'):
+            if is_cid:
                 r = r.strip('cid__')
-            if r in gt:
+            if (gt is None and is_cid) or (gt is not None and r in gt):
                 viable_idx.append(row.strip('cid__'))
 
-    f = 'pipeline/dump/sm_dump.emb'
+    tag = os.path.splitext(os.path.basename(emb_file))[0]
+    dump_dir = 'pipeline/dump'
+    os.makedirs(dump_dir, exist_ok=True)
+    f = os.path.join(dump_dir, 'sm_dump-{}.emb'.format(tag))
     with open(f, 'w', encoding='utf-8') as fp:
         fp.write('{} {}\n'.format(len(viable_idx), dimensions))
         for _ in viable_idx:

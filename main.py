@@ -1,6 +1,10 @@
 import argparse
 import datetime
+import os
+import random
+import sys
 
+import numpy as np
 import warnings
 
 with warnings.catch_warnings():
@@ -22,6 +26,10 @@ def parse_args():
     group.add_argument('-f', '--config_file', action='store', default=None)
     group.add_argument('-d', '--config_dir', action='store', default=None)
     parser.add_argument('--no_info', action='store_true', default=False)
+    parser.add_argument('--seed', type=int, default=None,
+                        help='Enable deterministic mode with this seed. Defaults to paper-like behavior.')
+    parser.add_argument('--workers', type=int, default=None,
+                        help='Number of embedding-training workers. Defaults to all CPUs, or 1 with --seed.')
     args = parser.parse_args()
     return args
 
@@ -40,12 +48,18 @@ def embeddings_generation(walks, configuration, dictionary):
     print(OUTPUT_FORMAT.format('Training embeddings', t1.strftime(TIME_FORMAT)))
     t = 'pipeline/embeddings/' + output_file + '.emb'
     print('# Writing embeddings in file: {}'.format(t))
+    training_options = {}
+    if configuration.get('workers') is not None:
+        training_options['workers'] = int(configuration['workers'])
+    if configuration.get('seed') is not None:
+        training_options['seed'] = int(configuration['seed'])
     learn_embeddings(t, walks, write_walks=configuration['write_walks'],
                      dimensions=int(configuration['n_dimensions']),
                      window_size=int(configuration['window_size']),
                      training_algorithm=configuration['training_algorithm'],
                      learning_method=configuration['learning_method'],
-                     sampling_factor=configuration['sampling_factor'])
+                     sampling_factor=configuration['sampling_factor'],
+                     **training_options)
     if configuration['compression']:
         newf = clean_embeddings_file(t, dictionary)
     else:
@@ -158,9 +172,16 @@ def read_configuration(config_file):
     return config
 
 
-def full_run(config_dir, config_file):
+def full_run(config_dir, config_file, seed=None, workers=None):
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
     # Parsing the configuration file.
     configuration = read_configuration(config_dir + '/' + config_file)
+    if seed is not None:
+        configuration['seed'] = seed
+    if workers is not None:
+        configuration['workers'] = workers
     # Checking the correctness of the configuration, setting default values for missing values.
     configuration = check_config_validity(configuration)
 
@@ -186,6 +207,10 @@ def full_run(config_dir, config_file):
 def main(file_path=None, dir_path=None, args=None):
     results = None
     configuration = None
+    seed = getattr(args, 'seed', None) if args else None
+    workers = getattr(args, 'workers', None) if args else None
+    if seed is not None and workers is None:
+        workers = 1
 
     # Building dir tree required to run the code.
     os.makedirs('pipeline/dump', exist_ok=True)
@@ -237,7 +262,7 @@ def main(file_path=None, dir_path=None, args=None):
                 print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
                 print()
 
-                full_run(config_dir, file)
+                full_run(config_dir, file, seed=seed, workers=workers)
 
                 t_end = datetime.datetime.now()
                 print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
@@ -255,7 +280,7 @@ def main(file_path=None, dir_path=None, args=None):
             print(OUTPUT_FORMAT.format('Starting run.', t_start.strftime(TIME_FORMAT)))
             print()
 
-            full_run(config_dir, file)
+            full_run(config_dir, file, seed=seed, workers=workers)
 
             t_end = datetime.datetime.now()
             print(OUTPUT_FORMAT.format('Ending run.', t_end.strftime(TIME_FORMAT)))
@@ -266,4 +291,8 @@ def main(file_path=None, dir_path=None, args=None):
 
 if __name__ == '__main__':
     args = parse_args()
+    if args.seed is not None and os.environ.get('PYTHONHASHSEED') != '0':
+        os.environ['PYTHONHASHSEED'] = '0'
+        print('Re-executing with PYTHONHASHSEED=0 for seeded reproducibility.', file=sys.stderr)
+        os.execv(sys.executable, [sys.executable, os.path.abspath(sys.argv[0])] + sys.argv[1:])
     main(args=args)

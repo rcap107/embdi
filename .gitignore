@@ -134,9 +134,18 @@ mlruns_bk/
 /.idea/
 pipeline/datasets
 pipeline/debug
+pipeline/dump
 pipeline/edgelists
 pipeline/embeddings
+pipeline/experiments
+pipeline/generated-matches
+pipeline/logging
+pipeline/replacements
+pipeline/run-logs
+pipeline/sim_files
+pipeline/test
 pipeline/walks
+pipeline/*.params
 
 # VSCode settings
 .vscode/

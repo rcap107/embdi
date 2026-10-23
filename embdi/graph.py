@@ -215,15 +215,17 @@ class Graph:
             raise ValueError('No node class with "isappear"==True is present. '
                              'All random walks will be empty. Terminating. ')
 
-    def __init__(self, edgelist, prefixes, sim_list=None, flatten=[]):
+    def __init__(self, edgelist, prefixes, sim_list=None, flatten=[], deterministic=False):
         """Data structure used to represent dataframe df as a graph. The data structure contains a list of all nodes
         in the graph, built according to the parameters passed to the function.
 
         :param sim_list: optional, list of pairs of similar values
         :param smoothing_method: one of {no, smooth, inverse_smooth, log, inverse}
         :param flatten: if present and different from "all", expand the strings of all nodes whose type is in the list.
+        :param deterministic: sort set-derived collections so graph construction is reproducible.
         """
         self.nodes = {}
+        self.deterministic = deterministic
         self.edges = set()
         self.node_classes = {}
         self.node_is_numeric = {}
@@ -309,7 +311,10 @@ class Graph:
                                 numeric=self.node_is_numeric[node_prefix])
                     self.nodes[node_name] = node
                 tl.append(self.nodes[node_name])
-                to_link.append(set(tl))
+                if self.deterministic:
+                    to_link.append(sorted(set(tl), key=lambda node: node.name))
+                else:
+                    to_link.append(set(tl))
 
             for _1 in to_link[0]:
                 for _2 in to_link[1]:
@@ -378,7 +383,8 @@ def graph_generation(configuration, edgelist, prefixes, dictionary=None):
                 else:
                     l.append(_)
 
-    g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten)
+    g = Graph(edgelist=edgelist, prefixes=prefixes, sim_list=list_sim, flatten=flatten,
+              deterministic=configuration.get('seed') is not None)
     t_end = datetime.datetime.now()
     dt = t_end - t_start
     print()

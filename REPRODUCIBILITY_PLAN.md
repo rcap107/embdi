@@ -1,6 +1,6 @@
 # EmbDI Paper Reproducibility Plan
 
-**Status:** Active; Phases 0–2 complete (baseline, environment, data)  
+**Status:** Active; Phases 0–4 complete (baseline, environment, data, runtime, determinism); Phase 5 in progress (synthetic smoke + one small dataset passed)
 **Repository:** `/workspace`  
 **Date:** 2026-10-23  
 **Target:** Current `main`, CPython 3.12 only  
@@ -52,7 +52,7 @@ Consequences:
 ## 3. Current Known State
 
 - The repository has 24 reproducibility configs: 8 entity resolution, 8 schema matching, 8 embeddings quality.
-- All 24 configs currently fail input validation because datasets, edgelists, and EQ test directories are absent.
+- All 24 configs validate after extraction of the Zenodo data; the extracted inputs remain excluded by `.gitignore`.
 - Required data is excluded by `.gitignore`:
   - `pipeline/datasets`
   - `pipeline/edgelists`
@@ -67,11 +67,11 @@ Consequences:
 - The expected archive is `EmbDI datasets.zip`, size `1,421,696,261` bytes, MD5 `70036bc7482a6614d55d6054058ca17b`.
 - The workspace mount is case-insensitive, so `EmbDI/` and `embdi/` resolve to the same directory in this sandbox. Other environments may not behave this way.
 - There is no test suite.
-- The sandbox currently has Python 3.14.8 only. An agent must install and use Python 3.12.
+- The project environment uses CPython 3.12.15 via `uv` (see Phase 1).
 - `uv 0.13.4` is available and should be used for the environment.
 - The README explicitly notes that ER and SM results can vary between runs because random walks and embedding training are stochastic.
 
-Known issues to address:
+Known issues identified at baseline (resolved in Phases 1–3):
 
 - `pipeline/config_files/reproducibility/schema_matching/config-dblp_scholar-sm` points to a duplicated path:
   `pipeline/matches/sm-matches/sm-matches/sm-matches-dblp_scholar.txt`
@@ -323,6 +323,45 @@ Gate:
 
 - Beer ER, SM, and EQ each complete successfully.
 
+#### Phase 3 output-isolation record (2026-10-23)
+
+P0 fixes made (behavior-preserving):
+
+| Artifact | Before | After |
+| --- | --- | --- |
+| ER index dump | `pipeline/dump/indices.emb` | `pipeline/dump/indices-<emb-tag>.emb` |
+| ER similarity dump | `most_similar.pickle` (repo root) | `pipeline/dump/most_similar-<emb-tag>.pickle` |
+| ER suspicious matches | `suspicious_matches.csv` (repo root) | `pipeline/dump/suspicious_matches-<matches-tag>.csv` |
+| SM filtered embeddings | `pipeline/dump/sm_dump.emb` | `pipeline/dump/sm_dump-<emb-tag>.emb` |
+
+- Tags are derived from the input artifact basename (the embeddings or ground-truth file), which already embeds each config's `output_file` (`beer-ER`, `beer-SM`, `beer-EQ`, ...).
+- `build_similarity_structure` now writes the pickle inside a context manager; `compare_ground_truth_only` now closes its CSV handle.
+- `embdi/schema_matching.py::_clean_embeddings(emb_file, matches=None)` no longer requires the missing second argument, fixing the `match_columns` call at line 152. When `matches is None`, only `cid__` rows are kept. The ground-truth path used by `schema_matching` is unchanged.
+- `pipeline/generated-matches/*`, `pipeline/embeddings/*`, and `pipeline/walks/*` were already namespaced by `output_file`/`run-tag`; no change needed.
+- `.gitignore` now excludes generated run artifacts (`pipeline/dump`, `pipeline/generated-matches`, `pipeline/logging`, `pipeline/run-logs`, `pipeline/sim_files`, `pipeline/replacements`, `pipeline/experiments`, `pipeline/test`, `pipeline/*.params`). The tracked legacy `pipeline/dump/indices.emb` remains tracked but is left untouched.
+- P1 items were not triggered: no config value contains a colon or inline comment; walk pre-generation and edgelist regeneration are not on the run path. `--unblocking` was not used and `data_preprocessing` was not imported.
+
+Beer gate results (paper-like defaults, no seed, `workers=mp.cpu_count()`):
+
+| Task | Metrics | Runtime |
+| --- | --- | --- |
+| ER | P 91.6667, R 80.8824, F 85.9375; 55 correct / 5 wrong / 68 matches | 356.88 s |
+| SM | P 100.0000, R 100.0000, F 100.0000 | 388.04 s |
+| EQ | MA 92.15, MR 78.29, MC 92.90, EQ_avg 87.78 | 193.19 s |
+
+All three exited 0 with no traceback. Artifacts after all three runs:
+
+```text
+pipeline/dump/indices-beer-ER.emb
+pipeline/dump/most_similar-indices-beer-ER.pickle
+pipeline/dump/suspicious_matches-matches-beer.csv
+pipeline/dump/sm_dump-beer-SM.emb
+pipeline/embeddings/{beer-ER,beer-SM,beer-EQ}.emb
+pipeline/walks/{beer-ER,beer-SM,beer-EQ}.walks
+```
+
+No root-level `most_similar.pickle` or `suspicious_matches.csv` was created, and no SM artifact clobbered an ER artifact. Logs were captured under `/tmp/embdi-repro/logs/` (ephemeral; metrics are recorded above). The pre-existing tracked `pipeline/dump/indices.emb` was left untouched.
+
 ### Phase 4 — Optional determinism controls
 
 Tasks:
@@ -345,6 +384,41 @@ Deliverable:
 Gate:
 
 - Three seeded repeats of one small dataset produce stable outputs.
+
+#### Phase 4 determinism record (2026-10-23)
+
+Implemented an optional seeded mode without changing paper-like defaults:
+
+- `main.py` adds `--seed` and `--workers`. With `--seed`, `full_run` seeds Python `random` and NumPy before each config, and `PYTHONHASHSEED=0` is enforced by re-executing the interpreter before the run starts.
+- `embdi/embeddings.py::learn_embeddings` accepts `seed=None` and forwards it to `Word2Vec`, `FastText`, and `Doc2Vec`.
+- `embdi/graph.py` accepts `deterministic=False`; seeded mode sorts the set-derived `to_link` contents by node name.
+- `embdi/sentence_generation_strategies.py::generate_walks` sorts the intersection set in seeded mode.
+- `--workers` defaults to `mp.cpu_count()` as before. When `--seed` is set and `--workers` is omitted, it defaults to `1`; an explicit `--workers` value is honored.
+- Default runs (`no --seed`) take exactly the old paths: no RNG seeding, no sorting, `workers=mp.cpu_count()`.
+
+Gate command (Fodors–Zagats ER, canonical config, seed 42, three repeats):
+
+```bash
+for i in 1 2 3; do
+  uv run python main.py \
+    -f pipeline/config_files/reproducibility/entity_resolution/config-fodors_zagats-er \
+    --seed 42
+done
+```
+
+All three repeats produced byte-identical artifacts:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `fodors_zagats-ER.walks` | `70114ae3b391c0a47c44d59f9f1d51aa2b55c0e840e55b24dc98707538bb5c7b` |
+| `fodors_zagats-ER.emb` | `728f458e95ee319db6029b9a3d1b11d44b138c47a7ccb5526837a20aef4099e7` |
+| `indices-fodors_zagats-ER.emb` | `9252e7dc0569e88aeac22c425ebd1d3ad263cf2c8cd8a4988c7231caf5b48fa3` |
+| `most_similar-indices-fodors_zagats-ER.pickle` | `a70f6f59c464f90e0a206ffce0d3b07f0968af8f10c32ca83210f794564042c0` |
+| `suspicious_matches-matches-fodors_zagats.csv` | `67546e917e89c6eae3c25553176e2706195b8560011ceac6c016be0b8241c2f9` |
+
+Repeated metrics were stable: P 99.0909, R 99.0909, F 99.0909; GP 64.4970, GR 99.0909, GF 78.1362. Runtimes were 159 s, 174 s, and 174 s (workers=1). A seeded Beer ER run also completed successfully (P 95.0820, R 85.2941, F 89.9225; 899 s), confirming the mode works on a larger config.
+
+Seeded-mode metrics are not directly comparable to the paper-like Phase 3 numbers: sorting set-derived graph/walk order is a deliberate behavioral difference in seeded mode. Use paper-like defaults for the headline reproduction and seeded mode for repeatability/variance checks.
 
 ### Phase 5 — Verification ladder
 
@@ -380,6 +454,26 @@ Deliverable:
 Gate:
 
 - All 24 configs complete or every failure is explained.
+
+#### Phase 5 smoke record (2026-10-23)
+
+Synthetic smoke fixture (ephemeral, `/tmp/embdi-repro/synthetic/`): 20 cell nodes, 20 cid nodes, 60 value nodes, 80 edgelist rows, 200 walks of length 10, 20-dim Word2Vec, seed 7.
+
+```bash
+uv run python main.py -f /tmp/embdi-repro/synthetic/config-synthetic-smoke --seed 7
+```
+
+Result: exit 0; graph construction, random walks, and embedding training all completed in 0.02 s; 200/200 walks written; 41-line embedding file produced. A second seeded run produced byte-identical walks and embeddings (`cmp` on both). An unseeded default run also exited 0. No real dataset was read.
+
+One real dataset (Beer ER/SM/EQ) already passed in Phase 3. After the Phase 4 changes, the full Fodors–Zagats ER/SM/EQ set passed again on paper-like defaults:
+
+| Task | Metrics | Runtime |
+| --- | --- | --- |
+| ER | P 100.0000, R 100.0000, F 100.0000 | 67.72 s |
+| SM | P 100.0000, R 100.0000, F 100.0000 | 58.83 s |
+| EQ | MA 79.05, MR 88.43, MC 86.20, EQ_avg 84.56 | 40.51 s |
+
+The remaining real configs have not been run.
 
 ### Phase 6 — Results and documentation
 
@@ -458,9 +552,10 @@ Gate:
 - [x] Download and checksum the Zenodo data.
 - [x] Validate all 24 configs.
 - [x] Fix the SM config path typo.
-- [ ] Fix output-path collisions.
-- [ ] Run synthetic smoke test.
-- [ ] Run Beer ER/SM/EQ.
+- [x] Fix output-path collisions.
+- [x] Run synthetic smoke test.
+- [x] Run Beer ER/SM/EQ.
+- [x] Add optional seeded mode and verify three-repeat stability.
 - [ ] Run full 24-config matrix.
 - [ ] Produce paper-versus-reproduced results table.
 - [ ] Document deviations and limitations.

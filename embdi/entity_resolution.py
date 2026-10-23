@@ -1,5 +1,6 @@
 import argparse
 import datetime as dt
+import os
 import pickle
 
 import gensim.models as models
@@ -199,7 +200,11 @@ def build_similarity_structure(model_file, viable_lines, n_items, strategy,
     t_end = dt.datetime.now()
     diff = t_end - t_start
     print('# Time required to build sim struct: {:.2} seconds'.format(diff.total_seconds()))
-    pickle.dump(most_similar, open('most_similar.pickle', 'wb'))
+    tag = os.path.splitext(os.path.basename(model_file))[0]
+    dump_dir = 'pipeline/dump'
+    os.makedirs(dump_dir, exist_ok=True)
+    with open(os.path.join(dump_dir, 'most_similar-{}.pickle'.format(tag)), 'wb') as fp:
+        pickle.dump(most_similar, fp)
 
     return most_similar
 
@@ -228,7 +233,10 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     false_candidates = 0
     golden_candidates = 0
 
-    csvfile = open('suspicious_matches.csv', 'w')
+    tag = os.path.splitext(os.path.basename(matches_file))[0]
+    dump_dir = 'pipeline/dump'
+    os.makedirs(dump_dir, exist_ok=True)
+    csvfile = open(os.path.join(dump_dir, 'suspicious_matches-{}.csv'.format(tag)), 'w')
     csvwriter = csv.writer(csvfile, delimiter=',')
     csvwriter.writerow(['id1','id2'])
 
@@ -290,6 +298,7 @@ def compare_ground_truth_only(most_similar, matches_file, n_items, n_top):
     # print(s.format([_*100 for _ in ]))
     print('\n# Correct: {}\n# Wrong: {}\n# Total items: {}\n# Total matches: {}'.format(count_hit, count_miss,
                                                                               iteration_counter, len(matches)))
+    csvfile.close()
     return result_dict
 
 
@@ -375,7 +384,10 @@ def _prepare_tests(model_file):
                     viable_idx.append(row)
         # viable_idx = [row for idx, row in enumerate(fp) if idx > 0 and row.startswith('idx_')]
 
-    f = 'pipeline/dump/indices.emb'
+    tag = os.path.splitext(os.path.basename(model_file))[0]
+    dump_dir = 'pipeline/dump'
+    os.makedirs(dump_dir, exist_ok=True)
+    f = os.path.join(dump_dir, 'indices-{}.emb'.format(tag))
     with open(f, 'w', encoding='utf-8') as fp:
         fp.write('{} {}\n'.format(len(viable_idx), dimensions))
         for _ in viable_idx:
